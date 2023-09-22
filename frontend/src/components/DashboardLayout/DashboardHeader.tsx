@@ -1,25 +1,30 @@
+// Import react
 import React, {useState} from 'react';
 
 // Import MUI
 import {
   AppBar,
-  Avatar,
-  Box,
   Container,
   IconButton,
-  Menu,
-  MenuItem,
+  Stack,
   Toolbar,
   Typography,
 } from '@mui/material';
 
+// Import style
 import './Dashboard.scss';
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const DashboardHeader = () => {
+  //----------------------------------------------------------------//
+  //                          HOOKS                                 //
+  //----------------------------------------------------------------//
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
+  //----------------------------------------------------------------//
+  //                         HANDLERS                               //
+  //----------------------------------------------------------------//
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -28,25 +33,50 @@ const DashboardHeader = () => {
     setAnchorElUser(null);
   };
 
+  //----------------------------------------------------------------//
+  //                          RENDER                                //
+  //----------------------------------------------------------------//
   return (
-    
     <AppBar position='sticky' className="dashboard_header">
       <Container maxWidth="xl">
-        <Toolbar disableGutters className='dashboard_header__toolbar'>
+        <Toolbar sx={{mr: 10, ml: 10}} disableGutters className='dashboard_header__toolbar'>
           <Typography variant="h6" noWrap component="a" href="/"
             sx={{
               mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
-              color: 'inherit',
+              color: 'black',
               textDecoration: 'none',
             }}
           >
             Peer Prep
           </Typography>
-          <Box sx={{ flexGrow: 0 }}>
+          <Stack
+            direction={'row'}
+            spacing={5}
+          >
+            <IconButton
+              sx={{
+                color: 'black',
+                backgroundColor: 'white',
+                height: 53,
+                borderRadius: 14,
+                border: '3px solid black',
+                "&:hover": {
+                  color: 'black',
+                  border: '3px solid black',
+                },
+                width: '140px',
+                fontFamily: 'Poppins',
+                fontWeight: 600,
+                fontSize: 13,
+              }}
+              disableRipple
+            >
+              Quick Match
+            </IconButton>
+          </Stack>
+          {/* <Box sx={{ flexGrow: 0 }}>
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
               <Avatar alt="User" />
             </IconButton>
@@ -72,7 +102,7 @@ const DashboardHeader = () => {
                 </MenuItem>
               ))}
             </Menu>
-          </Box>
+          </Box> */}
         </Toolbar>
       </Container>
     </AppBar>

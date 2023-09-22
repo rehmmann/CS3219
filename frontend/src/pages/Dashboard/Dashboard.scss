@@ -11,20 +11,20 @@
 .dashboard_body {
     height: 100%;
     width: 100%;
-    // display: flex;
-    // flex-direction: column;
-    // justify-content: center;
+    min-width: 600px;
 }
 
 .dashboard_layout {
     display: flex;
     flex-direction: column;
+    min-width: 1200px;
 }
 
 .dashboard_header {
     background-color: $background-yellow !important;
     padding: 0.5rem 0.5rem 0.5rem 0.5rem;
     min-width: 1200px;
+
 }
 
 .dashboard_header__logo {
