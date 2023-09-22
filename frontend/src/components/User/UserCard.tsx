@@ -107,6 +107,7 @@ const UserCard = () => {
     <Paper
       sx={{
         width: '100%',
+        height: 'fit-content',
         padding: 5,
         borderRadius: 5
       }}
