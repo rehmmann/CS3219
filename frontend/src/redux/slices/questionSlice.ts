@@ -32,18 +32,6 @@ const questionSlice = createSlice({
           return { payload: question }
         },
       }
-      // receivedAll: {
-      //   reducer(
-      //     state,
-      //     action: PayloadAction<Page[], string, { currentPage: number }>
-      //   ) {
-      //     state.all = action.payload
-      //     state.meta = action.meta
-      //   },
-      //   prepare(payload: Page[], currentPage: number) {
-      //     return { payload, meta: { currentPage } }
-      //   },
-      // },
     },
   })
 
