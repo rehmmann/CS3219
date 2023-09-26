@@ -2,10 +2,11 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { User } from './utils/types';
 
 import Dashboard from './pages/Dashboard/Dashboard';
+import Matchmake from './pages/Matchmake/Matchmake';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import Login from './pages/Login/Login';
 
-const routes = (isLoggedIn: boolean) => {
+const routes = (isLoggedIn: boolean, isMatching: boolean) => {
   const r = [];
   const loggedInRoutes = [
     {
@@ -21,7 +22,7 @@ const routes = (isLoggedIn: boolean) => {
       element: <DashboardLayout />,
       children: [
         // { path: '', element: <>app</> },
-        { path: 'dashboard', element: <Dashboard />},
+        { path: 'dashboard', element: isMatching ? <Matchmake /> : <Dashboard /> },
         {
           path: 'member',
           children: [
