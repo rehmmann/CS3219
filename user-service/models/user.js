@@ -1,1 +1,0 @@
-const user = {id, username, email, password, role}
