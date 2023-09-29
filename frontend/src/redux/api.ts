@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { User } from '../utils/types';
 
-const BASE_URL = import.meta.env.VITE_BE_URL;
 const QUESTION_URL = import.meta.env.VITE_QUESTION_URL;
 const USER_URL = import.meta.env.VITE_USER_URL;
 const TOKEN = import.meta.env.VITE_GCLOUD_IDENTITY_TOKEN;
@@ -11,9 +10,16 @@ type UserCredentials = {
   password: string;
   username?: string;
 };
-
+type QuestionCreateProps = {
+  questionId: number;
+  questionTitle: string;
+  questionDescription: string;
+  questionComplexity: string;
+  questionCategories: string[];
+}
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `` }),
+  tagTypes: ['Question'],
   endpoints: (builder) => ({
     getQuestions: builder.query<{ questions: any[] }, void>({
       query: () => ({
@@ -21,8 +27,20 @@ export const api = createApi({
         method: 'GET',
         headers: {
           Authorization: `Bearer ${TOKEN}`,
-        }
+        },
       }),
+      providesTags: ['Question'],
+    }),
+    createQuestion: builder.mutation<{ question: any }, QuestionCreateProps>({
+      query: (question) => ({
+        url: `${QUESTION_URL}/api/questions/new`,
+        method: 'POST',
+        body: question,
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      }),
+      invalidatesTags: ['Question'],
     }),
     login: builder.mutation<{ token: string; user: User }, UserCredentials>({
       query: (credentials) => ({
@@ -41,4 +59,9 @@ export const api = createApi({
   }),
 });
 
-export const { useCreateUserMutation, useGetQuestionsQuery, useLoginMutation } = api;
+export const {
+  useCreateUserMutation,
+  useGetQuestionsQuery,
+  useCreateQuestionMutation,
+  useLoginMutation,
+} = api;

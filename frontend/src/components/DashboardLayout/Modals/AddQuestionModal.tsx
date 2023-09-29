@@ -30,10 +30,13 @@ import CustomButton from '../../Button/Button';
 // Import types
 import { QuestionCategories, QuestionComplexity } from '../../../utils/types';
 import { toast } from 'react-toastify';
+import { useCreateQuestionMutation } from '../../../redux/api';
 
 type AddQuestionModalProps = {
     questionModalOpen: boolean,
-    setQuestionModalOpen: Function
+    setQuestionModalOpen: Function,
+    nextQuestionId: number,
+    questions: any[],
 }
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -46,11 +49,10 @@ const MenuProps = {
   },
 };
 const AddQuestionModal = (props: AddQuestionModalProps) => {
-    const { questionModalOpen, setQuestionModalOpen} = props;
+    const { questions, questionModalOpen, setQuestionModalOpen, nextQuestionId } = props;
     //----------------------------------------------------------------//
     //                          HOOKS                                 //
     //----------------------------------------------------------------//
-    const dispatch = useDispatch();
     const [title, setTitle] = useState('');
     const [titleError, setTitleError] = useState(false);
     const [description, setDescription] = useState('');
@@ -59,13 +61,12 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
     const [complexityError, setComplexityError] = useState(false);
     const [category, setCategory] = useState<string[]>([]);
     const [categoryError, setCategoryError] = useState(false);
-    const questions = useSelector((state: RootState) => state.questions);
-    
+    const [createQuestion] = useCreateQuestionMutation();
     //----------------------------------------------------------------//
     //                         HANDLERS                               //
     //----------------------------------------------------------------//
     const questionTitleExists = (t: string) => {
-      return questions.data.some((question) => question.title.toLowerCase() === t.toLowerCase());
+      return questions.some((question) => question.title.toLowerCase() === t.toLowerCase());
     }
     const handleAddQuestionModalClose = () => {
         setQuestionModalOpen(false);
@@ -78,7 +79,8 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
         setComplexity('');
         setCategory([]);
     }
-    const handleAddQuestion = (e: React.FormEvent) => {
+
+    const handleAddQuestion = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setTitleError(!title);
       setDescriptionError(!description);
@@ -87,27 +89,34 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
       if (!title || !description || !complexity || !category) return;
       if (questionTitleExists(title)) {
         setTitleError(true);
+        console.log("ASDOJKASODK")
         toast.error('Question already exists!');
         return;
       }
-      const complexityCasted = complexity as QuestionComplexity;
-      const date = new Date();
-      dispatch(addQuestion({ 
-        id: String(questions.data.length + 1),
-        title,
-        description,
-        category,
-        complexity: complexityCasted,
-        createdAt: date.toLocaleDateString('en-gb'),
-        updatedAt: date.toLocaleDateString('en-gb'),
-        createdBy: "USER1"
-      }));
-      toast.success(`${title} added!`)
-      setTitle('');
-      setDescription('');
-      setComplexity('');
-      setCategory([]);
-      setQuestionModalOpen(false);
+      const createQuestionPromise = new Promise( async (resolve, reject) => {
+        try {
+          const res = await createQuestion({
+            questionId: nextQuestionId,
+            questionTitle: title,
+            questionDescription: description,
+            questionCategories: category,
+            questionComplexity: complexity,
+          }).unwrap();
+          return resolve(res);
+        } catch (error: any) {
+          return reject(error);
+        }
+      });
+      createQuestionPromise.then((res: any | null) => {
+        toast.success('Question Successfully Created!');
+        setTitle('');
+        setDescription('');
+        setComplexity('');
+        setCategory([]);
+        setQuestionModalOpen(false);
+      }).catch((err) => {
+        toast.error(err.data.error);
+      })
     };
 
     const handleCategoryChange = (event: SelectChangeEvent<typeof category>) => {
@@ -227,7 +236,6 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
               backgroundColor: "transparent"
             }}}
             disableRipple
-            onClick={handleAddQuestion}
           >
             <CustomButton
               title="Create"

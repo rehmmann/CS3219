@@ -1,5 +1,5 @@
 // Import react
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Import MUI
 import { 
@@ -15,8 +15,11 @@ import QuestionDetailsModal from '../../components/DashboardLayout/Modals/Questi
 import QuestionsTable from '../../components/DashboardLayout/QuestionsTable';
 import UserCard from '../../components/User/UserCard';
 
+import { map } from 'lodash';
+
 // Import style
 import './Dashboard.scss';
+import { useGetQuestionsQuery } from '../../redux/api';
 
 const Dashboard = () => {
   //----------------------------------------------------------------//
@@ -28,7 +31,26 @@ const Dashboard = () => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string[]>([]);
   const [complexity, setComplexity] = useState<QuestionComplexity>('');
-
+  const [questions, setQuestions] = useState([]);
+  const { data: questionData }  = useGetQuestionsQuery();
+  const [nextQuestionId, setNextQuestionId] = useState(0);
+  useEffect(() => {
+    if (questionData?.questions) {
+      let nextQuestionIdTemp = 0;
+      const questionsList = map(questionData.questions, q => {
+        nextQuestionIdTemp = Math.max(q.questionId + 1, nextQuestionIdTemp);
+        return {
+          id: q.questionId,
+          title: q.questionTitle,
+          category: q.questionCategories,
+          complexity: q.questionComplexity,
+          description: q.questionDescription,
+        }
+      });
+      setNextQuestionId(nextQuestionIdTemp);
+      setQuestions(questionsList);
+    }
+  }, [questionData]);
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -54,6 +76,8 @@ const Dashboard = () => {
       <AddQuestionModal
         questionModalOpen={questionModalOpen}
         setQuestionModalOpen={setQuestionModalOpen}
+        questions={questions}
+        nextQuestionId={nextQuestionId}
       />
       <QuestionDetailsModal
         questionDetailsOpen={questionDetailsOpen}
@@ -69,7 +93,7 @@ const Dashboard = () => {
         sx={{
           paddingTop: 5,
           width: '100%',
-          height: '60%',
+          height: '80%',
         }}
       >
         <Stack
@@ -95,6 +119,7 @@ const Dashboard = () => {
             <QuestionsTable
               setQuestionModalOpen={setQuestionModalOpen}
               handleClickQuestion={handleClickQuestion}
+              questions={questions}
             />
           </Stack>
         </Stack>

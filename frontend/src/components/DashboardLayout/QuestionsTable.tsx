@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { tableCellClasses } from "@mui/material/TableCell";
 
+import { map } from 'lodash';
 import { 
   Button,
   IconButton,
@@ -19,6 +20,7 @@ import {
 import './Dashboard.scss';
 import { RootState } from '../../redux/store';
 import AddIcon from '@mui/icons-material/Add';
+import { useGetQuestionsQuery } from '../../redux/api';
 interface Column {
   id: 'title' | 'category' | 'complexity' | 'createdAt' | 'updatedAt' | 'createdBy';
   label: string;
@@ -39,18 +41,19 @@ const columns: readonly Column[] = [
 type QuestionTableProps = {
     handleClickQuestion: Function,
     setQuestionModalOpen: Function,
+    questions: any[],
 }
 const QuestionsTable = (props: QuestionTableProps) => {
-  const { setQuestionModalOpen, handleClickQuestion, } = props;
+  const { questions, setQuestionModalOpen, handleClickQuestion, } = props;
   let counter = 0;
-
+  // 你好！ 天气好热啊， 我们去游泳吧！
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
-  const questions = useSelector((state: RootState) => state.questions);
+  // const questions = useSelector((state: RootState) => state.questions);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
+  
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -88,7 +91,7 @@ const QuestionsTable = (props: QuestionTableProps) => {
               <AddIcon />
             </IconButton>
           </Toolbar>
-          <TableContainer sx={{ maxHeight: 440 }}>
+          <TableContainer sx={{ maxHeight: '70vh' }}>
             <Table
               stickyHeader
               aria-label="sticky table"
@@ -112,7 +115,7 @@ const QuestionsTable = (props: QuestionTableProps) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {questions.data
+              {questions
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((question) => {
                   const isOdd = counter++ % 2 == 0;
@@ -181,7 +184,7 @@ const QuestionsTable = (props: QuestionTableProps) => {
               height: '6px'
             } 
           }}
-          count={questions.data.length}
+          count={questions.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

@@ -7,7 +7,6 @@ import Box from '@mui/material/Box';
 
 // Import redux
 import { useDispatch, useSelector } from 'react-redux';
-import { useLoginMutation, useGetQuestionsQuery } from './redux/api';
 import { RootState } from './redux/store';
 
 // Import routes
@@ -40,7 +39,6 @@ const App = () => {
   const {data: isMatching} = useSelector((state: RootState) => state.isMatching);
 
   const routing = useRoutes(routes(user != null, isMatching));
-  // const routing = useRoutes(routes(isValid(loginData.token)));
 
   return (
     <>

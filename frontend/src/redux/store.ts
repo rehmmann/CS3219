@@ -13,7 +13,7 @@ export const store = configureStore({
     isMatching: matchReducer,
   },
   middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat([api.middleware]),
+    getDefaultMiddleware().concat([api.middleware]),
 });
 
 setupListeners(store.dispatch);
