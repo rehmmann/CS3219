@@ -144,7 +144,7 @@ const loginUser = (request, response) => {
             return response.status(500).json({ error: 'Internal Server Error' });
         }
         if (results.rows.length == 0) {
-            return response.status(404).json({ error: 'Not Found Email'});
+            return response.status(404).json({ error: 'Account not found!'});
         }
         salt = results.rows[0].salt;
         const hashedPassword = checkHash(String(salt), String(password));
