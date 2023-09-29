@@ -4,6 +4,7 @@ import { api } from './api';
 import questionReducer from './slices/questionSlice';
 import userReducer from './slices/userSlice'; // temporary until hooked up with be
 import matchReducer from './slices/matchSlice';
+
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
@@ -12,7 +13,7 @@ export const store = configureStore({
     isMatching: matchReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+    getDefaultMiddleware().concat([api.middleware]),
 });
 
 setupListeners(store.dispatch);

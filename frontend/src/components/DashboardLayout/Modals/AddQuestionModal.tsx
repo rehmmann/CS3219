@@ -53,7 +53,6 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
     //----------------------------------------------------------------//
     //                          HOOKS                                 //
     //----------------------------------------------------------------//
-    const dispatch = useDispatch();
     const [title, setTitle] = useState('');
     const [titleError, setTitleError] = useState(false);
     const [description, setDescription] = useState('');

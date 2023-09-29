@@ -23,9 +23,11 @@ const checkToken = (token: string) => {
   return true; // temporary check!
 }
 
+
 const App = () => {
   // const { isLoggedIn } = useSelector((state) => state.auth);
   const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -34,7 +36,6 @@ const App = () => {
     }
   }, [token]);
 
-  const {data: user } = useSelector((state: RootState) => state.user); // temporary
   const {data: isMatching} = useSelector((state: RootState) => state.isMatching);
 
   const routing = useRoutes(routes(user != null, isMatching));
