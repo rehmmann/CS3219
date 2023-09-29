@@ -2,11 +2,11 @@ const Pool = require('pg').Pool
 const crypto = require('crypto');
 
 const pool = new Pool({
-    user: 'me',
-    host: 'localhost',
-    database: 'api',
-    password: 'password',
-    port: 5432,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
 })
 
 const createHash = (password) => {
@@ -59,7 +59,10 @@ const getUserById = (request, response) => {
 
 const createUser = (request, response) => {
     const { username, email, password, role } = request.body
-
+    if (!username || !email || !password) {
+        response.status(422).send('Unprocessable Entity');
+        return
+    }
     const [salt, hashedPassword] = createHash(password);
 
     if (role) {

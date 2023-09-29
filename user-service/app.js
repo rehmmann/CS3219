@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
@@ -17,7 +19,7 @@ app.get('/', (request, response) => {
 
 app.get('/users', db.getUsers)
 app.get('/users/signedin/:id', db.getUserById)
-app.get('/users/login', db.loginUser)
+app.post('/users/login', db.loginUser)
 app.post('/users', db.createUser)
 app.put('/users/signedin/:id', db.updateUser)
 app.delete('/users/signined/:id', db.deleteUser)
