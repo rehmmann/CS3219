@@ -1,6 +1,7 @@
 import { routes } from "./routes.js";
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
 
 // First Test Program
 
@@ -9,13 +10,16 @@ const uri =
 
 mongoose.connect(uri).then(() => {
   const app = express();
+  app.use(cors({
+    origin: '*'
+  }));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
   app.use("/api", routes);
 
-  app.listen(8080, () => {
-    console.log("App Intialised on port 8080");
+  app.listen(8000, () => {
+    console.log("App Intialised on port 8000");
   });
 });
 

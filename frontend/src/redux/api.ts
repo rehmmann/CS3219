@@ -1,30 +1,44 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { User } from '../utils/types';
 
-const dummyUser: User = {
-  id: '1',
-  username: 'dummyuser',
-  email: 'dummyuser@example.com',
-  role: 'user',
-  createdAt: '2023-01-01',
-  updatedAt: '2023-01-01',
+const BASE_URL = import.meta.env.VITE_BE_URL;
+const QUESTION_URL = import.meta.env.VITE_QUESTION_URL;
+const USER_URL = import.meta.env.VITE_USER_URL;
+const TOKEN = import.meta.env.VITE_GCLOUD_IDENTITY_TOKEN;
+
+type UserCredentials = {
+  email: string;
+  password: string;
+  username?: string;
 };
-  
+
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
+  baseQuery: fetchBaseQuery({ baseUrl: `` }),
   endpoints: (builder) => ({
-    login: builder.query<{ token: string; user: User }, void>({
-      // Replace this with your custom logic to simulate a login
-      queryFn: async (arg, api, extraOptions, baseQuery) => {
-        return {
-           data: { 
-            token: 'dummyToken', 
-            user: dummyUser 
-          }
-        };
-      },
+    getQuestions: builder.query<{ questions: any[] }, void>({
+      query: () => ({
+        url: `${QUESTION_URL}/api/questions`,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        }
+      }),
+    }),
+    login: builder.mutation<{ token: string; user: User }, UserCredentials>({
+      query: (credentials) => ({
+        url: `${USER_URL}/users/login`,
+        method: 'POST',
+        body: credentials,
+      }),
+    }),
+    createUser: builder.mutation<{ token: string; user: User }, UserCredentials>({
+      query: (credentials) => ({
+        url: `${USER_URL}/users`,
+        method: 'POST',
+        body: credentials,
+      }),
     }),
   }),
 });
 
-export const { useLoginQuery } = api;
+export const { useCreateUserMutation, useGetQuestionsQuery, useLoginMutation } = api;

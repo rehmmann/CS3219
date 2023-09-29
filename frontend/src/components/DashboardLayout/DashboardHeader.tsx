@@ -4,8 +4,12 @@ import React, {useState} from 'react';
 // Import MUI
 import {
   AppBar,
+  Avatar,
+  Box,
   Container,
   IconButton,
+  Menu,
+  MenuItem,
   Stack,
   Toolbar,
   Typography,
@@ -13,15 +17,17 @@ import {
 
 // Import style
 import './Dashboard.scss';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+// const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const DashboardHeader = () => {
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-
+  const navigate = useNavigate();
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -31,6 +37,13 @@ const DashboardHeader = () => {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  const handleLogout = () => {
+    setAnchorElUser(null);
+    localStorage.clear();
+    navigate("/");
+    toast.success("Logged out successfully!");
   };
 
   //----------------------------------------------------------------//
@@ -76,7 +89,7 @@ const DashboardHeader = () => {
               Quick Match
             </IconButton>
           </Stack>
-          {/* <Box sx={{ flexGrow: 0 }}>
+          <Box sx={{ flexGrow: 0 }}>
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
               <Avatar alt="User" />
             </IconButton>
@@ -96,13 +109,13 @@ const DashboardHeader = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              {/* {settings.map((setting) => ( */}
+              <MenuItem key={"logout"} onClick={handleLogout}>
+                <Typography textAlign="center">{"Log Out"}</Typography>
+              </MenuItem>
+              {/* ))} */}
             </Menu>
-          </Box> */}
+          </Box>
         </Toolbar>
       </Container>
     </AppBar>
