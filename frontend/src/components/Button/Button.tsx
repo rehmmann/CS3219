@@ -1,9 +1,10 @@
 import { IconButton } from "@mui/material";
+import React from "react";
 
 type ButtonProps = {
   title: string,
-  event: () => void,
-  style: React.CSSProperties,
+  event: (e: React.MouseEvent<HTMLElement>) => void,
+  style?: React.CSSProperties,
 }
 
 const Button = (props: ButtonProps) => {

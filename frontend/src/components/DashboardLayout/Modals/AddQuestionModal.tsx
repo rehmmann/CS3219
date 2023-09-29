@@ -14,21 +14,39 @@ import {
   Modal,
   Select,
   MenuItem,
+  OutlinedInput,
 } from '@mui/material';
+
+import { SelectChangeEvent } from '@mui/material/Select';
 
 // Import redux
 import { useDispatch, useSelector } from 'react-redux';
 import { addQuestion } from '../../../redux/slices/questionSlice';
 import { RootState } from '../../../redux/store';
 
+// Import local components
+import CustomButton from '../../Button/Button';
+
+// Import types
+import { QuestionCategories, QuestionComplexity } from '../../../utils/types';
+import { toast } from 'react-toastify';
+
 type AddQuestionModalProps = {
     questionModalOpen: boolean,
     setQuestionModalOpen: Function
 }
-
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
 const AddQuestionModal = (props: AddQuestionModalProps) => {
     const { questionModalOpen, setQuestionModalOpen} = props;
-    
     //----------------------------------------------------------------//
     //                          HOOKS                                 //
     //----------------------------------------------------------------//
@@ -39,39 +57,66 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
     const [descriptionError, setDescriptionError] = useState(false);
     const [complexity, setComplexity] = useState('');
     const [complexityError, setComplexityError] = useState(false);
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState<string[]>([]);
     const [categoryError, setCategoryError] = useState(false);
     const questions = useSelector((state: RootState) => state.questions);
     
     //----------------------------------------------------------------//
     //                         HANDLERS                               //
     //----------------------------------------------------------------//
+    const questionTitleExists = (t: string) => {
+      return questions.data.some((question) => question.title.toLowerCase() === t.toLowerCase());
+    }
     const handleAddQuestionModalClose = () => {
         setQuestionModalOpen(false);
+        setTitleError(false);
+        setDescriptionError(false);
+        setComplexityError(false);
+        setCategoryError(false);
+        setTitle('');
+        setDescription('');
+        setComplexity('');
+        setCategory([]);
     }
     const handleAddQuestion = (e: React.FormEvent) => {
       e.preventDefault();
       setTitleError(!title);
       setDescriptionError(!description);
       setComplexityError(!complexity);
-      setCategoryError(!category);
+      setCategoryError(!category.length);
       if (!title || !description || !complexity || !category) return;
+      if (questionTitleExists(title)) {
+        setTitleError(true);
+        toast.error('Question already exists!');
+        return;
+      }
+      const complexityCasted = complexity as QuestionComplexity;
       const date = new Date();
       dispatch(addQuestion({ 
         id: String(questions.data.length + 1),
         title,
         description,
         category,
-        complexity,
+        complexity: complexityCasted,
         createdAt: date.toLocaleDateString('en-gb'),
         updatedAt: date.toLocaleDateString('en-gb'),
         createdBy: "USER1"
-      }))
+      }));
+      toast.success(`${title} added!`)
       setTitle('');
       setDescription('');
       setComplexity('');
-      setCategory('');
+      setCategory([]);
       setQuestionModalOpen(false);
+    };
+
+    const handleCategoryChange = (event: SelectChangeEvent<typeof category>) => {
+      const {
+        target: { value },
+      } = event;
+      setCategory(
+        typeof value === 'string' ? value.split(',') : value,
+      );
     };
 
     //----------------------------------------------------------------//
@@ -92,11 +137,13 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
             bgcolor: 'background.paper',
             border: '2px solid #000',
             boxShadow: 24,
+            fontFamily: 'Poppins',
+            borderRadius: 5,
             p: 4
           }}
           component="form"
         >
-          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{paddingTop: 2, paddingBottom: 2}}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{paddingTop: 2, paddingBottom: 2, fontFamily: 'Poppins'}}>
             Create Question
           </Typography>
           <form onSubmit={handleAddQuestion}>
@@ -137,19 +184,40 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
                     error={complexityError}
                     required
                   >
-                    <MenuItem value="easy">Easy</MenuItem>
-                    <MenuItem value="medium">Medium</MenuItem>
-                    <MenuItem value="hard">Hard</MenuItem>
+                    <MenuItem value="Easy">Easy</MenuItem>
+                    <MenuItem value="Medium">Medium</MenuItem>
+                    <MenuItem value="Hard">Hard</MenuItem>
                   </Select>
                 </FormControl>
-                <TextField 
+                <FormControl>
+                <InputLabel
+                    id="category-label"
+                    required
+                    error={categoryError}
+                  >
+                    Category
+                  </InputLabel>
+                <Select
+                  labelId="Category"
                   id="category"
-                  label="Category"
-                  onChange={e => setCategory(e.target.value)}
+                  multiple
                   value={category}
+                  onChange={handleCategoryChange}
+                  input={<OutlinedInput label="Category" />}
+                  MenuProps={MenuProps}
                   error={categoryError}
-                  required
-                />
+                >
+                  {QuestionCategories.map((category) => (
+                    <MenuItem
+                      key={category}
+                      value={category}
+                    >
+                      {category}
+                    </MenuItem>
+                  ))}
+                </Select>
+                </FormControl>
+
               </Stack>
               
             </FormControl>
@@ -161,18 +229,10 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
             disableRipple
             onClick={handleAddQuestion}
           >
-            <IconButton 
-              sx={{
-                color: 'blue',
-                backgroundColor: 'transparent',
-                "&:hover": {
-                  backgroundColor: "transparent",
-                  color: 'lightblue'
-              }}}
-              disableRipple
-            >
-              Create
-            </IconButton>
+            <CustomButton
+              title="Create"
+              event={(e) => handleAddQuestion(e)}
+            />
           </Button>
         </Box>
       </Modal>
