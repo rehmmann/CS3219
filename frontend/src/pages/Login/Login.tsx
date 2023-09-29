@@ -14,8 +14,12 @@ import { User } from '../../utils/types';
 import { userLogin } from '../../redux/slices/userSlice';
 import { useDispatch } from 'react-redux';
 
+import CustomButton from '../../components/Button/Button';
+
 // Import style
 import './Login.scss';
+import { useNavigate } from 'react-router-dom';
+import { useLoginMutation } from '../../redux/api';
 
 type LoginData = { password: { value: string }, email: { value: string }};
 
@@ -39,23 +43,15 @@ const textInputStyle = {
     },
 }
 
-const defaultUser: User = {
-  id: '1',
-  username: 'dummyuser',
-  email: 'dummyuser@example.com',
-  role: 'user',
-  createdAt: '2023-01-01',
-  updatedAt: '2023-01-01',
-};
-
 const Login = () => {
-
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const dispatch = useDispatch();
   const [buttonDisabled, setButtonDisabled] = useState(false);
-
+  const navigate = useNavigate();
+  const [login] = useLoginMutation();
+  const [signingUp, setSigningUp] = useState(false);
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -66,31 +62,25 @@ const Login = () => {
     const formData = target.elements as any as LoginData;
     const password = formData.password.value;
     const email = formData.email.value;
-    const resolveAfter3Sec = new Promise((resolve, reject) => {
-      if (email == "dummyuser@example.com" && password == "password") {
-        setTimeout(() => {
-          setButtonDisabled(false);
-          return resolve(defaultUser)
-        }, 2000)
-      } else {
-        setTimeout(() => {
-          setButtonDisabled(false);
-          return reject(null);
-        }, 2000)
+
+    const resolveAfter3Sec = new Promise( async (resolve, reject) => {
+      try {
+        const res = await login({email, password}).unwrap();
+        setButtonDisabled(false);
+        return resolve(res);
+      } catch (error: any) {
+        setButtonDisabled(false);
+        return reject(error);
       }
     });
-    toast.promise(
-      resolveAfter3Sec.then((res: any | User | null) => {
-        localStorage.setItem("token", "dummyToken");
-        localStorage.setItem("user", JSON.stringify(res));
-        dispatch(userLogin(res));
-      }),
-      {
-        pending: 'Logging in...',
-        success: 'Logged in successfully!👌',
-        error: 'Login failed! 🤯'
-      }
-    );
+    resolveAfter3Sec.then((res: any | User | null) => {
+        toast.success('Welcome back ' + res.username + '!');
+        localStorage.setItem('token', 'dummyToken');
+        localStorage.setItem('user', JSON.stringify(res));
+        navigate('/app/dashboard');
+    }).catch((err) => {
+      toast.error(err.data.error);
+    })
   };
 
   //----------------------------------------------------------------//
@@ -171,7 +161,7 @@ const Login = () => {
               </form>
             </div>
             <div>
-              Don't have an account? <a>Sign up now</a>
+              Don't have an account? <CustomButton title="Register" event={() => setSigningUp(true)} />
             </div>
           </div>
         </div>

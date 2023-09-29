@@ -7,7 +7,7 @@ import Box from '@mui/material/Box';
 
 // Import redux
 import { useDispatch, useSelector } from 'react-redux';
-import { useLoginQuery } from './redux/api';
+import { useLoginMutation, useGetQuestionsQuery } from './redux/api';
 import { RootState } from './redux/store';
 
 // Import routes
@@ -24,9 +24,11 @@ const checkToken = (token: string) => {
   return true; // temporary check!
 }
 
+
 const App = () => {
   // const { isLoggedIn } = useSelector((state) => state.auth);
   const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -35,19 +37,10 @@ const App = () => {
     }
   }, [token]);
 
-  const { data: loginData, isFetching } = useLoginQuery();
-  const {data: user } = useSelector((state: RootState) => state.user); // temporary
   const {data: isMatching} = useSelector((state: RootState) => state.isMatching);
 
   const routing = useRoutes(routes(user != null, isMatching));
   // const routing = useRoutes(routes(isValid(loginData.token)));
-  if (isFetching) {
-    return (
-      <Box sx={{ display: 'flex' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   return (
     <>

@@ -156,9 +156,16 @@ const loginUser = (request, response) => {
                 return response.status(500).json({ error: 'Internal Server Error' });
             }
             if (results.rows.length == 0) {
-                return response.status(404).json({ error: 'Not Found', results: results.rows, salt: salt, hashedPassword: hashedPassword });
+                return response.status(404).json({ error: 'Wrong Password!', results: results.rows, salt: salt, hashedPassword: hashedPassword });
             }
-            response.status(200).json(results.rows)
+            const user = results.rows[0];
+            const responseBody = {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            }
+            response.status(200).json(responseBody);
         })
     });
     
