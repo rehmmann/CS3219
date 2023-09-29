@@ -1,13 +1,19 @@
+// Import React
+import { useState } from 'react';
+
+// Import MUI
 import {
     FormControl,
     IconButton,
     Stack,
     TextField,
 } from '@mui/material';
-import { useState } from 'react';
-import { useCreateUserMutation, useLoginMutation } from '../../redux/api';
+
+// Import redux
+import { useCreateUserMutation } from '../../redux/api';
+
+// Import toast
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 
 import {User } from '../../utils/types';
 type LoginData = { password: { value: string }, email: { value: string }};
@@ -32,43 +38,54 @@ const textInputStyle = {
       },
   }
 type SignUpFormProps = {
-  setSigningUp: Function 
+  setSigningUp: Function
 }
 
 const SignUpForm = (props: SignUpFormProps) => {
   const { setSigningUp } = props;
+
+  //----------------------------------------------------------------//
+  //                          HOOKS                                 //
+  //----------------------------------------------------------------//
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [createUser] = useCreateUserMutation();
-  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
   const [email, setEmail] = useState('');
+
+  //----------------------------------------------------------------//
+  //                         HANDLERS                               //
+  //----------------------------------------------------------------//
   const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setButtonDisabled(true);
-      if (password !== retypePassword) {
-        toast.error('Passwords do not match!');
+    e.preventDefault();
+    setButtonDisabled(true);
+    if (password !== retypePassword) {
+      toast.error('Passwords do not match!');
+      setButtonDisabled(false);
+      return;
+    }
+    const createUserPromise = new Promise( async (resolve, reject) => {
+      try {
+        const res = await createUser({email, username, password}).unwrap();
         setButtonDisabled(false);
-        return;
+        return resolve(res);
+      } catch (error: any) {
+        setButtonDisabled(false);
+        return reject(error);
       }
-      const createUserPromise = new Promise( async (resolve, reject) => {
-        try {
-          const res = await createUser({email, username, password}).unwrap();
-          setButtonDisabled(false);
-          return resolve(res);
-        } catch (error: any) {
-          setButtonDisabled(false);
-          return reject(error);
-        }
-      });
-      createUserPromise.then((res: any | User | null) => {
-        toast.success('Account Successfully Created!');
-        setSigningUp(false);
-      }).catch((err) => {
-        toast.error(err.data.error);
-      })
-    };
+    });
+    createUserPromise.then((res: any | User | null) => {
+      toast.success('Account Successfully Created!');
+      setSigningUp(false);
+    }).catch((err) => {
+      toast.error(err.data.error);
+    })
+  };
+
+  //----------------------------------------------------------------//
+  //                          RENDER                                //
+  //----------------------------------------------------------------//
   return (
     <form
       onSubmit={(e) => handleSignUp(e)}

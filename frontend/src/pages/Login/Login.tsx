@@ -1,49 +1,15 @@
 // Import react
 import { useState } from 'react';
 
-// Import MUI
-import { Button, FormControl, IconButton, Stack, TextField } from '@mui/material';
-
-// Import toast
-import { toast } from 'react-toastify';
-
-// Import types
-import { User } from '../../utils/types';
-
 // Import redux
-import { userLogin } from '../../redux/slices/userSlice';
-import { useDispatch } from 'react-redux';
-
 import CustomButton from '../../components/Button/Button';
 
-// Import style
-import './Login.scss';
-import { useNavigate } from 'react-router-dom';
-import { useLoginMutation } from '../../redux/api';
+// Import components
 import LogInForm from './LogInForm';
 import SignUpForm from './SignUpForm';
 
-type LoginData = { password: { value: string }, email: { value: string }};
-
-const textInputStyle = {
-  "& label.Mui-focused": {
-    color: 'rgba(0, 0, 0, 0.6)'
-  },
-  "borderBottom": '2px solid black',
-  '& .MuiInput-underline:before': { borderBottomColor: 'black' },
-  '& .MuiInput-underline:after': { borderBottomColor: 'black' },
-    input: {
-      '&:-webkit-autofill::first-line': {
-        'color': 'green',
-        'fontSize': '13px'
-      },
-      '&:-webkit-autofill': {
-        '-webkit-box-shadow': '0 0 0 100px #ffff inset',
-        '-webkit-text-fill-color': 'black',
-        'fontSize': '13px'
-      },
-    },
-}
+// Import style
+import './Login.scss';
 
 const Login = () => {
   //----------------------------------------------------------------//
