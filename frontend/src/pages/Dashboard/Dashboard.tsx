@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 
 // Import types
-import { Question } from '../../utils/types';
+import { Question, QuestionComplexity } from '../../utils/types';
 
 // Import components
 import AddQuestionModal from '../../components/DashboardLayout/Modals/AddQuestionModal';
@@ -26,6 +26,8 @@ const Dashboard = () => {
   const [questionDetailsOpen, setQuestionDetailsOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState<string[]>([]);
+  const [complexity, setComplexity] = useState<QuestionComplexity>('');
 
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
@@ -35,6 +37,8 @@ const Dashboard = () => {
     setQuestionDetailsOpen(true);
     setTitle(question.title);
     setDescription(question.description);
+    setCategory(question.category);
+    setComplexity(question.complexity);
   }
   const questionsDetailsCloseHandler = () => {
     setTitle('');
@@ -56,6 +60,8 @@ const Dashboard = () => {
         questionsDetailsCloseHandler={questionsDetailsCloseHandler}
         title={title}
         description={description}
+        category={category}
+        complexity={complexity}
       />
       <Stack
         direction={'row'}

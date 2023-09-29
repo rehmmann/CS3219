@@ -140,6 +140,14 @@ const QuestionsTable = (props: QuestionTableProps) => {
                           return (
                             <TableCell key={column.id} align={column.align}>
                               <Button
+                                sx={{
+                                  textTransform: 'none',
+                                  "&:hover": { backgroundColor: "transparent" }
+                                }}
+                                disableRipple
+                                disableFocusRipple
+                                disableTouchRipple
+                                disableElevation
                                 onClick={e => handleClickQuestion(e, question)}
                               >
                                 {value}
