@@ -5,18 +5,13 @@ const BASE_URL = import.meta.env.VITE_BE_URL;
 const QUESTION_URL = import.meta.env.VITE_QUESTION_URL;
 const USER_URL = import.meta.env.VITE_USER_URL;
 const TOKEN = import.meta.env.VITE_GCLOUD_IDENTITY_TOKEN;
-const dummyUser: User = {
-  id: '1',
-  username: 'dummyuser',
-  email: 'dummyuser@example.com',
-  role: 'user',
-  createdAt: '2023-01-01',
-  updatedAt: '2023-01-01',
-};
-type LoginCredentials = {
+
+type UserCredentials = {
   email: string;
   password: string;
+  username?: string;
 };
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `` }),
   endpoints: (builder) => ({
@@ -29,9 +24,16 @@ export const api = createApi({
         }
       }),
     }),
-    login: builder.mutation<{ token: string; user: User }, LoginCredentials>({
+    login: builder.mutation<{ token: string; user: User }, UserCredentials>({
       query: (credentials) => ({
         url: `${USER_URL}/users/login`,
+        method: 'POST',
+        body: credentials,
+      }),
+    }),
+    createUser: builder.mutation<{ token: string; user: User }, UserCredentials>({
+      query: (credentials) => ({
+        url: `${USER_URL}/users`,
         method: 'POST',
         body: credentials,
       }),
@@ -39,4 +41,4 @@ export const api = createApi({
   }),
 });
 
-export const { useLoginMutation, useGetQuestionsQuery } = api;
+export const { useCreateUserMutation, useGetQuestionsQuery, useLoginMutation } = api;

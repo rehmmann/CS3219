@@ -20,6 +20,8 @@ import CustomButton from '../../components/Button/Button';
 import './Login.scss';
 import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../redux/api';
+import LogInForm from './LogInForm';
+import SignUpForm from './SignUpForm';
 
 type LoginData = { password: { value: string }, email: { value: string }};
 
@@ -47,42 +49,10 @@ const Login = () => {
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
-  const dispatch = useDispatch();
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  const navigate = useNavigate();
-  const [login] = useLoginMutation();
   const [signingUp, setSigningUp] = useState(false);
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setButtonDisabled(true);
-    const target = e.target as HTMLFormElement;
-    const formData = target.elements as any as LoginData;
-    const password = formData.password.value;
-    const email = formData.email.value;
-
-    const resolveAfter3Sec = new Promise( async (resolve, reject) => {
-      try {
-        const res = await login({email, password}).unwrap();
-        setButtonDisabled(false);
-        return resolve(res);
-      } catch (error: any) {
-        setButtonDisabled(false);
-        return reject(error);
-      }
-    });
-    resolveAfter3Sec.then((res: any | User | null) => {
-        toast.success('Welcome back ' + res.username + '!');
-        localStorage.setItem('token', 'dummyToken');
-        localStorage.setItem('user', JSON.stringify(res));
-        navigate('/app/dashboard');
-    }).catch((err) => {
-      toast.error(err.data.error);
-    })
-  };
-
   //----------------------------------------------------------------//
   //                          RENDER                                //
   //----------------------------------------------------------------//
@@ -102,66 +72,17 @@ const Login = () => {
               Ready to solve some problem with peers?
             </div>
             <div className="login_form_container">
-              <form
-                onSubmit={(e) => handleLogin(e)}
-              >
-                <FormControl
-                  sx={{ width: '100%', mt: 10, mb: 10 }}
-                  variant="standard"
-                >
-                  <Stack spacing={8}>
-                    <TextField
-                      id="email"
-                      label="Email"
-                      type="email"
-                      variant='standard'
-                      sx={textInputStyle}
-                      required
-                      InputLabelProps={{ required: false, style: { fontFamily: 'Poppins' }}}
-                      inputProps={{style: { fontFamily: 'Poppins' }}}
-                    >
-                      <label>Email</label>
-                      <input type="text" />
-                    </TextField>
-                    <TextField
-                      id="password"
-                      label="Password"
-                      type="password"
-                      variant='standard'
-                      sx={textInputStyle}
-                      SelectProps={{style: {color: 'black'}}}
-                      required
-                      inputProps={{style: { fontFamily: 'Poppins' }}}
-                      InputLabelProps={{ required: false, style: { fontFamily: 'Poppins' }}}
-                    />
-                    <IconButton
-                      sx={{
-                        color: 'black',
-                        backgroundColor: '#FFD900',
-                        height: 53,
-                        borderRadius: 14,
-                        border: '3px solid black',
-                        "&:hover": {
-                          color: 'black',
-                          border: '3px solid black',
-                        },
-                        width: '100%',
-                        fontFamily: 'Poppins',
-                        fontWeight: 600,
-                        fontSize: 13,
-                      }}
-                      disabled={buttonDisabled}
-                      type="submit"
-                      disableRipple
-                    >
-                      Log In
-                    </IconButton>
-                  </Stack>
-                </FormControl>
-              </form>
+              {signingUp ? <SignUpForm setSigningUp={setSigningUp}/> : <LogInForm/>}
             </div>
             <div>
-              Don't have an account? <CustomButton title="Register" event={() => setSigningUp(true)} />
+              {signingUp ?
+                <div>
+                  Already have an account? <CustomButton title="Log In" event={() => setSigningUp(false)} />
+                </div> :
+                <div>
+                  Don't have an account? <CustomButton title="Register" event={() => setSigningUp(true)} />
+                </div>
+              }
             </div>
           </div>
         </div>

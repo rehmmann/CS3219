@@ -70,7 +70,7 @@ const createUser = (request, response) => {
         (error, results) => {
             if (error && error.code === '23505') {
                 // Duplicate entry error
-                return response.status(409).json({ error: 'Duplicate entry' });
+                return response.status(409).json({ error: 'User already exists!' });
             }
             if (error) {
                 console.error('Error executing query:', error);
@@ -83,13 +83,13 @@ const createUser = (request, response) => {
         (error, results) => {
             if (error && error.code === '23505') {
                 // Duplicate entry error
-                return response.status(409).json({ error: 'Duplicate entry' });
+                return response.status(409).json({ error: 'User already exists!' });
             }
             if (error) {
                 console.error('Error executing query:', error);
             return response.status(500).json({ error: 'Internal Server Error' });
             }
-            response.status(201).send(`User added with id: ${results.rows[0].id}, username: ${results.rows[0].username}`)
+            response.status(201).send();
         })
     }
 
