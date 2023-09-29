@@ -1,11 +1,11 @@
+import dotenv from "dotenv";
 import { routes } from "./routes.js";
 import express from "express";
 import mongoose from "mongoose";
 
-// First Test Program
+dotenv.config();
 
-const uri =
-  "mongodb+srv://rehmmann:rehman@cluster0.qredme9.mongodb.net/Peer-prep?retryWrites=true&w=majority";
+const uri = process.env.MONGO_DB_URL;
 
 mongoose.connect(uri).then(() => {
   const app = express();
