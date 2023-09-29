@@ -74,7 +74,13 @@ const Dashboard = () => {
             width: '85%',
           }}
         >
-          <UserCard />
+         <Stack
+            direction={'column'}
+            width={'fit-content'}
+            spacing={3}
+          >
+              <UserCard />
+            </Stack>
           <Stack
             direction={'column'}
             width={'70%'}
