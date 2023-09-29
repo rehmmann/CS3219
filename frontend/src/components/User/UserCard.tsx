@@ -5,8 +5,9 @@ import { useState } from "react";
 import { Box, IconButton, Paper, Stack } from "@mui/material";
 
 // Import redux
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
+import { initMatch } from '../../redux/slices/matchSlice';
 
 type UserLogoProps = {
   logoLink?: string
@@ -54,6 +55,7 @@ const UserCard = () => {
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
+  const dispatch = useDispatch();
   const {data: user} = useSelector((state: RootState) => state.user);
   const [selectedTopic, setSelectedTopic] = useState<string>();
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>();
@@ -196,6 +198,9 @@ const UserCard = () => {
             fontSize: 13,
           }}
           disableRipple
+          onClick={() => {
+            dispatch(initMatch(true));
+          }}
         >
           Match
         </IconButton>

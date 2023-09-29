@@ -28,14 +28,18 @@ const App = () => {
   // const { isLoggedIn } = useSelector((state) => state.auth);
   const token = localStorage.getItem('token');
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (token && checkToken(token)) {
       dispatch(userLogin(JSON.parse(localStorage.getItem('user') || "") as User));
     }
   }, [token]);
+
   const { data: loginData, isFetching } = useLoginQuery();
   const {data: user } = useSelector((state: RootState) => state.user); // temporary
-  const routing = useRoutes(routes(user != null));
+  const {data: isMatching} = useSelector((state: RootState) => state.isMatching);
+
+  const routing = useRoutes(routes(user != null, isMatching));
   // const routing = useRoutes(routes(isValid(loginData.token)));
   if (isFetching) {
     return (
