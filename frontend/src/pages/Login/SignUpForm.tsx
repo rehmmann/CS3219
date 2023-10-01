@@ -9,14 +9,12 @@ import {
     TextField,
 } from '@mui/material';
 
-// Import redux
-import { useCreateUserMutation } from '../../redux/api';
-
 // Import toast
 import { toast } from 'react-toastify';
 
-import {User } from '../../utils/types';
-type LoginData = { password: { value: string }, email: { value: string }};
+// Import firebase
+import { firebaseAuth,  } from '../../utils/firebase';
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -43,13 +41,10 @@ type SignUpFormProps = {
 
 const SignUpForm = (props: SignUpFormProps) => {
   const { setSigningUp } = props;
-
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [createUser] = useCreateUserMutation();
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
   const [email, setEmail] = useState('');
@@ -65,22 +60,14 @@ const SignUpForm = (props: SignUpFormProps) => {
       setButtonDisabled(false);
       return;
     }
-    const createUserPromise = new Promise( async (resolve, reject) => {
-      try {
-        const res = await createUser({email, username, password}).unwrap();
-        setButtonDisabled(false);
-        return resolve(res);
-      } catch (error: any) {
-        setButtonDisabled(false);
-        return reject(error);
-      }
-    });
-    createUserPromise.then((res: any | User | null) => {
-      toast.success('Account Successfully Created!');
+    createUserWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
       setSigningUp(false);
+      setButtonDisabled(false);
+      toast.success('Account Successfully Created!');
     }).catch((err) => {
-      toast.error(err.data.error);
-    })
+      toast.error("Email is already in use!");
+      setButtonDisabled(false);
+    });
   };
 
   //----------------------------------------------------------------//
@@ -111,7 +98,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               },  style: { fontFamily: 'Poppins' }}}
           >
           </TextField>
-          <TextField
+          {/* <TextField
               id="username"
               label="Username"
               type="text"
@@ -128,7 +115,7 @@ const SignUpForm = (props: SignUpFormProps) => {
                 autoComplete: 'off',
               }, style: { fontFamily: 'Poppins' }}}
           >
-          </TextField>
+          </TextField> */}
           <TextField
               id="password"
               label="Password"
