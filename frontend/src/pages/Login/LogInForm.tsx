@@ -10,14 +10,12 @@ import {
     TextField,
 } from '@mui/material';
 
-// Import redux
-import { useLoginMutation } from '../../redux/api';
-
 // Import toast
 import { toast } from 'react-toastify';
 
-// Import types
-import { User } from '../../utils/types';
+// Import firebase
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { firebaseAuth } from '../../utils/firebase';
 
 const textInputStyle = {
   "& label.Mui-focused": {
@@ -44,7 +42,6 @@ const LogInForm = () => {
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [login] = useLoginMutation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -55,23 +52,13 @@ const LogInForm = () => {
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setButtonDisabled(true);
-    const loginPromise = new Promise( async (resolve, reject) => {
-      try {
-        const res = await login({email, password}).unwrap();
-        setButtonDisabled(false);
-        return resolve(res);
-      } catch (error: any) {
-        setButtonDisabled(false);
-        return reject(error);
-      }
-    });
-    loginPromise.then((res: any | User | null) => {
-        toast.success('Welcome back ' + res.username + '!');
-        localStorage.setItem('token', 'dummyToken');
-        localStorage.setItem('user', JSON.stringify(res));
-        navigate('/app/dashboard');
+    signInWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
+      setButtonDisabled(false);
+      navigate('/app/dashboard');
+      toast.success('Welcome back!');
     }).catch((err) => {
-      toast.error(err.data.error);
+      toast.error("Login Failed!");
+      setButtonDisabled(false);
     })
   };
 

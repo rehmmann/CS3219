@@ -15,6 +15,8 @@ import {
   Typography,
 } from '@mui/material';
 
+import { getAuth, signOut } from "firebase/auth";
+
 // Import style
 import './Dashboard.scss';
 import { useNavigate } from 'react-router-dom';
@@ -41,9 +43,15 @@ const DashboardHeader = () => {
 
   const handleLogout = () => {
     setAnchorElUser(null);
-    localStorage.clear();
-    navigate("/");
-    toast.success("Logged out successfully!");
+    const auth = getAuth();
+    signOut(auth).then(() => {
+      localStorage.clear();
+      navigate("/");
+      toast.success("Logged out successfully!");
+    }).catch((error) => {
+      toast.error("Error! Could not log out!");
+    });
+    
   };
 
   //----------------------------------------------------------------//
