@@ -14,7 +14,7 @@ import {
 import { toast } from 'react-toastify';
 
 // Import firebase
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { firebaseAuth } from '../../utils/firebase';
 
 const textInputStyle = {
@@ -53,10 +53,12 @@ const LogInForm = () => {
     e.preventDefault();
     setButtonDisabled(true);
     signInWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
+      console.log(res);
       setButtonDisabled(false);
       navigate('/app/dashboard');
       toast.success('Welcome back!');
     }).catch((err) => {
+      console.error(err);
       toast.error("Login Failed!");
       setButtonDisabled(false);
     })

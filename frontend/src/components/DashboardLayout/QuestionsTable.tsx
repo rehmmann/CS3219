@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { tableCellClasses } from "@mui/material/TableCell";
 
-import { map } from 'lodash';
 import { 
   Button,
   IconButton,
@@ -18,9 +16,8 @@ import {
 } from '@mui/material';
 
 import './Dashboard.scss';
-import { RootState } from '../../redux/store';
 import AddIcon from '@mui/icons-material/Add';
-import { useGetQuestionsQuery } from '../../redux/api';
+
 interface Column {
   id: 'title' | 'category' | 'complexity' | 'createdAt' | 'updatedAt' | 'createdBy';
   label: string;
@@ -31,11 +28,7 @@ interface Column {
 
 const columns: readonly Column[] = [
   { id: 'title', label: 'Title', minWidth: 120 },
-  // { id: 'category', label: 'Category', minWidth: 120, align: 'center', },
   { id: 'complexity', label: 'Complexity', minWidth: 120, align: 'right', },
-  // { id: 'createdAt', label: 'Created', minWidth: 170, align: 'right', },
-  // { id: 'updatedAt', label: 'Updated', minWidth: 170, align: 'right', }, 
-  // { id: 'createdBy', label: 'Created By', minWidth: 150, align: 'right', }, 
 ];
 
 type QuestionTableProps = {
@@ -50,7 +43,6 @@ const QuestionsTable = (props: QuestionTableProps) => {
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
-  // const questions = useSelector((state: RootState) => state.questions);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   
@@ -58,6 +50,7 @@ const QuestionsTable = (props: QuestionTableProps) => {
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
   const handleChangePage = (event: unknown, newPage: number) => {
+    console.log(event);
     setPage(newPage);
   };
 

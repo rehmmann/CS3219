@@ -1,4 +1,4 @@
-export type QuestionComplexity = 'Easy' | 'Medium' | 'Hard';
+export type QuestionComplexity = 'Easy' | 'Medium' | 'Hard' | null;
 export const QuestionCategories = [
     'Algorithms',
     'Arrays',

@@ -22,11 +22,11 @@ export const api = createApi({
   tagTypes: ['Question'],
   endpoints: (builder) => ({
     getQuestions: builder.query<{ questions: any[] }, void>({
-      query: () => ({
-        url: `${QUESTION_URL}/api/questions`,
+      query: (token) => ({
+        url: `${QUESTION_URL}`,
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
       }),
       providesTags: ['Question'],

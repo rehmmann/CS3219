@@ -15,13 +15,27 @@ import QuestionDetailsModal from '../../components/DashboardLayout/Modals/Questi
 import QuestionsTable from '../../components/DashboardLayout/QuestionsTable';
 import UserCard from '../../components/User/UserCard';
 
+// Import utils
 import { map } from 'lodash';
+
+// Import firebase
+import { getAuth } from 'firebase/auth';
 
 // Import style
 import './Dashboard.scss';
 import { useGetQuestionsQuery } from '../../redux/api';
 
 const Dashboard = () => {
+  const auth = getAuth();
+  console.log(auth)
+  let accessToken: any = '';
+  useEffect (() => {
+    auth.currentUser?.getIdTokenResult().then((idTokenResult) => {
+      console.log(idTokenResult.token)
+      accessToken = idTokenResult.token;
+    })
+  }, [auth]);
+ 
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
@@ -30,9 +44,10 @@ const Dashboard = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string[]>([]);
-  const [complexity, setComplexity] = useState<QuestionComplexity>('');
-  const [questions, setQuestions] = useState([]);
-  const { data: questionData }  = useGetQuestionsQuery();
+  const [complexity, setComplexity] = useState<QuestionComplexity>(null);
+  const [questions, setQuestions] = useState<any[]>([]);
+
+  const { data: questionData }  = useGetQuestionsQuery(accessToken);
   const [nextQuestionId, setNextQuestionId] = useState(0);
   useEffect(() => {
     if (questionData?.questions) {

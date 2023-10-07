@@ -1,6 +1,7 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { User } from './utils/types';
+// Import react
+import { Navigate } from 'react-router-dom';
 
+// Import pages
 import Dashboard from './pages/Dashboard/Dashboard';
 import Matchmake from './pages/Matchmake/Matchmake';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
@@ -21,7 +22,6 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
       path: 'app',
       element: <DashboardLayout />,
       children: [
-        // { path: '', element: <>app</> },
         { path: 'dashboard', element: isMatching ? <Matchmake /> : <Dashboard /> },
         {
           path: 'member',

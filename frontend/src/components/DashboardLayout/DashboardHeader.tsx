@@ -49,6 +49,7 @@ const DashboardHeader = () => {
       navigate("/");
       toast.success("Logged out successfully!");
     }).catch((error) => {
+      console.error(error);
       toast.error("Error! Could not log out!");
     });
     

@@ -1,6 +1,3 @@
-// Import react
-import { useState } from 'react';
-
 // Import redux
 import { useDispatch } from "react-redux";
 import { initMatch } from '../../redux/slices/matchSlice';

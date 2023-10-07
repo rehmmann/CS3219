@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   FormControl,
-  IconButton,
   InputLabel,
   Stack,
   TextField,
@@ -16,19 +15,13 @@ import {
   MenuItem,
   OutlinedInput,
 } from '@mui/material';
-
 import { SelectChangeEvent } from '@mui/material/Select';
-
-// Import redux
-import { useDispatch, useSelector } from 'react-redux';
-import { addQuestion } from '../../../redux/slices/questionSlice';
-import { RootState } from '../../../redux/store';
 
 // Import local components
 import CustomButton from '../../Button/Button';
 
 // Import types
-import { QuestionCategories, QuestionComplexity } from '../../../utils/types';
+import { QuestionCategories } from '../../../utils/types';
 import { toast } from 'react-toastify';
 import { useCreateQuestionMutation } from '../../../redux/api';
 
@@ -108,6 +101,7 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
         }
       });
       createQuestionPromise.then((res: any | null) => {
+        console.log(res);
         toast.success('Question Successfully Created!');
         setTitle('');
         setDescription('');
@@ -239,7 +233,7 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
           >
             <CustomButton
               title="Create"
-              event={(e) => handleAddQuestion(e)}
+              event={(e: any) => handleAddQuestion(e)}
             />
           </Button>
         </Box>

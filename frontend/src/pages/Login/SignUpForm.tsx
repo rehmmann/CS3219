@@ -61,10 +61,12 @@ const SignUpForm = (props: SignUpFormProps) => {
       return;
     }
     createUserWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
+      console.log(res);
       setSigningUp(false);
       setButtonDisabled(false);
       toast.success('Account Successfully Created!');
     }).catch((err) => {
+      console.error(err);
       toast.error("Email is already in use!");
       setButtonDisabled(false);
     });
