@@ -1,15 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { User } from '../utils/types';
+import { getAuth } from 'firebase/auth';
 
 const QUESTION_URL = import.meta.env.VITE_QUESTION_URL;
-const USER_URL = import.meta.env.VITE_USER_URL;
-const TOKEN = import.meta.env.VITE_GCLOUD_IDENTITY_TOKEN;
 
-type UserCredentials = {
-  email: string;
-  password: string;
-  username?: string;
-};
+
 type QuestionCreateProps = {
   questionId: number;
   questionTitle: string;
@@ -18,50 +12,38 @@ type QuestionCreateProps = {
   questionCategories: string[];
 }
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: `` }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: ``,
+    prepareHeaders: async (headers) => {
+      const auth = getAuth();
+      await auth.currentUser?.getIdTokenResult().then((idTokenResult) => {
+        headers.set('authorization', `Bearer ${idTokenResult.token}`);
+      })
+      return headers;
+    },
+  }),
   tagTypes: ['Question'],
   endpoints: (builder) => ({
     getQuestions: builder.query<{ questions: any[] }, void>({
-      query: (token) => ({
+      query: () => ({
         url: `${QUESTION_URL}`,
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }),
       providesTags: ['Question'],
     }),
     createQuestion: builder.mutation<{ question: any }, QuestionCreateProps>({
       query: (question) => ({
-        url: `${QUESTION_URL}/api/questions/new`,
+        url: `${QUESTION_URL}/new`,
         method: 'POST',
         body: question,
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
+
       }),
       invalidatesTags: ['Question'],
-    }),
-    login: builder.mutation<{ token: string; user: User }, UserCredentials>({
-      query: (credentials) => ({
-        url: `${USER_URL}/users/login`,
-        method: 'POST',
-        body: credentials,
-      }),
-    }),
-    createUser: builder.mutation<{ token: string; user: User }, UserCredentials>({
-      query: (credentials) => ({
-        url: `${USER_URL}/users`,
-        method: 'POST',
-        body: credentials,
-      }),
     }),
   }),
 });
 
 export const {
-  useCreateUserMutation,
   useGetQuestionsQuery,
   useCreateQuestionMutation,
-  useLoginMutation,
 } = api;

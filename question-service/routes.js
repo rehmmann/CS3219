@@ -21,4 +21,6 @@ router.get("/questions", getFilteredQuestions);
 //Delete question based on questionId
 router.delete("/questions/:id", deleteQuestion);
 
+router.get("/questions/test", (req, res) => { res.send("Question Service Version 6"); });
+
 export let routes = router;
