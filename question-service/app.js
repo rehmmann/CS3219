@@ -1,17 +1,21 @@
 import { routes } from "./routes.js";
 import express from "express";
 import mongoose from "mongoose";
-
-// First Test Program
+import cors from "cors";
 
 const uri =
   "mongodb+srv://rehmmann:rehman@cluster0.qredme9.mongodb.net/Peer-prep?retryWrites=true&w=majority";
 
 mongoose.connect(uri).then(() => {
   const app = express();
+  app.use(
+    cors({
+      origin: "*",
+    })
+  );
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
-
+  app.options("*", cors());
   app.use("/api", routes);
 
   app.listen(8080, () => {
