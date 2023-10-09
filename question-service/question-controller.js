@@ -40,12 +40,30 @@ export async function getFilteredQuestions(req, res) {
   try {
     const query = req.query;
     let andQuery = {};
+    let orQuery = [];
+
     if (query.id) andQuery.questionId = Number(query.id);
     if (query.complexity) andQuery.questionComplexity = query.complexity;
-    if (query.categories) andQuery.questionCategories = query.categories;
-    console.log(andQuery);
-
-    const questions = await Question.find(andQuery);
+    if (query.categories) {
+      if (Array.isArray(query.categories)) {
+        for (const category of query.categories) {
+          orQuery.push({ questionCategories: category });
+        }
+      } else {
+        // 'categories' is a single value, convert it to an array
+        orQuery.push({ questionCategories: query.categories });
+      }
+    }
+    // console.log(andQuery);
+    // console.log(orQuery);
+    const questions = await Question.find({
+      $and: [
+        andQuery,
+        {
+          $or: orQuery,
+        },
+      ],
+    });
     console.log(questions.length);
     res.status(200).json({
       questions: questions,
