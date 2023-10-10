@@ -40,6 +40,6 @@ io.on("connection", async (socket) => {
     });
 });
 
-server.listen(3001, () => {
-    console.log("Server listening on on http://localhost:3001");
+server.listen(80, () => {
+    console.log("Server listening on on http://localhost:80");
 });

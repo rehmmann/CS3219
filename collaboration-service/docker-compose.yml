@@ -9,13 +9,13 @@ services:
   app:
     depends_on:
       - redis
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: collaboration-service-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: collaboration-service-app:latest
     container_name: app
     restart: on-failure
     ports:
-      - "3001:3001"
+      - "80:80"
     volumes:
       - .:/app
