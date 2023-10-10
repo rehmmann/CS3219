@@ -1,15 +1,22 @@
 export const ClientEvents = {
-    JOIN_ROOM: 'joinRoom',
-    LEAVE_ROOM: 'leaveRoom',
-    DELETE_ROOM: 'deleteRoom',
+    JOIN_ROOM: 'join-room',
+    LEAVE_ROOM: 'leave-room',
+    DELETE_ROOM: 'delete-room',
     MESSAGE: 'message',
     CODE: 'code',
 }
 
 export const ServerEvents = {
-    JOIN_ROOM: 'joinRoom',
-    LEAVE_ROOM: 'leaveRoom',
-    DELETE_ROOM: 'deleteRoom',
+    JOINED_ROOM: 'joined-room',
+    LEFT_ROOM: 'left-room',
+    DELETE_ROOM: 'deleted-room',
     MESSAGE: 'message',
     CODE: 'code',
+    ERROR: 'error',
+}
+
+export const ClientErrors = {
+    MISSING_TOKEN: 'Missing JWT',
+    INVALID_TOKEN: "Invalid JWT",
+    MISSING_USER_ID: "Missing User ID",
 }
