@@ -15,7 +15,7 @@ export const clientJoinRoom = async (io, socket, redis, userId) => {
             sendErrorToClient(io, socket, "Missing fields");
             return;
         }
-        const roomId = makeRoomId(userId, otherUserId);
+        const roomId = makeRoomId(userId, otherUserId, questionId);
         const room = await getRoom(redis, roomId) 
         if (room) {
             console.log("Room already exists")
