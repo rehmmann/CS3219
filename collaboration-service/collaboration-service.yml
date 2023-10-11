@@ -28,12 +28,13 @@ channels:
       ws:
         query:
           type: object
+          required: [token, userId]
           properties:
             token:
               type: string
             userId:
               type: string
-            required: [token, userId]
+            required: ["token", "userId"]
 
 components:
   messages:
@@ -42,12 +43,12 @@ components:
       name: join-room
       payload:
         type: object
+        required: [otherUserId, questionId]
         properties:
           otherUserId:
             type: string
           questionId:
             type: string
-          required: [otherUserId, questionId]
     LeaveRoom:
       name: leave-room
       payload:
@@ -55,29 +56,28 @@ components:
         properties:
           roomId:
             type: string
-          required: [roomId]
     
     # Server Messages
     JoinedRoom:
       name: joined-room
       payload:
         type: object
+        required: [userId, roomId]
         properties:
           userId:
             type: string
           roomId:
             type: string
-          required: [userId, roomId]
     LeftRoom:
       name: left-room
       payload:
         type: object
+        required: [userId, roomId]
         properties:
           userId:
             type: string
           roomId:
             type: string
-          required: [userId, roomId]
     Error:
       name: error
       payload:
