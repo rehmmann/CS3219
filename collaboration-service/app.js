@@ -32,7 +32,7 @@ const authentication = async (socket, next) => {
         const token = socket.handshake.query.token;
         try {
             if (await validateToken(firebaseApp, token)) {
-                if (!socket.handshake.query.uid) {
+                if (!socket.handshake.query.userId) {
                     return next(new Error(ClientErrors.MISSING_USER_ID));
                 }
                 next();
@@ -48,7 +48,7 @@ const authentication = async (socket, next) => {
 };
 
 const connection = async (socket) => {
-    const userId = socket.handshake.query.uid;
+    const userId = socket.handshake.query.userId;
     clientJoinRoom(io, socket, redis, userId);
     clientLeaveRoom(io, socket, redis, userId);
     socket.on('disconnect', () => { 
