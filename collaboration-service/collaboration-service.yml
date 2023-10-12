@@ -7,7 +7,7 @@ info:
 servers:
   development:
     url: localhost:80
-    protocol: wss
+    protocol: ws
     description:
       The development API server
 
