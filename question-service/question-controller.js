@@ -8,14 +8,33 @@ async function getQuestion() {
 }
 
 export async function createQuestion(req, res) {
-  var question = new Question(req.body);
+  // Find the maximum questionId
+  const maxQuestion = await Question.findOne(
+    {},
+    { questionId: 1 },
+    { sort: { questionId: -1 } }
+  );
+
+  let newQuestionId = 1; // Default value if no questions are found
+
+  if (maxQuestion) {
+    newQuestionId = maxQuestion.questionId + 1;
+  }
+  // Create the question object without the questionId field
+  var question = new Question({
+    questionTitle: req.body.questionTitle,
+    questionCategories: req.body.questionCategories,
+    questionComplexity: req.body.questionComplexity,
+    questionDescription: req.body.questionDescription,
+    questionId: newQuestionId, // Set the calculated question ID
+  });
   console.log(question);
 
   question
     .save()
     .then((result) => {
       console.log(result);
-      res.json({ message: "Question Created" });
+      res.json({ message: "Question Created", questionId: newQuestionId });
     })
     .catch((err) => {
       res
@@ -41,6 +60,7 @@ export async function getFilteredQuestions(req, res) {
     const query = req.query;
     let andQuery = {};
     let orQuery = [];
+    let questions = [];
 
     if (query.id) andQuery.questionId = Number(query.id);
     if (query.complexity) andQuery.questionComplexity = query.complexity;
@@ -53,20 +73,77 @@ export async function getFilteredQuestions(req, res) {
         // 'categories' is a single value, convert it to an array
         orQuery.push({ questionCategories: query.categories });
       }
+      questions = await Question.find({
+        $and: [
+          andQuery,
+          {
+            $or: orQuery,
+          },
+        ],
+      });
+    } else {
+      questions = await Question.find({
+        $and: [andQuery],
+      });
     }
-    // console.log(andQuery);
-    // console.log(orQuery);
-    const questions = await Question.find({
-      $and: [
-        andQuery,
-        {
-          $or: orQuery,
-        },
-      ],
-    });
+
     console.log(questions.length);
     res.status(200).json({
       questions: questions,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err,
+    });
+  }
+}
+
+export async function getRandomFilteredQuestions(req, res) {
+  try {
+    const query = req.query;
+    let andQuery = {};
+    let orQuery = [];
+    let questions = [];
+    let randomQuestion = {};
+
+    if (query.id) andQuery.questionId = Number(query.id);
+    if (query.complexity) andQuery.questionComplexity = query.complexity;
+    if (query.categories) {
+      if (Array.isArray(query.categories)) {
+        for (const category of query.categories) {
+          orQuery.push({ questionCategories: category });
+        }
+      } else {
+        // 'categories' is a single value, convert it to an array
+        orQuery.push({ questionCategories: query.categories });
+      }
+      questions = await Question.find({
+        $and: [
+          andQuery,
+          {
+            $or: orQuery,
+          },
+        ],
+      });
+      // Generate a random index
+      const randomIndex = Math.floor(Math.random() * questions.length);
+
+      // Retrieve the random question
+      randomQuestion = questions[randomIndex];
+    } else {
+      questions = await Question.find({
+        $and: [andQuery],
+      });
+      // Generate a random index
+      const randomIndex = Math.floor(Math.random() * questions.length);
+
+      // Retrieve the random question
+      randomQuestion = questions[randomIndex];
+    }
+
+    console.log(questions.length);
+    res.status(200).json({
+      question: randomQuestion,
     });
   } catch (err) {
     res.status(500).json({
