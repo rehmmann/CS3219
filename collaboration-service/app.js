@@ -29,7 +29,6 @@ const redis = await createRedisClient();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-//   app.use("/api", routes);
 
 const authentication = async (socket, next) => {
     if (process.env.IS_LOCAL) {
@@ -69,6 +68,6 @@ const connection = async (socket) => {
 
 io.use(authentication).on("connection", connection);
 
-server.listen(80, () => {
-    console.log("Server listening on on http://localhost:80");
+server.listen(3001, () => {
+    console.log("Server listening on on http://localhost:3001");
 });
