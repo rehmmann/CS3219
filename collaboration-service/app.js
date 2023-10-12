@@ -12,6 +12,10 @@ import { clientJoinRoom } from "./controllers/clientJoinRoom.js";
 import { clientLeaveRoom } from "./controllers/clientLeaveRoom.js";
 import admin from 'firebase-admin';
 import serviceAccount from "./serviceAccount.json" assert { type: "json" };
+import { clientGetRoom } from "./controllers/clientGetRoom.js";
+import { clientSendMessage } from "./controllers/clientSendMessage.js";
+import { clientUpdateCode } from "./controllers/clientUpdateCode.js";
+import { clientUpdateLanguage } from "./controllers/clientUpdateLanguage.js";
 dotenv.config();
 
 const app = express();
@@ -28,6 +32,9 @@ app.use(express.json());
 //   app.use("/api", routes);
 
 const authentication = async (socket, next) => {
+    if (process.env.IS_LOCAL) {
+        return next();
+    }
     if (socket.handshake.query && socket.handshake.query.token) {
         const token = socket.handshake.query.token;
         try {
@@ -51,6 +58,10 @@ const connection = async (socket) => {
     const userId = socket.handshake.query.userId;
     clientJoinRoom(io, socket, redis, userId);
     clientLeaveRoom(io, socket, redis, userId);
+    clientGetRoom(io, socket, redis, userId);
+    clientSendMessage(io, socket, redis, userId);
+    clientUpdateCode(io, socket, redis, userId);
+    clientUpdateLanguage(io, socket, redis, userId);
     socket.on('disconnect', () => { 
         console.log("User " + userId + " disconnected")
     })

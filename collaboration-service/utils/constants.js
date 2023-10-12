@@ -2,9 +2,10 @@ export const ClientEvents = {
     JOIN_ROOM: 'join-room',
     LEAVE_ROOM: 'leave-room',
     DELETE_ROOM: 'delete-room',
-    REFRESH_ROOM: 'refresh-room',
+    GET_ROOM: 'get-room',
     MESSAGE: 'message',
     CODE: 'code',
+    LANGUAGE: 'language',
 }
 
 export const ServerEvents = {
@@ -14,6 +15,7 @@ export const ServerEvents = {
     ROOM_STATE: 'room-state',
     MESSAGE: 'message',
     CODE: 'code',
+    LANGUAGE: 'language',
     ERROR: 'error',
 }
 

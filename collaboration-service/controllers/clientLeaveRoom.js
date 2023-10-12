@@ -2,11 +2,6 @@ import { ClientEvents, ServerEvents } from "../utils/constants.js";
 
 export const clientLeaveRoom = async (io, socket, redis, userId) => {
     const handleLeaveRoom = async (data) => {
-        /*
-            data = {
-                roomId: string
-            }
-        */
         console.log("Client left room: " + data);
         const roomId = data.roomId;
         io.to(roomId).emit(ServerEvents.LEFT_ROOM, {

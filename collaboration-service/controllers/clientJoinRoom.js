@@ -30,8 +30,18 @@ export const clientJoinRoom = async (io, socket, redis, userId) => {
         } else {
             await createRoom(redis, roomId, {
                 users: [userId, otherUserId],
-                roomId: roomId,
-                questionId: questionId
+                code: {
+                    [userId]: {
+                        code: "",
+                        language: "javascript" // Default Javascript
+                    },
+                    [otherUserId]: {
+                        code: "",
+                        language: "javascript" // Default Javascript
+                    },
+                },
+                id: roomId,
+                questionId
             });
             const room = await getRoom(redis, roomId);
             if (room) {
