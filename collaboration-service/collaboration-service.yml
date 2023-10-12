@@ -6,7 +6,7 @@ info:
     Manages the collaboration between users
 servers:
   development:
-    url: localhost:80
+    url: localhost
     protocol: ws
     description:
       The development API server
@@ -14,16 +14,18 @@ servers:
 channels:
   /: 
     publish:
+      operationId: onPublish
       message:
-        oneOf:
-          - $ref: '#/components/messages/JoinRoom'
-          - $ref: '#/components/messages/LeaveRoom'
+        # oneOf:
+        $ref: '#/components/messages/JoinRoom'
+          # - $ref: '#/components/messages/LeaveRoom'
     subscribe:
+      operationId: onSubscribe
       message:
-        oneOf:
-          - $ref: '#/components/messages/JoinedRoom'
-          - $ref: '#/components/messages/LeftRoom'
-          - $ref: '#/components/messages/Error'
+        # oneOf:
+        $ref: '#/components/messages/JoinedRoom'
+          # - $ref: '#/components/messages/LeftRoom'
+          # - $ref: '#/components/messages/Error'
     bindings:
       ws:
         query:
