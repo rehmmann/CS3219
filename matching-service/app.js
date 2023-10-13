@@ -1,30 +1,42 @@
-import express from "express";
+import FirestoreHandler from "./db/firestoreHandler.js";
+import Matcher from "./matcher.js";
 import cors from "cors";
 import { routes } from "./matching-routes.js";
-import Matcher from "./matcher.js";
+import QuestionServiceInstance from "./QuestionServiceInstance.js";
+import express from "express";
 
 
-const QUEUE_NAME = "user-matchlist";
-const matcher = new Matcher(QUEUE_NAME);
 
-matcher.intialise().then(
-    () =>
-    {
-        const app = express();
-        app.use(cors({
-            origin: '*'
-        }));
-        app.use(express.urlencoded({ extended: true }));
-        app.use(express.json());
+const PROJECT_ID = 'peer-prep-399105';
 
-        app.use("/api", routes);
+const fh = new FirestoreHandler(PROJECT_ID);
+await fh.connect();
+const qst = new QuestionServiceInstance();
+await qst.connect();
+const matcher = new  Matcher(fh, qst);
 
-        app.listen(8080, () => {
-            console.log("App Intialised on port 8080");
-        });
-    }
-)
+
+
+const app = express();
+
+app.use(cors({
+    origin: '*'
+}));
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.json());
+
+app.use("/api", routes);
+
+app.listen(8080, () => {
+    console.log("App Intialised on port 8080");
+});
+
+
 
 export default matcher;
+
+
 
 

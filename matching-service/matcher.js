@@ -1,160 +1,162 @@
-import amqp from 'amqplib';
+import UnmatchedUser from "./models/unmatchedUser.js";
+import MatchedUsers from "./models/matchedUsers.js";
+
 class Matcher {
-    constructor(matcherName) {
-        this.matcherName= matcherName;
-        this.channel = null;
-        // this.rabbitSettings = {
-        //     protocol: 'amqp',
-        //     port: 5672,
-        //     username: 'guest',
-        //     password: 'guest',
-        //     vhost : "/",
-        //     authMechanism: ['PLAIN', "AMQPLAIN","EXTERNAL"]
-        // }
-        this.rabbitSettings = process.env.AMQP_URL || 'amqp://localhost:5673';
-        this.awaitMatchBuffer = [] // A buffer for users awaiting matches
-        this.matched = {} // A Record for users already matched
-    }
-
     
-    // Need to be called before running the class
-    async intialise() {
-        try {
-            const conn = await amqp.connect(this.rabbitSettings, 'heartbeat=60');
-            console.log("Connection Created.");
-    
-            const channel = await conn.createChannel();
-            console.log("Channel Created...");
-    
-            const res = await channel.assertQueue(this.matcherName); // Checks if Queue exists , if not creates a queue
-            console.log(`Queue with name ${this.matcherName}  Created..`);
-
-            this.channel = channel;
-
-            // intialises the consumer
-            channel.consume(this.matcherName,(msg) => this.processMatch(msg));
-        }
-        catch (err) {
-            throw Error(`Matcher Intialisation Error ${err}` )
-        }
+    constructor(firestoreHandler, questInst) {
+        this.firestoreHandler = firestoreHandler;
+        this.QueueOrderBy = "addDatetime";
+        this.QueueOrderPref = "asc";
+        this.Queuelimit = 1;
+        this.questInst = questInst;
     }
 
+    // etiher queus the user ot be matched , or adds the match to the database
+    async findMatch(user) {
+        const userJson = {"email": user.email, "id": user.id, "topic": user.topic, "difficulty": user.difficulty};
+        const umUser = UnmatchedUser.toObject(userJson);
+        
+        // Search in Unmatched Queue
+        const queryRes = await this.firestoreHandler.readwithAndQuery(UnmatchedUser.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchPredicates());
 
-    // Adds User to the queue
-    // Takes in user json object
-    async addUser(user) {
-        if (this.channel == null) {
-            // Channel needs to be intialised before adding to the Queue
-            throw Error("Channel Not Intialised")
-        }
-        try {
-            await this.channel.sendToQueue(this.matcherName, Buffer.from(JSON.stringify(user)));
-        } catch (err) {
-            throw Error(`Could not add user ${user.email} to the queue ${this.matcherName}:  ${err}` )
-        }
-    }
 
-    // Handler for queue addition 
-    async processMatch(msg) {
-        if (this.channel == null) {
-            // Channel needs to be intialised before adding to the Queue
-            throw Error("Channel Not Intialised")
-        }
-
-        try {
-            const user_obj = JSON.parse(msg.content.toString());
-            this.awaitMatchBuffer.push(user_obj);
-            this.channel.ack(msg);
-            await this.matchCurrent();
-        } catch (err) {
-            throw new Error(`Process Match Error, Could Not Process incoming users: ${err} `);
-        }
-    }
-
-    // Matched users in Buffer
-    matchCurrent() {
-        if (this.awaitMatchBuffer.length < 2) {
-            console.log("Only one user in buffer, cannot perform matching");
+        if (queryRes == null) {
+            await this.addUser(umUser);
+            console.log(`Added User: ${userJson.email} to Queue`);
         } else {
-            // User matching can be performed
-            // At Max the number of user in Buffer should be 2
-            console.log(`The current match buffer:  ${this.awaitMatchBuffer}`);
-            // let user1 = this.awaitMatchBuffer.pop();
-            // let user2 = this.awaitMatchBuffer.pop();
+            // Get Question Id
+            const questionId = await this.questInst.getQuestionId(umUser.difficulty, umUser.topic);
             
-            // this.matched[user1.id] = user2;
-            // this.matched[user2.id] = user1;
-            for (var i = 1; i < this.awaitMatchBuffer.length; i++ ){
-                var curr = this.awaitMatchBuffer[i];
-                var isDone = false;
-                for (var j = 0; j< i; j++) {
-                    // Backward Propagation ensures FCFS
-                    var matched_user = this.awaitMatchBuffer[j];
+            console.log(`Question Id is ${questionId}`);
+            // Get MatchedUser
+            let matchedUserEmail = null;
 
-
-                    if (this.validMatch(curr, matched_user)){
-                        // Add the match 
-                        this.matched[curr.id] = matched_user;
-                        this.matched[matched_user.id] = curr;
-
-                        // Remove these elemnts from the lower index
-                        this.awaitMatchBuffer.splice(j, 1);
-
-                        // Remove these elemnts from the upper index
-                        this.awaitMatchBuffer.splice(i - 1,1 );
-                        isDone = true;
-                        break;
-                    }
-                }
-                if (isDone) {
-                    break;
-                }
+            for (var key in queryRes) {
+                matchedUserEmail = key;
             }
+            const matchedUserJson = queryRes[matchedUserEmail];
 
+            // From matcheUserJson
+            const matchedJson = {"email1" : umUser.email, "id1": umUser.id ,"email2": matchedUserJson.email , "id2" : matchedUserJson.id, "topic": umUser.topic, "difficulty" : umUser.difficulty, "questionId": questionId};
+            // Make Object
+            console.log(`MatchedJson ${matchedJson}`);
+            const matchedUsers = MatchedUsers.fromJsonToObject(matchedJson);
 
+            // Add Matched user
+            await this.addMatchToFind(matchedUsers, matchedUserJson);
+
+            console.log(`Added match: ${matchedJson} to matches db`);
         }
     }
 
-    // You can look at the current match Queue
-    async inspectMatchQueue() {
-        return this.awaitMatchBuffer;
-    }
 
-    // Check User in Matching Buffer
-    async checkUserInMatchQueue(user) {
-        for (var i = 0; i < this.awaitMatchBuffer.length; i++ ){
-            var curr = this.awaitMatchBuffer[i];
-            if ((curr.id == user.id) && (curr.email == user.email) && (JSON.stringify(curr.pref) == JSON.stringify(user.pref))) {
-                return true;
+    // Returns the match found for the user email and deals with match Foudn logic
+    async checkMatches(user) {
+        const userJson = {"email": user.email, "id": user.id, "topic": user.topic, "difficulty": user.difficulty};
+        const umUser = UnmatchedUser.toObject(userJson);
+        const queryRes = await this.firestoreHandler.readwithOrQuery(MatchedUsers.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchesPredicates());
+        if (queryRes != null) {
+            // Match Found
+            let matchFoundEmail = null;
+            for (var key in queryRes) {
+                matchFoundEmail = key;
             }
-        }
-        return false;
-    }
-
-
-    validMatch(user1, user2) {
-        return JSON.stringify(user1.pref) == JSON.stringify(user2.pref);
-    }
-
-    // Returns User Match  , if the user is matched
-    async checkUserMatched(user) {
-        try {
-            let key = user.id
-
-            if (key in this.matched) {
-                let matchedUser = this.matched[key];
-                delete this.matched[key];
-                return matchedUser
+            const matchFound = queryRes[matchFoundEmail];
+            const matchObject = MatchedUsers.fromJsonToObject(matchFound);
+            
+            // Acknowledge the match
+            if (matchFound.ack1 || matchFound.ack2) {
+                // Match Found & One of the matches already acked 
+                // Delete the Match
+                await this.deleteMatch(matchFoundEmail);
             } else {
-                return null;
+                // match Found but noone acked
+                // Ack and store the one Found
+                if (userJson.email == matchFoundEmail) {
+                    // Current user is user1
+                    matchFound.ack1 = true;
+                } else {
+                    // Current user us user2
+                    matchFound.ack2 = true;
+                }
+
+                await this.updateMatchFromJson(matchFound,matchFoundEmail);
+
+                
+
             }
-        } catch (err) {
-            throw Error(`Could not check match ${user.email}:  ${err}` )
-        }
+            
+            // Returned the match user
+            return matchObject.fromJsonToReq(user);
+
+        } 
+
+        // No Match Found
+        return null;
+
     }
 
 
+    async removeUser(user) {
+        const userJson = {"email": user.email, "id": user.id, "topic": user.topic, "difficulty": user.difficulty};
+        const umUser = UnmatchedUser.toObject(userJson);
+        const unmatchRes = await this.firestoreHandler.readwithAndQuery(UnmatchedUser.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getExactMatchPredicate());
+        const matchRes = await this.firestoreHandler.readwithOrQuery(MatchedUsers.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchesPredicates());
+        
+        if (unmatchRes != null) {
+            //Found unmatch
+            console.log("Found in Unmatched Queue");
+            await this.deleteUser(umUser);
 
+        } else if (matchRes != null) {
+            console.log("Found in Matched.");
+            // Found a match
+
+            let matchFoundEmail = null;
+            for (var key in queryRes) {
+                matchFoundEmail = key;
+            }
+            await this.deleteMatch(matchFoundEmail);
+
+        } else {
+            // Not in the database
+            throw new Error("Not in the Database");
+        }
+
+    }
+
+    // Utiltiy Functions For Add 
+
+    // Takes in Unmatched user object
+    async addUser(user) { 
+        await this.firestoreHandler.write(UnmatchedUser.collectionName, user.email,user.toFirestore() );
+    }
+
+
+    // Takes in Unmatched user object 
+    async addMatchToFind(mUsers, deleteUser) {
+        // Add the Match
+        await this.firestoreHandler.write(MatchedUsers.collectionName, deleteUser.email, mUsers.toFirestore());
+
+        await this.deleteUser(deleteUser);
+
+
+        
+    }
+
+    // Takes in Matched user json
+    async updateMatchFromJson(updateMatchJson, matchFoundEmail) {
+        await this.firestoreHandler.write(MatchedUsers.collectionName, matchFoundEmail, updateMatchJson);
+    }
+
+    async deleteUser(user) {
+        // Delete the Matched User
+        await this.firestoreHandler.delete(UnmatchedUser.collectionName, user.email);
+    }
+
+    async deleteMatch(matchId) {
+        await this.firestoreHandler.delete(MatchedUsers.collectionName, matchId);
+    }
 }
 
 export default Matcher;

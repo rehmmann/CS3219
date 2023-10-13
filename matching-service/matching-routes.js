@@ -3,8 +3,7 @@ import express from "express";
 import {
   findMatch,
   checkMatch,
-  inspectMatchQueue,
-  checkUserInQueue
+  removeUser
 } from "./matching-controller.js";
 
 let router = express.Router();
@@ -15,11 +14,8 @@ router.post("/match/findMatch", findMatch);
 //Check user Matched
 router.post("/match/checkMatch", checkMatch);
 
-//Inspect Match Queue
-router.post("/match/inspectQueue", inspectMatchQueue);
-
-// Finds user in Queue
-router.post("/match/findUser", checkUserInQueue );
+// Remove User
+router.post("/match/removeUser",removeUser)
 
 
 
