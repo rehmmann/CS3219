@@ -19,16 +19,16 @@ import { clientUpdateLanguage } from "./controllers/clientUpdateLanguage.js";
 dotenv.config();
 
 const app = express();
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 const server = createServer(app);
 const io = new Server(server);
 const firebaseApp = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 const redis = await createRedisClient();
-
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
 const authentication = async (socket, next) => {
     if (process.env.IS_LOCAL) {
