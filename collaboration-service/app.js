@@ -24,7 +24,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: "*"
+    }
+});
 const firebaseApp = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
