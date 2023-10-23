@@ -1,5 +1,5 @@
 // Import react
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRoutes } from 'react-router-dom';
 // Import MUI
 import {
@@ -25,21 +25,31 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { getAuth } from 'firebase/auth';
 import { setToken } from './redux/slices/authSlice';
 
+// Import socket
+import { socket } from './utils/socket';
+
+// Import context
+import { SocketContext } from './contexts';
+
 // Import styles
 import 'react-toastify/dist/ReactToastify.css';
 import './App.scss'
 
+
 const App = () => {
   const auth = getAuth();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const [soc, setSoc] = useState<any>(null);
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   useEffect (() => {
     auth.currentUser?.getIdTokenResult().then((idTokenResult) => {
       dispatch(setToken(idTokenResult.token));
+      setSoc(socket(auth.currentUser!.uid!, idTokenResult.token))
     })
-  }, [auth]);
+  }, [auth.currentUser]);
+  
   const {data: isMatching} = useSelector((state: RootState) => state.isMatching);
   const [user, loading] = useAuthState(auth);
 
@@ -66,13 +76,13 @@ const App = () => {
 
   const routing = useRoutes(routes(user != null, isMatching));
     return (
-      <>
+      <SocketContext.Provider value={soc}>
         {routing}
         <ToastContainer
           pauseOnFocusLoss={false}
           transition={Slide}
         />
-      </>
+      </SocketContext.Provider>
     );
 }
 
