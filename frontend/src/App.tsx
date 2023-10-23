@@ -35,20 +35,26 @@ import { SocketContext } from './contexts';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.scss'
 
-
+import { Socket} from "socket.io-client";
 const App = () => {
   const auth = getAuth();
   const dispatch = useDispatch();
-  const [soc, setSoc] = useState<any>(null);
+  const [soc, setSoc] = useState<Socket | null>(null);
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   useEffect (() => {
     auth.currentUser?.getIdTokenResult().then((idTokenResult) => {
       dispatch(setToken(idTokenResult.token));
-      setSoc(socket(auth.currentUser!.uid!, idTokenResult.token))
+      setSoc(socket(auth.currentUser!.uid!, idTokenResult.token));
     })
   }, [auth.currentUser]);
+
+  useEffect(() => {
+    soc?.onAny((event, ...args) => {
+      console.log(event, args);
+    })
+  }, [soc])
   
   const {data: isMatching} = useSelector((state: RootState) => state.isMatching);
   const [user, loading] = useAuthState(auth);
