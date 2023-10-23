@@ -20,6 +20,7 @@ const Button = (props: ButtonProps) => {
         borderRadius: 14,
         border: '3px solid black',
         "&:hover": {
+          transition: "border .5s, background .5s, color .5s",
           color: 'black',
           border: '3px solid black',
         },
