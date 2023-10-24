@@ -50,12 +50,6 @@ const App = () => {
     })
   }, [auth.currentUser]);
 
-  useEffect(() => {
-    soc?.onAny((event, ...args) => {
-      console.log(event, args);
-    })
-  }, [soc])
-  
   const {data: isMatching} = useSelector((state: RootState) => state.isMatching);
   const [user, loading] = useAuthState(auth);
 

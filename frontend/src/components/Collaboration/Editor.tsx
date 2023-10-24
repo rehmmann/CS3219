@@ -1,6 +1,4 @@
-import { useState } from "react";
-
-import {Editor as MonacoEditor} from "@monaco-editor/react";
+import {Editor as MonacoEditor, OnChange} from "@monaco-editor/react";
 
 import LanguageDropDown from './LanguageDropDown';
 import Button from '../../components/Button/Button';
@@ -25,26 +23,24 @@ type languageType = {
 };
 
 type EditorProps = {
-  defaultLanguage: string,
-  defaultCode: string,
   isMainEditor: boolean,
+  handleEditorChange: OnChange,
+  handleChangeLanguage: OnChange,
+  code: string,
+  language: string,
 }
 
 const Editor = (props: EditorProps) => {
-  const { defaultLanguage, defaultCode, isMainEditor } = props;
-  const [language, setLanguage] = useState(defaultLanguage);
-  const [code, setCode] = useState(defaultCode);
-
-  const handleEditorChange = (value: string) => {
-    setCode(value);
-  };
-
-  const handleChangeLanguage = (language: languageType) => {
-    setLanguage(language.value);
-  };
+  const { 
+    isMainEditor,
+    code,
+    language,
+    handleEditorChange,
+    handleChangeLanguage
+  } = props;
 
   const handleSubmitCode = () => {
-    console.log(code);
+    console.log("SAD", code);
   };
 
   return (
@@ -63,6 +59,7 @@ const Editor = (props: EditorProps) => {
         language={language}
         value={code}
         theme={"light"}
+        options={{readOnly: !isMainEditor}}
         defaultValue=""
         onChange={handleEditorChange}
       />

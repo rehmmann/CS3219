@@ -1,78 +1,143 @@
-import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+// Import react
+import { useContext, useEffect, useState } from "react";
+import { useParams } from "react-router";
 
+// Import types
+import { ClientEvents, Message, ServerEvents } from "../../utils/types";
+import { OnChange } from "@monaco-editor/react";
+
+// Import socket
+import { SocketContext } from "../../contexts";
+import { Socket } from "socket.io-client";
+
+// Import local components
 import QuestionBox from '../../components/Collaboration/QuestionBox';
 import Editor from '../../components/Collaboration/Editor';
 import ChatBox from '../../components/Collaboration/ChatBox';
 
+// Import firebase
+import { getAuth } from "@firebase/auth";
+
+// Import api
+import { useGetQuestionsQuery } from "../../redux/api";
+
+// Import utils
+import { find } from "lodash";
+
 // Import style
 import './Collaboration.scss';
 
-const dummyRoom = {
-  "room": {
-    "messages": [
-      { 
-        userId: '1', 
-        message: 'hello there',
-        date: 1632965300000
-      },
-      { 
-        userId: '1', 
-        message: 'how to do this string question',
-        date: 1632965300001
-      },
-      { 
-        userId: '2', 
-        message: 'we pretty screwed',
-        date: 1632965300002
-      },
-      { 
-        userId: '1', 
-        message: 'frfr',
-        date: 1632965300003
-      },
-    ],
-    "users": [
-        "1",
-        "2"
-    ],
-    "code": {
-        "1": {
-            "code": "",
-            "language": "javascript"
-        },
-        "2": {
-            "code": "",
-            "language": "javascript"
-        }
-    },
-    "roomId": "d75a0a5c208c155f8d4eaee429e1a02b",
-    "questionId": 0
-  }
-};
-
-
 const Collaboration = () => {
-  const {data: questions} = useSelector((state: RootState) => state.questions);
-  const currentUser = dummyRoom.room.users[0];
-  const peerUser = dummyRoom.room.users[1];
-  const code = dummyRoom.room.code[currentUser].code;
-  const peerCode = dummyRoom.room.code[peerUser].code;
-  const language = dummyRoom.room.code[currentUser].language;
-  const peerLanguage = dummyRoom.room.code[peerUser].language;
-  const question = questions[dummyRoom.room.questionId];
-  const conversation = dummyRoom.room.messages;
-
+  const { questionId, otherUserId } = useParams();
+  const soc: Socket | null = useContext(SocketContext);
+  const auth = getAuth();
+  const [userId, setUserId] = useState<string | null>(null); // TODO: get from redux
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const { data: questionsData }  = useGetQuestionsQuery();
   
+  const [code, setCode] = useState<string>("");
+  const [peerCode, setPeerCode] = useState<string>("");
+  const [language, setLanguage] = useState<string>("javascript");
+  const [peerLanguage, setPeerLanguage] = useState<string>("javascript");
+  const [question, setQuestion] = useState<any | null>(null);
+  useEffect(() => {
+    if (questionsData?.questions && questionId) {
+      setQuestion(find(questionsData?.questions, (q: any) => q.questionId === parseInt(questionId)));
+    }
+  }, [questionsData?.questions])
+  useEffect (() => {
+    if (auth.currentUser) {
+      setUserId(auth.currentUser.uid);
+    }
+  }, [auth.currentUser]);
+
+  if (question && userId && questionId && otherUserId && soc && !roomId) {
+    soc.on(ServerEvents.JOINED_ROOM, (data) => {
+      const { room, userId: joiningUserId} = data;
+      setRoomId(room.id);
+      setPeerCode(room.code[otherUserId].code);
+      setPeerLanguage(room.code[otherUserId].language);
+      setMessages(room.messages);
+      setLanguage(room.code[userId].language);
+      setCode(room.code[userId].code);
+      if (joiningUserId !== userId) {
+        console.log("user joined room", joiningUserId, room);
+      }
+    });
+
+    soc.on(ServerEvents.LANGUAGE, (data) => {
+      if (data.userId === otherUserId) {
+        setPeerLanguage(data.code[otherUserId].language);
+        setPeerCode(data.code[otherUserId].code);
+      } else {
+        setLanguage(data.code[userId].language);
+        setCode(data.code[userId].code);
+      }
+    })
+
+    soc.on(ServerEvents.CODE, (data) => {
+      if (data.userId === otherUserId) {
+        setPeerCode(data.code[otherUserId].code);
+      }
+    })
+    soc.on(ServerEvents.MESSAGE, (data) => {
+      const { messages: newMessages } = data;
+      setMessages(newMessages);
+    })
+    soc.emit(ClientEvents.JOIN_ROOM, {
+      otherUserId,
+      questionId
+    });
+  }
+
+  const handleChangeLanguage: OnChange = (value: string | undefined) => {
+    if (soc) {
+      soc.emit(ClientEvents.LANGUAGE, {
+        roomId,
+        language: value,
+      });
+    }
+  }
+
+  const handleChangePeerLanguage: OnChange = (value: string | undefined) => {
+  }
+  const handleEditorChange: OnChange = (value: string | undefined) => {
+    if (soc) {
+      soc.emit(ClientEvents.CODE, {
+        roomId,
+        code: value,
+      })
+    }
+  }
+  const handlePeerEditorChange: OnChange = (value: string | undefined) => {
+  }
 
   return (
     <div className="collaboration_container">
-      <QuestionBox title={question.title} complexity={question.complexity} description={question.description}/>
-      <div className="editor_container">
-        <Editor defaultLanguage={language} defaultCode={code} isMainEditor={true}/>
-        <Editor defaultLanguage={peerLanguage} defaultCode={peerCode} isMainEditor={false}/>
-      </div>
-      <ChatBox conversation={conversation} currentUser="1"/>
+      {questionId && otherUserId && question ?
+        <>
+          <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question.questionDescription}/>
+            <div className="editor_container">
+              <Editor 
+                code={code}
+                language={language}
+                isMainEditor={true}
+                handleChangeLanguage={handleChangeLanguage}
+                handleEditorChange={handleEditorChange}
+              />
+              <Editor 
+                isMainEditor={false}
+                code={peerCode}
+                language={peerLanguage}
+                handleChangeLanguage={handleChangePeerLanguage}
+                handleEditorChange={handlePeerEditorChange}
+              />
+            </div>
+          <ChatBox roomId={roomId} conversation={messages} currentUser={userId}/>
+        </> : 
+        <>Please Join a room!</>
+      }
     </div>
     
   );

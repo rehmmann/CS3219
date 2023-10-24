@@ -7,6 +7,7 @@ import Collaboration from './pages/Collaboration/Collaboration';
 import Matchmake from './pages/Matchmake/Matchmake';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import Login from './pages/Login/Login';
+import { is } from 'immer/dist/internal.js';
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
   const r = [];
@@ -23,7 +24,8 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
       path: 'app',
       element: <DashboardLayout />,
       children: [
-        { path: 'dashboard', element: isMatching ? <Matchmake /> : /*<Dashboard />*/ <Collaboration /> },
+        { path: 'dashboard', element: isMatching ? <Matchmake /> : <Dashboard /> },
+        { path: 'collaboration/:questionId?/:otherUserId?', element: isMatching ? <Matchmake /> : <Collaboration /> },
         {
           path: 'member',
           children: [

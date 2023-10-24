@@ -7,20 +7,32 @@ import ListItemText from '@mui/material/ListItemText';
 import Fab from '@mui/material/Fab';
 import SendIcon from '@mui/icons-material/Send';
 
+import { SocketContext } from '../../contexts';
 import './ChatBox.scss';
+import { useContext, useState } from 'react';
+import { ClientEvents } from '../../utils/types';
+import { Socket } from 'socket.io-client';
 
 type ChatType = {
-  currentUser: string,
+  currentUser: string | null,
   conversation: { 
     userId: string, 
     message: string
     date: number
   }[],
+  roomId: string | null,
 }
 
 const ChatBox = (props: ChatType) => {
-  const { currentUser, conversation } = props;
-
+  const { currentUser, conversation, roomId } = props;
+  const soc = useContext<Socket | null>(SocketContext);
+  const [message, setMessage] = useState<string>("");
+  const handleSendMessage = () => {
+    if (soc) {
+      setMessage("");
+      soc.emit(ClientEvents.MESSAGE, { roomId, message });
+    }
+  }
   const renderConversation = () => conversation.map(respond => 
     <ListItem key={respond.date}>
       <Grid container>
@@ -33,7 +45,9 @@ const ChatBox = (props: ChatType) => {
       </Grid>
     </ListItem>
   );
-
+  const handleChangeMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMessage(event.target.value);
+  }
   return (
     <div className="chat_container">
       <Grid container className="chat_grid_container">
@@ -43,10 +57,16 @@ const ChatBox = (props: ChatType) => {
         <Divider light={true} className="divider_style"/>
         <Grid container className="chat_input_container">
           <Grid item xs={10}>
-            <TextField id="outlined-basic-email" label="" fullWidth />
+            <TextField 
+              id="outlined-basic-email" 
+              value={message} 
+              label="" 
+              fullWidth 
+              onChange={handleChangeMessage}
+            />
           </Grid>
           <Grid item xs={1} align="right">
-            <Fab color="primary" aria-label="add"><SendIcon /></Fab>
+            <Fab color="primary" aria-label="add" onClick={handleSendMessage}><SendIcon /></Fab>
           </Grid>
         </Grid>
       </Grid>

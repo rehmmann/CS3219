@@ -1,4 +1,4 @@
-import { io } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 
 const URL = import.meta.env.VITE_COLLABORATION_SOCKET_URL;
 
