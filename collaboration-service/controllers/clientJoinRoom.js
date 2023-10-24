@@ -23,7 +23,7 @@ export const clientJoinRoom = async (io, socket, redis, userId) => {
             socket.join(roomId);
             io.to(roomId).emit(ServerEvents.JOINED_ROOM, {
                 userId,
-                roomId
+                room
             });
 
             console.log("Room already exists for users " + userId + " and " + otherUserId + " for question " + questionId);
