@@ -9,13 +9,13 @@ import {
 let router = express.Router();
 
 //Find the Match for the user
-router.post("/match/findMatch", findMatch);
+router.post("/match/find-match", findMatch);
 
 //Check user Matched
-router.post("/match/checkMatch", checkMatch);
+router.post("/match/check-match", checkMatch);
 
 // Remove User
-router.post("/match/removeUser",removeUser)
+router.post("/match/remove-user",removeUser)
 
 
 

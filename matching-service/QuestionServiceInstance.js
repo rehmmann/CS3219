@@ -39,11 +39,11 @@ class QuestionServiceInstance {
         // Append the query string to the API URL
         const apiUrl = this.api + queryString; // Replace with the actual API endpoint and query parameters
         console.log(this.client);
-        console.log(`Making request to Url : ${apiUrl} token: ${this.bearer}`);
+        console.log(`Making request to Url : ${apiUrl}`);
 
         const response = await this.client.request({ url: apiUrl});
 
-        return response.data.questions[0].questionId
+        return response.data.question.questionId
     }
     
 }
