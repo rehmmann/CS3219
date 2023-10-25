@@ -111,9 +111,8 @@ class Matcher {
         } else if (matchRes != null) {
             console.log("Found in Matched.");
             // Found a match
-
-            let matchFoundEmail = null;
-            for (var key in queryRes) {
+             let matchFoundEmail = null;
+            for (var key in matchRes) {
                 matchFoundEmail = key;
             }
             await this.deleteMatch(matchFoundEmail);
