@@ -1,5 +1,10 @@
 // Import react
-import React, {useState} from 'react';
+import React, { useEffect, useState } from "react";
+import { useFindMatchMutation } from "../../redux/api";
+
+// Import redux
+import { useSelector, useDispatch } from "react-redux";
+import { initMatch } from "../../redux/slices/matchSlice";
 
 // Import MUI
 import {
@@ -13,14 +18,16 @@ import {
   Stack,
   Toolbar,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 import { getAuth, signOut } from "firebase/auth";
 
 // Import style
-import './Dashboard.scss';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import "./Dashboard.scss";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { set } from "lodash";
+import { firebaseAuth } from "../../utils/firebase";
 
 // const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
@@ -30,6 +37,15 @@ const DashboardHeader = () => {
   //----------------------------------------------------------------//
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [findMatch, {}] = useFindMatchMutation();
+
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userToken, setUserToken] = useState<string | null>(null);
+
+  const isMatchButtonEnabled = useSelector(
+    (state: any) => state.isMatching.isMatchButtonEnabled
+  );
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -44,56 +60,96 @@ const DashboardHeader = () => {
   const handleLogout = () => {
     setAnchorElUser(null);
     const auth = getAuth();
-    signOut(auth).then(() => {
-      localStorage.clear();
-      navigate("/");
-      toast.success("Logged out successfully!");
-    }).catch((error) => {
-      console.error(error);
-      toast.error("Error! Could not log out!");
-    });
-    
+    signOut(auth)
+      .then(() => {
+        localStorage.clear();
+        navigate("/");
+        toast.success("Logged out successfully!");
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("Error! Could not log out!");
+      });
   };
+
+  useEffect(() => {
+    const unsubscribe = firebaseAuth.onAuthStateChanged((user) => {
+      if (user) {
+        // User is signed in. Get the user's email and token.
+        const email = user?.email;
+        user.getIdToken().then((token) => {
+          setUserEmail(email);
+          setUserToken(token);
+        });
+      } else {
+        // User is signed out.
+        setUserEmail(null);
+        setUserToken(null);
+      }
+    });
+
+    // Clean up the listener when the component unmounts.
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   //----------------------------------------------------------------//
   //                          RENDER                                //
   //----------------------------------------------------------------//
   return (
-    <AppBar position='sticky' className="dashboard_header">
+    <AppBar position="sticky" className="dashboard_header">
       <Container maxWidth="xl">
-        <Toolbar sx={{mr: 10, ml: 10}} disableGutters className='dashboard_header__toolbar'>
-          <Typography variant="h6" noWrap component="a" href="/"
+        <Toolbar
+          sx={{ mr: 10, ml: 10 }}
+          disableGutters
+          className="dashboard_header__toolbar"
+        >
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            href="/"
             sx={{
               mr: 2,
               fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'black',
-              textDecoration: 'none',
+              letterSpacing: ".3rem",
+              color: "black",
+              textDecoration: "none",
             }}
           >
             Peer Prep
           </Typography>
-          <Stack
-            direction={'row'}
-            spacing={5}
-          >
+          <Stack direction={"row"} spacing={5}>
             <IconButton
               sx={{
-                color: 'black',
-                backgroundColor: 'white',
+                color: "black",
+                backgroundColor: "white",
                 height: 53,
                 borderRadius: 14,
-                border: '3px solid black',
+                border: "3px solid black",
                 "&:hover": {
-                  color: 'black',
-                  border: '3px solid black',
+                  color: "black",
+                  border: "3px solid black",
                 },
-                width: '140px',
-                fontFamily: 'Poppins',
+                width: "140px",
+                fontFamily: "Poppins",
                 fontWeight: 600,
                 fontSize: 13,
               }}
               disableRipple
+              disabled={!isMatchButtonEnabled}
+              onClick={() => {
+                findMatch({
+                  id: userToken ? userToken : "",
+                  email: userEmail ? userEmail : "",
+                  topic: "",
+                  difficulty: "",
+                }).then((res) => {
+                  console.log(res);
+                  dispatch(initMatch(true));
+                });
+              }}
             >
               Quick Match
             </IconButton>
@@ -103,17 +159,17 @@ const DashboardHeader = () => {
               <Avatar alt="User" />
             </IconButton>
             <Menu
-              sx={{ mt: '45px' }}
+              sx={{ mt: "45px" }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
+                vertical: "top",
+                horizontal: "right",
               }}
               keepMounted
               transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
+                vertical: "top",
+                horizontal: "right",
               }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
@@ -129,5 +185,5 @@ const DashboardHeader = () => {
       </Container>
     </AppBar>
   );
-}
+};
 export default DashboardHeader;
