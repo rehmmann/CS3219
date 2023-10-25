@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useFindMatchMutation } from "../../redux/api";
 // Import MUI
-import { Box, IconButton, Paper, Stack } from "@mui/material";
+import { Box, IconButton, InputLabel, MenuItem, Paper, Stack, TextField } from "@mui/material";
 
 // Import redux
 import { useSelector, useDispatch } from "react-redux";
@@ -10,6 +10,7 @@ import { RootState } from "../../redux/store";
 import { initMatch } from "../../redux/slices/matchSlice";
 
 import { firebaseAuth } from "../../utils/firebase";
+import { map } from "lodash";
 type UserLogoProps = {
   logoLink?: string;
 };
@@ -19,7 +20,13 @@ type MatchButtonProps = {
   title: string;
   value: string;
 };
-
+type CategorySelectProps = {
+  categories: string[]
+}
+const allCategories: string[] = [
+  "Arrays", "Bit Manipulation",
+  "Strings", "Brainteaser", "Data Structures", "Algorithms", "Recursion", "Databases"
+]
 //----------------------------------------------------------------//
 //                      LOCAL COMPONENTS                          //
 //----------------------------------------------------------------//
@@ -63,8 +70,8 @@ const UserCard = () => {
   //----------------------------------------------------------------//
   const dispatch = useDispatch();
   const { data: user } = useSelector((state: RootState) => state.user);
-  const [selectedTopic, setSelectedTopic] = useState<string>();
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>();
+  const [selectedCategory, setSelectedCategory] = useState<string>("undefined");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("");
   const [findMatch, {}] = useFindMatchMutation();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userToken, setUserToken] = useState<string | null>(null);
@@ -93,10 +100,81 @@ const UserCard = () => {
   //----------------------------------------------------------------//
   //                     LOCAL COMPONENTS                           //
   //----------------------------------------------------------------//
+  const CategorySelect = (props: CategorySelectProps) => {
+    const { categories } = props;
+    return (
+    <>
+    <InputLabel 
+      id="category-select"
+      sx={{
+        color: "black",
+        fontFamily: "Poppins",
+        fontWeight: 600,
+      }}
+    >
+      <h4>Category</h4>
+    </InputLabel>
+    <TextField
+      value={selectedCategory}
+      select
+      InputProps={{
+        sx: {
+          color: "black",
+          fontFamily: "Poppins",
+          fontWeight: 600,
+          borderRadius: 14,
+          backgroundColor: selectedCategory && selectedCategory != "undefined" ? "#FFD900" : "white",
+          border: "3px solid black",
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            border: "1px solid #484850",
+          },
+        }
+      }}
+      sx={{
+        fontFamily: "Poppins",
+        fontWeight: 600,
+        borderRadius: 51,
+      }}
+      
+    >
+    <MenuItem 
+      value="undefined"
+      sx={{
+        fontFamily: "Poppins",
+        fontWeight: 600,
+      }}
+      onClick={() => {
+        setSelectedCategory("undefined")
+      }}
+      disabled
+    >
+      Choose a Category
+    </MenuItem>
+    {map(categories, (category) => {
+      return (
+        <MenuItem 
+          value={category}
+          sx={{
+            fontFamily: "Poppins",
+            fontWeight: 600,
+          }}
+          onClick={() => {
+            setSelectedCategory(selectedCategory == category ? "undefined" : category)
+          }}
+        >
+          {category}
+        </MenuItem>
+      );
+    })}
+  </TextField>
+  </>
+  )
+
+  }
   const MatchButton = (props: MatchButtonProps) => {
     const { type, title, value } = props;
     const getBackgroundColor = () => {
-      if (value === selectedTopic || value === selectedDifficulty) {
+      if (value === selectedCategory || value === selectedDifficulty) {
         return "#FFD900";
       } else {
         return "white";
@@ -121,11 +199,11 @@ const UserCard = () => {
         }}
         disableRipple
         onClick={() => {
-          if (value === selectedTopic || value === selectedDifficulty) {
-            type === "topic" ? setSelectedTopic("") : setSelectedDifficulty("");
+          if (value === selectedCategory || value === selectedDifficulty) {
+            type === "topic" ? setSelectedCategory("") : setSelectedDifficulty("");
           } else {
             type === "topic"
-              ? setSelectedTopic(value)
+              ? setSelectedCategory(value)
               : setSelectedDifficulty(value);
           }
         }}
@@ -175,14 +253,8 @@ const UserCard = () => {
             borderTop: "1px solid #D9D9D9",
             pt: 3,
           }}
-        >
-          <h4>Topic</h4>
-          <Stack direction={"row"} justifyContent={"center"} spacing={1}>
-            <MatchButton type="topic" title="Arrays" value="Arrays" />
-            <MatchButton type="topic" title="Algorithms" value="Algorithms" />
-            <MatchButton type="topic" title="Strings" value="Strings" />
-            <MatchButton type="topic" title="Databases" value="Databases" />
-          </Stack>
+        >          
+          <CategorySelect categories={allCategories} />
           <h4>Difficulty</h4>
           <Stack direction={"row"} justifyContent={"center"} spacing={2}>
             <MatchButton type="difficulty" title="Easy" value="Easy" />
@@ -197,10 +269,11 @@ const UserCard = () => {
             }}
           >
             <IconButton
+              disabled={selectedDifficulty == "" && (selectedCategory == "undefined" || selectedCategory == "")}
               sx={{
                 color: "black",
-                backgroundColor: "white",
-                height: 33,
+                backgroundColor: "#FFD900",
+                height: 53,
                 width: 85,
                 borderRadius: 14,
                 border: "3px solid black",
@@ -217,7 +290,7 @@ const UserCard = () => {
                 findMatch({
                   email: userEmail ? userEmail : "",
                   id: userToken ? userToken : "",
-                  topic: selectedTopic ? selectedTopic : "",
+                  topic: selectedCategory === "undefined" ? "" : selectedCategory ? selectedCategory : "",
                   difficulty: selectedDifficulty ? selectedDifficulty : "",
                 }).then((res) => {
                   console.log(res);
