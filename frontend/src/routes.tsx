@@ -2,10 +2,12 @@
 import { Navigate } from "react-router-dom";
 
 // Import pages
-import Dashboard from "./pages/Dashboard/Dashboard";
-import Matchmake from "./pages/Matchmake/Matchmake";
-import DashboardLayout from "./components/DashboardLayout/DashboardLayout";
-import Login from "./pages/Login/Login";
+import Dashboard from './pages/Dashboard/Dashboard';
+import Collaboration from './pages/Collaboration/Collaboration';
+import Matchmake from './pages/Matchmake/Matchmake';
+import DashboardLayout from './components/DashboardLayout/DashboardLayout';
+import Login from './pages/Login/Login';
+import { is } from 'immer/dist/internal.js';
 import CollabSpace from "./pages/CollabSpace";
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
@@ -27,10 +29,8 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
       path: "app",
       element: <DashboardLayout />,
       children: [
-        {
-          path: "dashboard",
-          element: isMatching ? <Matchmake /> : <Dashboard />,
-        },
+        { path: 'dashboard', element: isMatching ? <Matchmake /> : <Dashboard /> },
+        { path: 'collaboration/:questionId?/:otherUserId?', element: isMatching ? <Matchmake /> : <Collaboration /> },
         { path: "collab", element: <CollabSpace /> },
         {
           path: "member",
