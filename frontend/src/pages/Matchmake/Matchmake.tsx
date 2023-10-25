@@ -13,6 +13,8 @@ import { Box } from "@mui/material";
 import "./Matchmake.scss";
 import { useEffect, useState } from "react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Matchmake = () => {
   const dispatch = useDispatch();
@@ -28,6 +30,8 @@ const Matchmake = () => {
   const [userToken, setUserToken] = useState<string | null>(null);
   const intervalRef = React.useRef<number>();
   const isMatchActive = React.useRef(true); // Track if the match is still active
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = firebaseAuth.onAuthStateChanged((user) => {
@@ -81,9 +85,10 @@ const Matchmake = () => {
           if (jsonString.includes("Not Matched")) {
             console.log("No match yet!");
           } else {
-            console.log("Match found!");
             clearInterval(intervalRef.current);
             isMatchActive.current = false;
+            navigate("/app/collab");
+            toast.success("Match Found!");
           }
         }
       });

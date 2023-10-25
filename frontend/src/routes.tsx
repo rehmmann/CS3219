@@ -1,64 +1,81 @@
 // Import react
-import { Navigate } from 'react-router-dom';
+import { Navigate } from "react-router-dom";
 
 // Import pages
-import Dashboard from './pages/Dashboard/Dashboard';
-import Matchmake from './pages/Matchmake/Matchmake';
-import DashboardLayout from './components/DashboardLayout/DashboardLayout';
-import Login from './pages/Login/Login';
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Matchmake from "./pages/Matchmake/Matchmake";
+import DashboardLayout from "./components/DashboardLayout/DashboardLayout";
+import Login from "./pages/Login/Login";
+import CollabSpace from "./pages/CollabSpace";
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
   const r = [];
   const loggedInRoutes = [
     {
-      path: '',
-      element: !isLoggedIn ? <Navigate to="/login" />: <Navigate to="/app/dashboard" />,
+      path: "",
+      element: !isLoggedIn ? (
+        <Navigate to="/login" />
+      ) : (
+        <Navigate to="/app/dashboard" />
+      ),
       children: [
-        { path: 'login', element: <>Logasdin</> },
-        { path: '', element: <Navigate to="/login" /> },
+        { path: "login", element: <>Logasdin</> },
+        { path: "", element: <Navigate to="/login" /> },
       ],
     },
     {
-      path: 'app',
+      path: "app",
       element: <DashboardLayout />,
       children: [
-        { path: 'dashboard', element: isMatching ? <Matchmake /> : <Dashboard /> },
         {
-          path: 'member',
+          path: "dashboard",
+          element: isMatching ? <Matchmake /> : <Dashboard />,
+        },
+        { path: "collab", element: <CollabSpace /> },
+        {
+          path: "member",
           children: [
-            { path: '', element: <>membergrid</> },
-            { path: 'add', element: <>AddMember</> },
+            { path: "", element: <>membergrid</> },
+            { path: "add", element: <>AddMember</> },
           ],
         },
       ],
     },
     {
-      path: 'login',
+      path: "login",
       element: !isLoggedIn ? <Login /> : <Navigate to="/app/dashboard" />,
     },
     {
-      path: '',
-      element: !isLoggedIn ? <Navigate to="/login" />: <Navigate to="/app/dashboard" />,
+      path: "",
+      element: !isLoggedIn ? (
+        <Navigate to="/login" />
+      ) : (
+        <Navigate to="/app/dashboard" />
+      ),
       children: [
-        { path: 'login', element: <>Logasdin</> },
-        { path: '', element: <Navigate to="/login" /> },
+        { path: "login", element: <>Logasdin</> },
+        { path: "", element: <Navigate to="/login" /> },
       ],
     },
   ];
   const loggedOutRoutes = [
     {
-      path: 'login',
+      path: "login",
       element: !isLoggedIn ? <Login /> : <Navigate to="/app/dashboard" />,
     },
     {
-      path: '*',
-      element: !isLoggedIn ? <Navigate to="/login" />: <Navigate to="/app/dashboard" />,
+      path: "*",
+      element: !isLoggedIn ? (
+        <Navigate to="/login" />
+      ) : (
+        <Navigate to="/app/dashboard" />
+      ),
       children: [
-        { path: 'login', element: <Login /> },
-        { path: '', element: <Navigate to="/login" /> },
+        { path: "login", element: <Login /> },
+        { path: "", element: <Navigate to="/login" /> },
       ],
     },
-  ]
+  ];
   r.push(...(isLoggedIn ? loggedInRoutes : loggedOutRoutes));
   return r;
 };

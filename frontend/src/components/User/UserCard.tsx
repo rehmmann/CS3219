@@ -178,10 +178,10 @@ const UserCard = () => {
         >
           <h4>Topic</h4>
           <Stack direction={"row"} justifyContent={"center"} spacing={1}>
-            <MatchButton type="topic" title="Array" value="Array" />
-            <MatchButton type="topic" title="Graph" value="Graph" />
-            <MatchButton type="topic" title="Stack" value="Stack" />
-            <MatchButton type="topic" title="Queue" value="Queue" />
+            <MatchButton type="topic" title="Arrays" value="Arrays" />
+            <MatchButton type="topic" title="Algorithms" value="Algorithms" />
+            <MatchButton type="topic" title="Strings" value="Strings" />
+            <MatchButton type="topic" title="Databases" value="Databases" />
           </Stack>
           <h4>Difficulty</h4>
           <Stack direction={"row"} justifyContent={"center"} spacing={2}>
