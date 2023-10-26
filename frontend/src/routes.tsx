@@ -8,9 +8,10 @@ import Matchmake from './pages/Matchmake/Matchmake';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import Login from './pages/Login/Login';
 import { is } from 'immer/dist/internal.js';
-import CollabSpace from "./pages/CollabSpace";
+import MatchedPage from "./pages/Matchmake/MatchedPage";
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
+  console.log("isMatching", isMatching);
   const r = [];
   const loggedInRoutes = [
     {
@@ -31,7 +32,7 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
       children: [
         { path: 'dashboard', element: isMatching ? <Matchmake /> : <Dashboard /> },
         { path: 'collaboration/:questionId?/:otherUserId?', element: isMatching ? <Matchmake /> : <Collaboration /> },
-        { path: "collab", element: <CollabSpace /> },
+        { path: "matched/:questionId?/:otherUserId?", element: <MatchedPage /> },
         {
           path: "member",
           children: [

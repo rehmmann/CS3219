@@ -81,10 +81,8 @@ const UserCard = () => {
       if (user) {
         // User is signed in. Get the user's email and token.
         const email = user?.email;
-        user.getIdToken().then((token) => {
-          setUserEmail(email);
-          setUserToken(token);
-        });
+        setUserEmail(email);
+        setUserToken(user.uid);
       } else {
         // User is signed out.
         setUserEmail(null);
