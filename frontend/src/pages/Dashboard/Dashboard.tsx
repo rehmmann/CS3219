@@ -16,11 +16,12 @@ import QuestionsTable from '../../components/DashboardLayout/QuestionsTable';
 import UserCard from '../../components/User/UserCard';
 
 // Import utils
-import { map } from 'lodash';
+import { includes, map } from 'lodash';
 
 // Import style
 import './Dashboard.scss';
 import { useGetQuestionsQuery } from '../../redux/api';
+import { getAuth } from 'firebase/auth';
 
 const Dashboard = () => {
  
@@ -30,11 +31,17 @@ const Dashboard = () => {
   const [questionModalOpen, setQuestionModalOpen] = useState(false);
   const [questionDetailsOpen, setQuestionDetailsOpen] = useState(false);
   const [title, setTitle] = useState('');
+  const [admin, setAdmin] = useState(false);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string[]>([]);
   const [complexity, setComplexity] = useState<QuestionComplexity>(null);
   const [questions, setQuestions] = useState<any[]>([]);
-  
+  getAuth().currentUser?.getIdTokenResult().then((idTokenResult) => {
+    const claims: any = idTokenResult.claims;
+    if (includes(claims?.roles, 'ADMIN')) {
+      setAdmin(true);
+    }
+  })
   const { data: questionData }  = useGetQuestionsQuery();
   const [nextQuestionId, setNextQuestionId] = useState(0);
   useEffect(() => {
@@ -77,12 +84,14 @@ const Dashboard = () => {
   //----------------------------------------------------------------//
   return (
     <div>
+      {admin && 
       <AddQuestionModal
         questionModalOpen={questionModalOpen}
         setQuestionModalOpen={setQuestionModalOpen}
         questions={questions}
         nextQuestionId={nextQuestionId}
       />
+      }
       <QuestionDetailsModal
         questionDetailsOpen={questionDetailsOpen}
         questionsDetailsCloseHandler={questionsDetailsCloseHandler}
@@ -124,6 +133,7 @@ const Dashboard = () => {
               setQuestionModalOpen={setQuestionModalOpen}
               handleClickQuestion={handleClickQuestion}
               questions={questions}
+              admin={admin}
             />
           </Stack>
         </Stack>

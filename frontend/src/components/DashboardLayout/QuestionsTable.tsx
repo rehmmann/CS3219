@@ -35,9 +35,10 @@ type QuestionTableProps = {
     handleClickQuestion: Function,
     setQuestionModalOpen: Function,
     questions: any[],
+    admin: boolean,
 }
 const QuestionsTable = (props: QuestionTableProps) => {
-  const { questions, setQuestionModalOpen, handleClickQuestion, } = props;
+  const { admin, questions, setQuestionModalOpen, handleClickQuestion, } = props;
   let counter = 0;
   // 你好！ 天气好热啊， 我们去游泳吧！
   //----------------------------------------------------------------//
@@ -80,9 +81,11 @@ const QuestionsTable = (props: QuestionTableProps) => {
             <div className="question_bank__title">
               Question Bank
             </div>
-            <IconButton onClick={() => setQuestionModalOpen(true)}  sx={{ p: 0 }}>
-              <AddIcon />
-            </IconButton>
+            {admin &&
+              <IconButton onClick={() => setQuestionModalOpen(true)}  sx={{ p: 0 }}>
+                <AddIcon />
+              </IconButton>
+            }
           </Toolbar>
           <TableContainer sx={{ maxHeight: '70vh' }}>
             <Table
