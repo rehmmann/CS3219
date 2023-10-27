@@ -24,24 +24,3 @@ mongoose.connect(uri).then(() => {
     console.log("App Intialised on port 8080");
   });
 });
-
-// async function connect() {
-//   try {
-//     await mongoose.connect(uri);
-//     console.log("Connected to MongoDB");
-//   } catch (err) {
-//     console.log("Error connecting to MongoDB", err);
-//   }
-// }
-
-// connect();
-
-// app.get("/", (req, res) => {
-//   res.send("Welcome to Peerprep User Service");
-// });
-
-// app.use("/api", routes);
-
-// app.listen(8080, () => {
-//   console.log("App Intialised on port 8080");
-// });

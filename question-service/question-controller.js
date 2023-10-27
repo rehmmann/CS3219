@@ -163,3 +163,41 @@ export async function deleteQuestion(req, res) {
       res.status(500).send(err);
     });
 }
+
+export const getQuestionById = async (req, res) => {
+  const { id } = req.params;
+  Question.findOne({ questionId: Number(id) })
+    .then((result) => {
+      if (result) res.json(result);
+      if (!result) res.json({ message: "Question Not Found" });
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+}
+
+export const updateQuestion = async (req, res) => {
+  const { id } = req.params;
+  const { questionTitle, questionCategories, questionComplexity, questionDescription } = req.body;
+  Question.updateOne({ questionId: Number(id) }, { questionTitle, questionCategories, questionComplexity, questionDescription })
+    .then((result) => {
+      if (result.modifiedCount == 1) {
+        res.json({ 
+          message: "Question Updates",
+          data: { 
+            questionTitle, 
+            questionCategories, 
+            questionComplexity,
+            questionDescription 
+          }
+        });
+      } else if (result.modifiedCount == 0) {
+        res.status(404).send({ message: "Question Not Found" });
+      } else {
+        res.status(520).send({ message: "Unknown Error" });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+};
