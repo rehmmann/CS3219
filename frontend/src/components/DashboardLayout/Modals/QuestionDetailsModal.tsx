@@ -58,7 +58,7 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
     const dispatch = useDispatch();
     const questions = useSelector((state: RootState) => state.questions);
     const questionTitleExists = (t: string) => {
-      return questions.data.some((question) => question.title.toLowerCase() === t.toLowerCase() && t.toLowerCase() !== title.toLowerCase());
+      return questions.data.some((question) => question.title.toLowerCase() == t.toLowerCase() && question.id != id);
     }
     
     const [titleError, setTitleError] = useState(false);
@@ -66,7 +66,11 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
     const [complexityError, setComplexityError] = useState(false);
     const [categoryError, setCategoryError] = useState(false);
     const handleQuestionDetailsClose = () => {
-        questionsDetailsCloseHandler();
+      setCategoryError(false);
+      setTitleError(false);
+      setDescriptionError(false);
+      setComplexityError(false);
+      questionsDetailsCloseHandler();
     }
     const handleDeleteQuestion = () => {
       dispatch(deleteQuestion(id))
@@ -208,6 +212,8 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
               </Select>
               <Stack
                 direction={"row"}
+                padding={2}
+                spacing={2}
               >
                 <Button
                   variant="contained"

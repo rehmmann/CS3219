@@ -52,7 +52,7 @@ const questionSlice = createSlice({
           })
           state.data.splice(index, 1, {...state.data[index], ...action.payload, updatedAt: new Date().toISOString()})
         },
-        prepare(question: Question) {
+        prepare(question: UpdateQuestion) {
           return { payload: question }
         },
       }
