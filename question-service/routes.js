@@ -38,38 +38,50 @@ const guard = (roles) => {
     }
   };
 }
+
 //Create new question based on request body
-router
-  .use(guard(["ADMIN"]))
-  .post("/questions/new", createQuestion);
+router.post(
+  "/questions/new",
+  guard(["ADMIN"]),
+  createQuestion
+);
 
 //Get random question
 router
-  .use(guard([]))
   .get("/questions/random", getRandomQuestion);
 
 //Get list of questions based on query parameters
-router
-  .use(guard([]))
-  .get("/questions", getFilteredQuestions);
+router.get(
+  "/questions",
+  guard([]),
+  getFilteredQuestions
+);
 
 //Get 1 random question based on query parameters
-router
-  .use(guard([]))
-  .get("/questions/random-filtered", getRandomFilteredQuestions);
+router.get(
+  "/questions/random-filtered",
+  guard([]),
+  getRandomFilteredQuestions
+);
 
-router
-  .use(guard([]))
-  .get("/questions/:id", getQuestionById);
+router.get(
+  "/questions/:id",
+  guard([]),
+  getQuestionById
+);
 // Updates a question based on questionId
-router
-  .use(guard(["ADMIN"]))
-  .put("/questions/:id", updateQuestion);
+router.put(
+  "/questions/:id",
+  guard(['ADMIN']),
+  updateQuestion
+);
 
 //Delete question based on questionId
-router
-  .use(guard(["ADMIN"]))
-  .delete("/questions/:id", deleteQuestion);
+router.delete(
+  "/questions/:id",
+  guard(['ADMIN']),
+  deleteQuestion
+);
 
 router.get("/questions/test", (req, res) => { res.send("Question Service Version 8"); });
 
