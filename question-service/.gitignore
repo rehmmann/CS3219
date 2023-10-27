@@ -3,3 +3,4 @@ node_modules
 openapi-run.yaml
 api-gateway.yaml
 .DS_Store
+serviceAccount.json
