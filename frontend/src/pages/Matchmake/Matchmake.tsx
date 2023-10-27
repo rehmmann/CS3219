@@ -8,7 +8,7 @@ import Loading from "../../components/Loading/Loading";
 import { useRemoveUserMutation, useCheckMatchMutation } from "../../redux/api";
 // Import MUI
 import { Box } from "@mui/material";
-
+ 
 // Import style
 import "./Matchmake.scss";
 import { useEffect, useState } from "react";
@@ -38,10 +38,8 @@ const Matchmake = () => {
       if (user) {
         // User is signed in. Get the user's email and token.
         const email = user?.email;
-        user.getIdToken().then((token) => {
-          setUserEmail(email);
-          setUserToken(token);
-        });
+        setUserToken(user.uid)
+        setUserEmail(email);
       } else {
         // User is signed out.
         setUserEmail(null);
@@ -77,18 +75,29 @@ const Matchmake = () => {
         email: userEmail ? userEmail : "",
         topic: "",
         difficulty: "Hard",
-      }).then((res) => {
-        console.log(res);
+      }).then((res: any) => {
         if ("data" in res && typeof res.data === "object") {
           const jsonString = JSON.stringify(res);
-          console.log(jsonString);
           if (jsonString.includes("Not Matched")) {
             console.log("No match yet!");
           } else {
-            clearInterval(intervalRef.current);
-            isMatchActive.current = false;
-            navigate("/app/collab");
-            toast.success("Match Found!");
+            console.log(res.data)
+            const otherUserId = res?.data?.matched_user?.matchedId
+            const questionId = res?.data?.matched_user?.questionId
+            if (otherUserId && questionId) {
+              clearInterval(intervalRef.current);
+              isMatchActive.current = false;
+              dispatch(initMatch(false));
+              navigate(`/app/matched/${questionId}/${otherUserId}`);
+              toast.success("Match Found!");
+            } else {
+              clearInterval(intervalRef.current);
+              isMatchActive.current = false;
+              dispatch(initMatch(false));
+              navigate(`/app/matched/`);
+              toast.success("Match Found!");
+            }
+
           }
         }
       });
