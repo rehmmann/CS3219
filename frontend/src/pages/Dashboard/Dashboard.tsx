@@ -28,6 +28,7 @@ const Dashboard = () => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string[]>([]);
   const [complexity, setComplexity] = useState<QuestionComplexity>('');
+  const [id, setId] = useState<string>('');
 
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
@@ -38,6 +39,7 @@ const Dashboard = () => {
     setTitle(question.title);
     setDescription(question.description);
     setCategory(question.category);
+    setId(question.id)
     setComplexity(question.complexity);
   }
   const questionsDetailsCloseHandler = () => {
@@ -62,6 +64,11 @@ const Dashboard = () => {
         description={description}
         category={category}
         complexity={complexity}
+        id={id}
+        setTitle={setTitle}
+        setDescription={setDescription}
+        setComplexity={setComplexity}
+        setCategory={setCategory}
       />
       <Stack
         direction={'row'}

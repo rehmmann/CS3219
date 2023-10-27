@@ -227,7 +227,6 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
               backgroundColor: "transparent"
             }}}
             disableRipple
-            onClick={handleAddQuestion}
           >
             <CustomButton
               title="Create"
