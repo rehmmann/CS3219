@@ -5,6 +5,7 @@ import {
   getRandomQuestion,
   getFilteredQuestions,
   deleteQuestion,
+  getRandomFilteredQuestions,
 } from "./question-controller.js";
 
 let router = express.Router();
@@ -15,8 +16,11 @@ router.post("/questions/new", createQuestion);
 //Get random question
 router.get("/questions/random", getRandomQuestion);
 
-//Get question based on query parameters
+//Get list of questions based on query parameters
 router.get("/questions", getFilteredQuestions);
+
+//Get 1 random question based on query parameters
+router.get("/questions/random-filtered", getRandomFilteredQuestions);
 
 //Delete question based on questionId
 router.delete("/questions/:id", deleteQuestion);

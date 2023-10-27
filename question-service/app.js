@@ -10,12 +10,14 @@ const uri = process.env.MONGO_DB_URL;
 
 mongoose.connect(uri).then(() => {
   const app = express();
-  app.use(cors({
-    origin: '*'
-  }));
+  app.use(
+    cors({
+      origin: "*",
+    })
+  );
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
-  app.options('*', cors())
+  app.options("*", cors());
   app.use("/api", routes);
 
   app.listen(8080, () => {
