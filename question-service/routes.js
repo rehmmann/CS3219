@@ -1,5 +1,4 @@
 import express from "express";
-import Question from "./question-model.js";
 import serviceAccount from "./serviceAccount.json" assert { type: "json" };
 import admin from "firebase-admin";
 import {
@@ -17,18 +16,23 @@ const firebaseApp = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-const guard = ( roles) => {
+const guard = (roles) => {
   return async (req, res, next) => {
     try {
       const idToken = req.headers.authorization.split(' ')[1];
       const decodedToken = await firebaseApp.auth().verifyIdToken(idToken);
-      const userRoles = decodedToken.roles;
-      roles.forEach(role => {
-        if (!userRoles.includes(role)) {
-          throw new Error('Unauthorized');
-        }
-      });
-      next();
+      if (roles.length === 0) {
+        next();
+      } else {
+        const userRoles = decodedToken.roles;
+        if (!userRoles) throw new Error('Unauthorized');
+        roles.forEach(role => {
+          if (!userRoles.includes(role)) {
+            throw new Error('Unauthorized');
+          }
+        });
+        next();
+      }  
     } catch (err) {
       res.status(401).send('Unauthorized');
     }
