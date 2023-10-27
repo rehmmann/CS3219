@@ -28,3 +28,11 @@ export type Question = {
     updatedAt: string;
     createdBy: string;
 }
+
+export type UpdateQuestion = {
+    id: string;
+    title: string;
+    description: string;
+    category: QuestionCategory[];
+    complexity: QuestionComplexity;
+}
