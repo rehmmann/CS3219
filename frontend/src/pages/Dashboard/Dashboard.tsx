@@ -68,11 +68,12 @@ const Dashboard = () => {
   const handleClickQuestion = (e: React.FormEvent, question: Question) => {
     e.preventDefault();
     setQuestionDetailsOpen(true);
-    setTitle(question.title);
-    setDescription(question.description);
-    setCategory(question.category);
-    setComplexity(question.complexity);
+    setTitle(question?.title);
+    setDescription(question?.description);
+    setCategory(question?.category);
+    setComplexity(question?.complexity);
   }
+
   const questionsDetailsCloseHandler = () => {
     setTitle('');
     setDescription('');
@@ -85,12 +86,12 @@ const Dashboard = () => {
   return (
     <div>
       {admin && 
-      <AddQuestionModal
-        questionModalOpen={questionModalOpen}
-        setQuestionModalOpen={setQuestionModalOpen}
-        questions={questions}
-        nextQuestionId={nextQuestionId}
-      />
+        <AddQuestionModal
+          questionModalOpen={questionModalOpen}
+          setQuestionModalOpen={setQuestionModalOpen}
+          questions={questions}
+          nextQuestionId={nextQuestionId}
+        />
       }
       <QuestionDetailsModal
         questionDetailsOpen={questionDetailsOpen}
