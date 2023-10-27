@@ -1,9 +1,13 @@
+require('dotenv').config();
+const cors = require('cors');
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 const db = require('./queries')
 const port = 8080
-
+app.use(cors({
+  origin: '*'
+}));
 app.use(bodyParser.json())
 app.use(
   bodyParser.urlencoded({
@@ -17,7 +21,7 @@ app.get('/', (request, response) => {
 
 app.get('/users', db.getUsers)
 app.get('/users/signedin/:id', db.getUserById)
-app.get('/users/login', db.loginUser)
+app.post('/users/login', db.loginUser)
 app.post('/users', db.createUser)
 app.put('/users/signedin/:id', db.updateUser)
 app.delete('/users/signined/:id', db.deleteUser)

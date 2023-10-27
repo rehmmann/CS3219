@@ -2,11 +2,11 @@ const Pool = require('pg').Pool
 const crypto = require('crypto');
 
 const pool = new Pool({
-    user: 'me',
-    host: 'localhost',
-    database: 'api',
-    password: 'password',
-    port: 5432,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
 })
 
 const createHash = (password) => {
@@ -59,7 +59,10 @@ const getUserById = (request, response) => {
 
 const createUser = (request, response) => {
     const { username, email, password, role } = request.body
-
+    if (!username || !email || !password) {
+        response.status(422).send('Unprocessable Entity');
+        return
+    }
     const [salt, hashedPassword] = createHash(password);
 
     if (role) {
@@ -67,7 +70,7 @@ const createUser = (request, response) => {
         (error, results) => {
             if (error && error.code === '23505') {
                 // Duplicate entry error
-                return response.status(409).json({ error: 'Duplicate entry' });
+                return response.status(409).json({ error: 'User already exists!' });
             }
             if (error) {
                 console.error('Error executing query:', error);
@@ -80,13 +83,13 @@ const createUser = (request, response) => {
         (error, results) => {
             if (error && error.code === '23505') {
                 // Duplicate entry error
-                return response.status(409).json({ error: 'Duplicate entry' });
+                return response.status(409).json({ error: 'User already exists!' });
             }
             if (error) {
                 console.error('Error executing query:', error);
             return response.status(500).json({ error: 'Internal Server Error' });
             }
-            response.status(201).send(`User added with id: ${results.rows[0].id}, username: ${results.rows[0].username}`)
+            response.status(201).send();
         })
     }
 
@@ -141,7 +144,7 @@ const loginUser = (request, response) => {
             return response.status(500).json({ error: 'Internal Server Error' });
         }
         if (results.rows.length == 0) {
-            return response.status(404).json({ error: 'Not Found Email'});
+            return response.status(404).json({ error: 'Account not found!'});
         }
         salt = results.rows[0].salt;
         const hashedPassword = checkHash(String(salt), String(password));
@@ -153,9 +156,16 @@ const loginUser = (request, response) => {
                 return response.status(500).json({ error: 'Internal Server Error' });
             }
             if (results.rows.length == 0) {
-                return response.status(404).json({ error: 'Not Found', results: results.rows, salt: salt, hashedPassword: hashedPassword });
+                return response.status(404).json({ error: 'Wrong Password!', results: results.rows, salt: salt, hashedPassword: hashedPassword });
             }
-            response.status(200).json(results.rows)
+            const user = results.rows[0];
+            const responseBody = {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            }
+            response.status(200).json(responseBody);
         })
     });
     
