@@ -49,6 +49,7 @@ const ChangePasswordForm = () => {
 
   const [retypePassword, setRetypePassword] = useState('');
   const [changePassword] = useChangePasswordMutation();
+  const { id } = JSON.parse(localStorage.getItem('user') || '{}');
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
