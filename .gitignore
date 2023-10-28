@@ -2,3 +2,5 @@ node_modules
 serviceAccount.json
 app.yaml
 .env
+api-gateway.yaml
+openapi-run.yaml

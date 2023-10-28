@@ -15,3 +15,7 @@ npm run dev
 username: dummy@example.com
 password: password
 ```
+
+## Assignment 2
+
+#### Running the Application

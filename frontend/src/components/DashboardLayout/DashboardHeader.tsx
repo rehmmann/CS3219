@@ -6,6 +6,7 @@ import {
   AppBar,
   Avatar,
   Box,
+  Button,
   Container,
   IconButton,
   Menu,
@@ -45,6 +46,10 @@ const DashboardHeader = () => {
     navigate("/");
     toast.success("Logged out successfully!");
   };
+  const handleChangePassword = () => {
+    setAnchorElUser(null);
+    navigate("/app/change-password");
+  }
 
   //----------------------------------------------------------------//
   //                          RENDER                                //
@@ -53,7 +58,10 @@ const DashboardHeader = () => {
     <AppBar position='sticky' className="dashboard_header">
       <Container maxWidth="xl">
         <Toolbar sx={{mr: 10, ml: 10}} disableGutters className='dashboard_header__toolbar'>
-          <Typography variant="h6" noWrap component="a" href="/"
+          <Button
+            onClick={() => navigate('/app/dashboard')}
+          >
+          <Typography variant="h6" noWrap
             sx={{
               mr: 2,
               fontWeight: 700,
@@ -64,6 +72,8 @@ const DashboardHeader = () => {
           >
             Peer Prep
           </Typography>
+          </Button>
+          
           <Stack
             direction={'row'}
             spacing={5}
@@ -110,6 +120,9 @@ const DashboardHeader = () => {
               onClose={handleCloseUserMenu}
             >
               {/* {settings.map((setting) => ( */}
+              <MenuItem key={"logout"} onClick={handleChangePassword}>
+                <Typography textAlign="center">{"Change Password"}</Typography>
+              </MenuItem>
               <MenuItem key={"logout"} onClick={handleLogout}>
                 <Typography textAlign="center">{"Log Out"}</Typography>
               </MenuItem>

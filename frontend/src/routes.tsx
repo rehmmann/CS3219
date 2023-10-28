@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Matchmake from './pages/Matchmake/Matchmake';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import Login from './pages/Login/Login';
+import ChangePasswordForm from './pages/ChangePassword/ChangePassword';
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
   const r = [];
@@ -24,14 +25,12 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
         // { path: '', element: <>app</> },
         { path: 'dashboard', element: isMatching ? <Matchmake /> : <Dashboard /> },
         {
-          path: 'member',
-          children: [
-            { path: '', element: <>membergrid</> },
-            { path: 'add', element: <>AddMember</> },
-          ],
+          path: 'change-password',
+          element: <ChangePasswordForm />,
         },
       ],
     },
+    
     {
       path: 'login',
       element: !isLoggedIn ? <Login /> : <Navigate to="/app/dashboard" />,

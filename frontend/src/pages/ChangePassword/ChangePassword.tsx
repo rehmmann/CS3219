@@ -5,18 +5,18 @@ import { useState } from 'react';
 import {
     FormControl,
     IconButton,
+    Paper,
     Stack,
     TextField,
 } from '@mui/material';
 
 // Import redux
-import { useCreateUserMutation } from '../../redux/api';
+import { useChangePasswordMutation } from '../../redux/api';
 
 // Import toast
 import { toast } from 'react-toastify';
 
-import {User } from '../../utils/types';
-type LoginData = { password: { value: string }, email: { value: string }};
+import { User } from '../../utils/types';
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -37,36 +37,35 @@ const textInputStyle = {
         },
       },
   }
-type SignUpFormProps = {
-  setSigningUp: Function
-}
 
-const SignUpForm = (props: SignUpFormProps) => {
-  const { setSigningUp } = props;
+const ChangePasswordForm = () => {
 
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [createUser] = useCreateUserMutation();
-  const [password, setPassword] = useState('');
-  const [retypePassword, setRetypePassword] = useState('');
-  const [email, setEmail] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
+  const [retypePassword, setRetypePassword] = useState('');
+  const [changePassword] = useChangePasswordMutation();
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
-  const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChangePassword = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setButtonDisabled(true);
-    if (password !== retypePassword) {
+    if (newPassword !== retypePassword) {
       toast.error('Passwords do not match!');
       setButtonDisabled(false);
       return;
     }
-    const createUserPromise = new Promise( async (resolve, reject) => {
+    const changePasswordPromise = new Promise( async (resolve, reject) => {
       try {
-        const res = await createUser({email, password}).unwrap();
+        const res = await changePassword({id, passwords: {
+          oldPassword,
+          newPassword
+        }}).unwrap();
         setButtonDisabled(false);
         return resolve(res);
       } catch (error: any) {
@@ -74,9 +73,9 @@ const SignUpForm = (props: SignUpFormProps) => {
         return reject(error);
       }
     });
-    createUserPromise.then((res: any | User | null) => {
-      toast.success('Account Successfully Created!');
-      setSigningUp(false);
+    changePasswordPromise.then((res: any | User | null) => {
+      toast.success('Password changed successfully!');
+
     }).catch((err) => {
       toast.error(err.data.error);
     })
@@ -86,8 +85,24 @@ const SignUpForm = (props: SignUpFormProps) => {
   //                          RENDER                                //
   //----------------------------------------------------------------//
   return (
+    <Paper
+      sx={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+      }}
+    >
+
+    <Stack
+      sx={{
+        width: '40%'
+      }}
+    >
+
+
     <form
-      onSubmit={(e) => handleSignUp(e)}
+      onSubmit={(e) => handleChangePassword(e)}
       >
       <FormControl
         sx={{ width: '100%', mt: 10, mb: 10 }}
@@ -95,16 +110,16 @@ const SignUpForm = (props: SignUpFormProps) => {
       >
         <Stack spacing={8}>
           <TextField
-              id="email"
-              label="Email"
-              type="email"
+              id="oldPassword"
+              label="Old Password"
+              type="password"
               variant='standard'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
               sx={textInputStyle}
               required
               InputLabelProps={{ required: false, style: { fontFamily: 'Poppins' }}}
-              inputProps={{autoComplete: 'new-password',
+              inputProps={{autoComplete: 'old-password',
               form: {
                 autoComplete: 'off',
               },  style: { fontFamily: 'Poppins' }}}
@@ -115,8 +130,8 @@ const SignUpForm = (props: SignUpFormProps) => {
               label="Password"
               type="password"
               variant='standard'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               sx={textInputStyle}
               SelectProps={{style: {color: 'black'}}}
               required
@@ -161,12 +176,15 @@ const SignUpForm = (props: SignUpFormProps) => {
               type="submit"
               disableRipple
           >
-              Sign Up
+              Change Password
           </IconButton>
         </Stack>
       </FormControl>
     </form>
+    </Stack>
+    </Paper>
+
   );
 }
 
-export default SignUpForm;
+export default ChangePasswordForm;

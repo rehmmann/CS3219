@@ -17,6 +17,14 @@ type QuestionCreateProps = {
   questionComplexity: string;
   questionCategories: string[];
 }
+type ChangePasswordObject = {
+  passwords: {
+    oldPassword: string;
+    newPassword: string;
+  },
+  id: string
+
+}
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `` }),
   tagTypes: ['Question'],
@@ -56,6 +64,13 @@ export const api = createApi({
         body: credentials,
       }),
     }),
+    changePassword: builder.mutation<{}, ChangePasswordObject>({
+      query: (changePasswordObject) => ({
+        url: `${USER_URL}/users/change-password/${changePasswordObject.id}`,
+        method: 'PUT',
+        body: changePasswordObject.passwords,
+      }),
+    }),
   }),
 });
 
@@ -64,4 +79,5 @@ export const {
   useGetQuestionsQuery,
   useCreateQuestionMutation,
   useLoginMutation,
+  useChangePasswordMutation,
 } = api;

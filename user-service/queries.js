@@ -6,7 +6,7 @@ const pool = new Pool({
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    port: process.env.DB_HOST == 'localhost' ? 5432 : process.env.DB_PORT,
 })
 
 const createHash = (password) => {
@@ -58,52 +58,36 @@ const getUserById = (request, response) => {
 }
 
 const createUser = (request, response) => {
-    const { username, email, password, role } = request.body
-    if (!username || !email || !password) {
+    const { email, password } = request.body
+    if (!email || !password) {
         response.status(422).send('Unprocessable Entity');
         return
     }
     const [salt, hashedPassword] = createHash(password);
-
-    if (role) {
-        pool.query('INSERT INTO users (username, email, password, role, salt) VALUES ($1, $2, $3, $4, $5) RETURNING * ', [username, email, hashedPassword, role, salt], 
-        (error, results) => {
-            if (error && error.code === '23505') {
-                // Duplicate entry error
-                return response.status(409).json({ error: 'User already exists!' });
-            }
-            if (error) {
-                console.error('Error executing query:', error);
-                return response.status(500).json({ error: 'Internal Server Error' });
-            }
-            response.status(201).send(`User added with ID: ${results.rows[0].id}, username: ${results.rows[0].username}`)
-        })
-    } else {
-        pool.query('INSERT INTO users (username, email, password, salt) VALUES ($1, $2, $3, $4) RETURNING * ', [username, email, hashedPassword, salt], 
-        (error, results) => {
-            if (error && error.code === '23505') {
-                // Duplicate entry error
-                return response.status(409).json({ error: 'User already exists!' });
-            }
-            if (error) {
-                console.error('Error executing query:', error);
+    pool.query('INSERT INTO users (email, password, salt) VALUES ($1, $2, $3) RETURNING * ', [email, hashedPassword, salt], 
+    (error, results) => {
+        if (error && error.code === '23505') {
+            // Duplicate entry error
+            return response.status(409).json({ error: 'User already exists!' });
+        }
+        if (error) {
+            console.error('Error executing query:', error);
             return response.status(500).json({ error: 'Internal Server Error' });
-            }
-            response.status(201).send();
-        })
-    }
-
+        }
+        response.status(201).send(`User added with ID: ${results.rows[0].id}`)
+    })
+    
 }
 
 const updateUser = (request, response) => {
   const id = parseInt(request.params.id)
-  const { username, email, password } = request.body
+  const { email, password } = request.body
 
   const [salt, hashedPassword] = createHash(password);
 
     pool.query(
-        'UPDATE users SET username = $1, email = $2, password = $3, salt = $4 WHERE id = $5',
-        [username, email, hashedPassword, salt, id],
+        'UPDATE users SET email = $1, password = $2, salt = $3 WHERE id = $4',
+        [email, hashedPassword, salt, id],
         (error, results) => {
             if (error && error.code === '23505') {
                 // Duplicate entry error
@@ -118,6 +102,52 @@ const updateUser = (request, response) => {
     )
 }
 
+const changePassword = (request, response) => {
+    const id = parseInt(request.params.id)
+    const { oldPassword, newPassword } = request.body
+    var oldSalt = '';
+    const [salt, hashedPassword] = createHash(newPassword);
+    pool.query('SELECT * FROM users WHERE id = $1', [id],  
+    (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            return response.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (results.rows.length == 0) {
+            return response.status(404).json({ error: 'Account not found!'});
+        }
+        
+        oldSalt = results.rows[0].salt;
+        const hashedOldPassword = checkHash(String(oldSalt), String(oldPassword));
+
+        pool.query('SELECT * FROM users WHERE id = $1 AND password = $2', [id, hashedOldPassword],  
+        (error, results) => {
+            if (error) {
+                console.error('Error executing query:', error);
+                return response.status(500).json({ error: 'Internal Server Error' });
+            }
+            if (results.rows.length == 0) {
+                return response.status(404).json({ error: 'Wrong Password!', results: results.rows, salt: oldSalt, hashedPassword: hashedOldPassword });
+            }
+
+            pool.query(
+                'UPDATE users SET password = $1, salt = $2 WHERE id = $3',
+                [hashedPassword, salt, id],
+                (error, results) => {
+                    if (error && error.code === '23505') {
+                        // Duplicate entry error
+                        return response.status(409).json({ error: 'Duplicate entry' });
+                    }
+                    if (error) {
+                        console.error('Error executing query:', error);
+                    return response.status(500).json({ error: 'Internal Server Error' });
+                    }
+                    response.status(200).json({ message: 'Password changed successfully!'});
+                }
+            )
+        })
+    });
+}
 const deleteUser = (request, response) => {
     const id = parseInt(request.params.id)
 
@@ -134,7 +164,6 @@ const deleteUser = (request, response) => {
 const loginUser = (request, response) => {
 
     const {email, password} = request.body
-
     var salt = '';
 
     pool.query('SELECT * FROM users WHERE email = $1', [email],  
@@ -161,13 +190,13 @@ const loginUser = (request, response) => {
             const user = results.rows[0];
             const responseBody = {
                 id: user.id,
-                username: user.username,
                 email: user.email,
-                role: user.role,
             }
             response.status(200).json(responseBody);
         })
     });
+
+    
     
 }
 
@@ -178,4 +207,5 @@ module.exports = {
   updateUser,
   deleteUser,
   loginUser,
+  changePassword,
 }
