@@ -9,14 +9,12 @@ import {
     TextField,
 } from '@mui/material';
 
-// Import redux
-import { useCreateUserMutation } from '../../redux/api';
-
 // Import toast
 import { toast } from 'react-toastify';
 
-import {User } from '../../utils/types';
-type LoginData = { password: { value: string }, email: { value: string }};
+// Import firebase
+import { firebaseAuth,  } from '../../utils/firebase';
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -43,7 +41,6 @@ type SignUpFormProps = {
 
 const SignUpForm = (props: SignUpFormProps) => {
   const { setSigningUp } = props;
-
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
@@ -64,7 +61,17 @@ const SignUpForm = (props: SignUpFormProps) => {
       setButtonDisabled(false);
       return;
     }
-    if (password.length < 8) {
+    createUserWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
+      console.log(res);
+      setSigningUp(false);
+      setButtonDisabled(false);
+      toast.success('Account Successfully Created!');
+    }).catch((err) => {
+      console.error(err);
+      toast.error("Email is already in use!");
+      setButtonDisabled(false);
+    });
+<!--     if (password.length < 8) {
       toast.error('Password must be at least 8 characters long!');
       setButtonDisabled(false);
       return;
@@ -86,7 +93,7 @@ const SignUpForm = (props: SignUpFormProps) => {
     }).catch((err) => {
       toast.error(err.data.error);
       return err
-    })
+    }) -->
   };
 
   //----------------------------------------------------------------//

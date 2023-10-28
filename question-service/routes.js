@@ -42,7 +42,7 @@ const guard = (roles) => {
 //Create new question based on request body
 router.post(
   "/questions/new",
-  // guard(["ADMIN"]),
+  guard(["ADMIN"]),
   createQuestion
 );
 
@@ -53,33 +53,33 @@ router
 //Get list of questions based on query parameters
 router.get(
   "/questions",
-  // guard([]),
+  guard([]),
   getFilteredQuestions
 );
 
 //Get 1 random question based on query parameters
 router.get(
   "/questions/random-filtered",
-  // guard([]),
+  guard([]),
   getRandomFilteredQuestions
 );
 
 router.get(
   "/questions/:id",
-  // guard([]),
+  guard([]),
   getQuestionById
 );
 // Updates a question based on questionId
 router.put(
   "/questions/:id",
-  // guard(['ADMIN']),
+  guard(['ADMIN']),
   updateQuestion
 );
 
 //Delete question based on questionId
 router.delete(
   "/questions/:id",
-  // guard(['ADMIN']),
+  guard(['ADMIN']),
   deleteQuestion
 );
 

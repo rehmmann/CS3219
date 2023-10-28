@@ -1,20 +1,37 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { User } from '../utils/types';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { getAuth } from "firebase/auth";
 
 const QUESTION_URL = import.meta.env.VITE_QUESTION_URL;
-const USER_URL = import.meta.env.VITE_USER_URL;
-const TOKEN = import.meta.env.VITE_GCLOUD_IDENTITY_TOKEN;
+const MATCH_URL = import.meta.env.VITE_MATCH_URL;
 
-type UserCredentials = {
-  email: string;
-  password: string;
-  username?: string;
-};
 type QuestionCreateProps = {
   questionTitle: string;
   questionDescription: string;
   questionComplexity: string;
   questionCategories: string[];
+};
+
+type FindMatchProps = {
+  id: string;
+  email: string;
+  topic: string;
+  difficulty: string;
+};
+
+type CheckMatchProps = {
+  id: string;
+  email: string;
+  topic: string;
+  difficulty: string;
+};
+
+type RemoveUserProps = {
+  id: string;
+  email: string;
+  topic: string;
+  difficulty: string;
+};
+=======
 }
 type ChangePasswordObject = {
   passwords: {
@@ -40,30 +57,46 @@ type QuestionUpdateProps = {
 }
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: `` }),
-  tagTypes: ['Question'],
+  baseQuery: fetchBaseQuery({
+    baseUrl: ``,
+    prepareHeaders: async (headers) => {
+      const auth = getAuth();
+      await auth.currentUser?.getIdTokenResult().then((idTokenResult) => {
+        headers.set("authorization", `Bearer ${idTokenResult.token}`);
+      });
+      return headers;
+    },
+  }),
+  tagTypes: ["Question", "Match"],
   endpoints: (builder) => ({
     getQuestions: builder.query<{ questions: any[] }, void>({
       query: () => ({
-        url: `${QUESTION_URL}/api/questions`,
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
+        url: `${QUESTION_URL}`,
+        method: "GET",
       }),
-      providesTags: ['Question'],
+      providesTags: ["Question"],
     }),
     createQuestion: builder.mutation<{ question: any }, QuestionCreateProps>({
       query: (question) => ({
-        url: `${QUESTION_URL}/api/questions/new`,
-        method: 'POST',
+        url: `${QUESTION_URL}/new`,
+        method: "POST",
         body: question,
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
       }),
-      invalidatesTags: ['Question'],
+      invalidatesTags: ["Question"],
     }),
+    findMatch: builder.mutation<ResponseType, FindMatchProps>({
+      query: (matchData) => ({
+        url: `${MATCH_URL}/find-match`,
+        method: "POST",
+        body: matchData,
+      }),
+      invalidatesTags: ["Match"],
+    }),
+    checkMatch: builder.mutation<ResponseType, CheckMatchProps>({
+      query: (matchData) => ({
+        url: `${MATCH_URL}/check-match`,
+        method: "POST",
+        body: matchData,
     deleteQuestion: builder.mutation<{ question: any }, string>({
       query: (id) => ({
         url: `${QUESTION_URL}/api/questions/${id}`,
@@ -91,13 +124,15 @@ export const api = createApi({
         method: 'POST',
         body: credentials,
       }),
+      invalidatesTags: ["Match"],
     }),
-    createUser: builder.mutation<{ token: string; user: User }, UserCredentials>({
-      query: (credentials) => ({
-        url: `${USER_URL}/users`,
-        method: 'POST',
-        body: credentials,
+    removeUser: builder.mutation<ResponseType, RemoveUserProps>({
+      query: (userData) => ({
+        url: `${MATCH_URL}/remove-user`,
+        method: "POST",
+        body: userData,
       }),
+      invalidatesTags: ["Match"],
     }),
     deleteUser: builder.mutation<{ token: string; user: User }, string>({
       query: (id) => ({
@@ -123,9 +158,11 @@ export const api = createApi({
 });
 
 export const {
-  useCreateUserMutation,
   useGetQuestionsQuery,
   useCreateQuestionMutation,
+  useFindMatchMutation,
+  useCheckMatchMutation,
+  useRemoveUserMutation,
   useUpdateQuestionMutation,
   useDeleteQuestionMutation,
   useLoginMutation,

@@ -15,23 +15,33 @@ import QuestionDetailsModal from '../../components/DashboardLayout/Modals/Questi
 import QuestionsTable from '../../components/DashboardLayout/QuestionsTable';
 import UserCard from '../../components/User/UserCard';
 
-import { map } from 'lodash';
+// Import utils
+import { includes, map } from 'lodash';
 
 // Import style
 import './Dashboard.scss';
 import { useGetQuestionsQuery } from '../../redux/api';
+import { getAuth } from 'firebase/auth';
 
 const Dashboard = () => {
+ 
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [questionModalOpen, setQuestionModalOpen] = useState(false);
   const [questionDetailsOpen, setQuestionDetailsOpen] = useState(false);
   const [title, setTitle] = useState('');
+  const [admin, setAdmin] = useState(false);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string[]>([]);
-  const [complexity, setComplexity] = useState<QuestionComplexity>('');
-  const [questions, setQuestions] = useState([]);
+  const [complexity, setComplexity] = useState<QuestionComplexity>(null);
+  const [questions, setQuestions] = useState<any[]>([]);
+  getAuth().currentUser?.getIdTokenResult().then((idTokenResult) => {
+    const claims: any = idTokenResult.claims;
+    if (includes(claims?.roles, 'ADMIN')) {
+      setAdmin(true);
+    }
+  })
   const { data: questionData }  = useGetQuestionsQuery();
   const [id, setId] = useState<string>('');
   useEffect(() => {
@@ -48,6 +58,7 @@ const Dashboard = () => {
       setQuestions(questionsList);
     }
   }, [questionData]);
+  
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -60,6 +71,7 @@ const Dashboard = () => {
     setId(question.id)
     setComplexity(question.complexity);
   }
+
   const questionsDetailsCloseHandler = () => {
     setTitle('');
     setDescription('');
@@ -71,11 +83,13 @@ const Dashboard = () => {
   //----------------------------------------------------------------//
   return (
     <div>
-      <AddQuestionModal
-        questionModalOpen={questionModalOpen}
-        setQuestionModalOpen={setQuestionModalOpen}
-        questions={questions}
-      />
+      {admin && 
+        <AddQuestionModal
+          questionModalOpen={questionModalOpen}
+          setQuestionModalOpen={setQuestionModalOpen}
+          questions={questions}
+        />
+      }
       <QuestionDetailsModal
         questionDetailsOpen={questionDetailsOpen}
         questionsDetailsCloseHandler={questionsDetailsCloseHandler}
@@ -122,6 +136,7 @@ const Dashboard = () => {
               setQuestionModalOpen={setQuestionModalOpen}
               handleClickQuestion={handleClickQuestion}
               questions={questions}
+              admin={admin}
             />
           </Stack>
         </Stack>

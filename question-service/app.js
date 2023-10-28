@@ -19,7 +19,7 @@ mongoose.connect(uri).then(() => {
   app.options("*", cors());
   app.use("/api", routes);
 
-  app.listen(8000, () => {
-    console.log("App Intialised on port 8000");
+  app.listen(8080, () => {
+    console.log("App Intialised on port 8080");
   });
 });
