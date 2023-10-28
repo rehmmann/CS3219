@@ -57,6 +57,21 @@ const LogInForm = () => {
       setButtonDisabled(false);
       navigate('/app/dashboard');
       toast.success('Welcome back!');
+//     const loginPromise = new Promise( async (resolve, reject) => {
+//       try {
+//         const res = await login({email, password}).unwrap();
+//         setButtonDisabled(false);
+//         return resolve(res);
+//       } catch (error: any) {
+//         setButtonDisabled(false);
+//         return reject(error);
+//       }
+//     });
+//     loginPromise.then((res: any | User | null) => {
+//         toast.success('Welcome back!');
+//         localStorage.setItem('token', 'dummyToken');
+//         localStorage.setItem('user', JSON.stringify(res));
+//         navigate('/app/dashboard');
     }).catch((err) => {
       console.error(err);
       toast.error("Login Failed!");

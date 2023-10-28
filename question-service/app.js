@@ -3,7 +3,6 @@ import { routes } from "./routes.js";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-
 dotenv.config();
 
 const uri = process.env.MONGO_DB_URL;

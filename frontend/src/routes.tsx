@@ -9,6 +9,8 @@ import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import Login from './pages/Login/Login';
 import { is } from 'immer/dist/internal.js';
 import MatchedPage from "./pages/Matchmake/MatchedPage";
+import ChangePasswordForm from './pages/ChangePassword/ChangePassword';
+import DeleteAccountForm from './pages/DeleteAccount/DeleteAccountForm';
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
   console.log("isMatching", isMatching);
@@ -34,14 +36,16 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
         { path: 'collaboration/:questionId?/:otherUserId?', element: isMatching ? <Matchmake /> : <Collaboration /> },
         { path: "matched/:questionId?/:otherUserId?", element: <MatchedPage /> },
         {
-          path: "member",
-          children: [
-            { path: "", element: <>membergrid</> },
-            { path: "add", element: <>AddMember</> },
-          ],
+          path: 'change-password',
+          element: <ChangePasswordForm />,
         },
+        {
+          path: 'delete-account',
+          element: <DeleteAccountForm />
+        }
       ],
     },
+    
     {
       path: "login",
       element: !isLoggedIn ? <Login /> : <Navigate to="/app/dashboard" />,

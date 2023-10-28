@@ -1,3 +1,6 @@
-frontend
-.DS_Store
-question-service/api-gateway.yaml
+node_modules
+serviceAccount.json
+app.yaml
+.env
+api-gateway.yaml
+openapi-run.yaml

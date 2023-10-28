@@ -11,6 +11,7 @@ import {
   AppBar,
   Avatar,
   Box,
+  Button,
   Container,
   IconButton,
   Menu,
@@ -92,22 +93,25 @@ const DashboardHeader = () => {
     };
   }, []);
 
+  const handleChangePassword = () => {
+    setAnchorElUser(null);
+    navigate("/app/change-password");
+  }
+  const handleDeleteAccount = () => {
+    setAnchorElUser(null);
+    navigate("/app/delete-account");
+  }
   //----------------------------------------------------------------//
   //                          RENDER                                //
   //----------------------------------------------------------------//
   return (
     <AppBar position="sticky" className="dashboard_header">
       <Container maxWidth="xl">
-        <Toolbar
-          sx={{ mr: 10, ml: 10 }}
-          disableGutters
-          className="dashboard_header__toolbar"
-        >
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
+        <Toolbar sx={{mr: 10, ml: 10}} disableGutters className='dashboard_header__toolbar'>
+          <Button
+            onClick={() => navigate('/app/dashboard')}
+          >
+          <Typography variant="h6" noWrap
             sx={{
               mr: 2,
               fontWeight: 700,
@@ -118,7 +122,13 @@ const DashboardHeader = () => {
           >
             Peer Prep
           </Typography>
-          <Stack direction={"row"} spacing={5}>
+          </Button>
+          
+          <Stack
+            direction={'row'}
+            spacing={5}
+          >
+
             <IconButton
               sx={{
                 color: "black",
@@ -173,8 +183,14 @@ const DashboardHeader = () => {
               onClose={handleCloseUserMenu}
             >
               {/* {settings.map((setting) => ( */}
+              <MenuItem key={"logout"} onClick={handleChangePassword}>
+                <Typography textAlign="center">{"Change Password"}</Typography>
+              </MenuItem>
               <MenuItem key={"logout"} onClick={handleLogout}>
                 <Typography textAlign="center">{"Log Out"}</Typography>
+              </MenuItem>
+              <MenuItem key={"logout"} onClick={handleDeleteAccount}>
+                <Typography textAlign="center">{"Delete Account"}</Typography>
               </MenuItem>
               {/* ))} */}
             </Menu>

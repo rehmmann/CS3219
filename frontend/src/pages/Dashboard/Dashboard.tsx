@@ -43,12 +43,10 @@ const Dashboard = () => {
     }
   })
   const { data: questionData }  = useGetQuestionsQuery();
-  const [nextQuestionId, setNextQuestionId] = useState(0);
+  const [id, setId] = useState<string>('');
   useEffect(() => {
     if (questionData?.questions) {
-      let nextQuestionIdTemp = 0;
-      const questionsList = map(questionData.questions, q => {
-        nextQuestionIdTemp = Math.max(q.questionId + 1, nextQuestionIdTemp);
+      const questionsList = map(questionData.questions, (q: any) => {
         return {
           id: q.questionId,
           title: q.questionTitle,
@@ -57,7 +55,6 @@ const Dashboard = () => {
           description: q.questionDescription,
         }
       });
-      setNextQuestionId(nextQuestionIdTemp);
       setQuestions(questionsList);
     }
   }, [questionData]);
@@ -68,10 +65,11 @@ const Dashboard = () => {
   const handleClickQuestion = (e: React.FormEvent, question: Question) => {
     e.preventDefault();
     setQuestionDetailsOpen(true);
-    setTitle(question?.title);
-    setDescription(question?.description);
-    setCategory(question?.category);
-    setComplexity(question?.complexity);
+    setTitle(question.title);
+    setDescription(question.description);
+    setCategory(question.category);
+    setId(question.id)
+    setComplexity(question.complexity);
   }
 
   const questionsDetailsCloseHandler = () => {
@@ -90,7 +88,6 @@ const Dashboard = () => {
           questionModalOpen={questionModalOpen}
           setQuestionModalOpen={setQuestionModalOpen}
           questions={questions}
-          nextQuestionId={nextQuestionId}
         />
       }
       <QuestionDetailsModal
@@ -100,6 +97,11 @@ const Dashboard = () => {
         description={description}
         category={category}
         complexity={complexity}
+        id={id}
+        setTitle={setTitle}
+        setDescription={setDescription}
+        setComplexity={setComplexity}
+        setCategory={setCategory}
       />
       <Stack
         direction={'row'}

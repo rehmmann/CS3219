@@ -5,16 +5,19 @@ import { useState } from 'react';
 import {
     FormControl,
     IconButton,
+    Paper,
     Stack,
     TextField,
 } from '@mui/material';
 
+// Import redux
+import { useChangePasswordMutation } from '../../redux/api';
+
 // Import toast
 import { toast } from 'react-toastify';
 
-// Import firebase
-import { firebaseAuth,  } from '../../utils/firebase';
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { User } from '../../utils/types';
+import { useNavigate } from 'react-router-dom';
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -35,73 +38,82 @@ const textInputStyle = {
         },
       },
   }
-type SignUpFormProps = {
-  setSigningUp: Function
-}
 
-const SignUpForm = (props: SignUpFormProps) => {
-  const { setSigningUp } = props;
+const ChangePasswordForm = () => {
+
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [createUser] = useCreateUserMutation();
-  const [password, setPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const navigate = useNavigate();
   const [retypePassword, setRetypePassword] = useState('');
-  const [email, setEmail] = useState('');
-
+  const [changePassword] = useChangePasswordMutation();
+  const { id } = JSON.parse(localStorage.getItem('user') || '{}');
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
-  const handleSignUp = () => {
-    // e.preventDefault();
+  const handleChangePassword = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setButtonDisabled(true);
-    if (password !== retypePassword) {
+    if (newPassword !== retypePassword) {
       toast.error('Passwords do not match!');
       setButtonDisabled(false);
       return;
     }
-    createUserWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
-      console.log(res);
-      setSigningUp(false);
-      setButtonDisabled(false);
-      toast.success('Account Successfully Created!');
-    }).catch((err) => {
-      console.error(err);
-      toast.error("Email is already in use!");
-      setButtonDisabled(false);
-    });
-<!--     if (password.length < 8) {
-      toast.error('Password must be at least 8 characters long!');
+    if (newPassword == oldPassword) {
+      toast.error('New password cannot be the same as the old password!');
       setButtonDisabled(false);
       return;
     }
-    const createUserPromise = new Promise( async (resolve, reject) => {
+    const changePasswordPromise = new Promise( async (resolve, reject) => {
       try {
-        const res = await createUser({email, password}).unwrap();
+        const res = await changePassword({id, passwords: {
+          oldPassword,
+          newPassword
+        }}).unwrap();
+        setButtonDisabled(false);
         return resolve(res);
       } catch (error: any) {
         setButtonDisabled(false);
         return reject(error);
       }
     });
-    createUserPromise.then((res: any | User | null) => {
-      toast.success('Account Successfully Created!');
-      setButtonDisabled(false);
-      setSigningUp(false);
-      return res
+    changePasswordPromise.then((res: any | User | null) => {
+      setNewPassword('');
+      setOldPassword('');
+      setRetypePassword('');
+      navigate('/app/dashboard');
+      toast.success('Password changed successfully!');
+
     }).catch((err) => {
       toast.error(err.data.error);
-      return err
-    }) -->
+    })
   };
 
   //----------------------------------------------------------------//
   //                          RENDER                                //
   //----------------------------------------------------------------//
   return (
+    <Paper
+      sx={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+      }}
+    >
+
+    <Stack
+      sx={{
+        width: '40%'
+      }}
+    >
+
+
     <form
-      // onSubmit={(e) => handleSignUp(e)}
+      onSubmit={(e) => handleChangePassword(e)}
       >
       <FormControl
         sx={{ width: '100%', mt: 10, mb: 10 }}
@@ -109,16 +121,16 @@ const SignUpForm = (props: SignUpFormProps) => {
       >
         <Stack spacing={8}>
           <TextField
-              id="email"
-              label="Email"
-              type="email"
+              id="oldPassword"
+              label="Old Password"
+              type="password"
               variant='standard'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
               sx={textInputStyle}
               required
               InputLabelProps={{ required: false, style: { fontFamily: 'Poppins' }}}
-              inputProps={{autoComplete: 'new-password',
+              inputProps={{autoComplete: 'old-password',
               form: {
                 autoComplete: 'off',
               },  style: { fontFamily: 'Poppins' }}}
@@ -129,8 +141,8 @@ const SignUpForm = (props: SignUpFormProps) => {
               label="Password"
               type="password"
               variant='standard'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               sx={textInputStyle}
               SelectProps={{style: {color: 'black'}}}
               required
@@ -172,16 +184,18 @@ const SignUpForm = (props: SignUpFormProps) => {
               fontSize: 13,
               }}
               disabled={buttonDisabled}
-              // type="submit"
+              type="submit"
               disableRipple
-              onClick={handleSignUp}
           >
-              Sign Up
+              Change Password
           </IconButton>
         </Stack>
       </FormControl>
     </form>
+    </Stack>
+    </Paper>
+
   );
 }
 
-export default SignUpForm;
+export default ChangePasswordForm;

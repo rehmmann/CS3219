@@ -2,11 +2,8 @@ import { type } from "os";
 
 export type QuestionComplexity = 'Easy' | 'Medium' | 'Hard' | null;
 export const QuestionCategories = [
-    'Algorithms',
-    'Arrays',
-    'Bit Manipulation',
-    'Strings',
-    'Data Structures',
+    "Arrays", "Bit Manipulation",
+  "Strings", "Brainteaser", "Data Structures", "Algorithms", "Recursion", "Databases"
 ];
 
 export type QuestionCategory = typeof QuestionCategories[number];
@@ -69,4 +66,12 @@ export const ServerEvents = {
     CODE: 'code',
     LANGUAGE: 'language',
     ERROR: 'error',
+}
+
+export type UpdateQuestion = {
+    id: string;
+    title: string;
+    description: string;
+    category: QuestionCategory[];
+    complexity: QuestionComplexity;
 }

@@ -10,12 +10,14 @@ import SignUpForm from './SignUpForm';
 
 // Import style
 import './Login.scss';
+import ForgotPassword from './ForgotPassword';
 
 const Login = () => {
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [signingUp, setSigningUp] = useState(false);
+  const [forgettingPassword, setForgettingPassword] = useState(false);
 
   //----------------------------------------------------------------//
   //                          RENDER                                //
@@ -25,6 +27,8 @@ const Login = () => {
       <div className="login_container">
         <div className="login_row">
           <div className="login_body">
+            {forgettingPassword ? <ForgotPassword setForgettingPassword={setForgettingPassword}/> : 
+            <>
             <div
               className="login_title"
             >
@@ -43,13 +47,22 @@ const Login = () => {
                 <div>
                   Already have an account? <CustomButton title="Log In" event={() => setSigningUp(false)} />
                 </div> :
+                <>
                 <div>
                   Don't have an account? <CustomButton title="Register" event={() => setSigningUp(true)} />
                 </div>
+                <CustomButton 
+                  title="Forgot Password"
+                  event={() => setForgettingPassword(true)}
+                  style={{height: 40, width: 200, marginTop: 2}} 
+                />
+                </>
               }
             </div>
+            </>}
           </div>
         </div>
+        
       </div>
       <div className="logo_container">
         <div className="logo_row">

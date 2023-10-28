@@ -1,6 +1,7 @@
 
 import { createSlice, PayloadAction} from '@reduxjs/toolkit';
-import { Question } from '../../utils/types';
+import { Question, UpdateQuestion } from '../../utils/types';
+import { filter, findIndex} from 'lodash';
 
 type SliceState = { state: 'loading' } | { state: 'finished'; data: Question[] }
 
@@ -33,9 +34,30 @@ const questionSlice = createSlice({
         prepare(question: Question) {
           return { payload: question }
         },
+      },
+      deleteQuestion: {
+        reducer(state, action: PayloadAction<string>) {
+          state.data = filter(state.data, (q: Question) => {
+            return q.id != action.payload
+          })
+        },
+        prepare(id: string) {
+          return { payload: id }
+        }
+      },
+      updateQuestion: {
+        reducer(state, action: PayloadAction<UpdateQuestion>) {
+          const index = findIndex(state.data, (q: Question) => {
+            return q.id == action.payload.id
+          })
+          state.data.splice(index, 1, {...state.data[index], ...action.payload, updatedAt: new Date().toISOString()})
+        },
+        prepare(question: UpdateQuestion) {
+          return { payload: question }
+        },
       }
     },
   })
 
-  export const { addQuestion } = questionSlice.actions;
+  export const { addQuestion, deleteQuestion, updateQuestion } = questionSlice.actions;
   export default questionSlice.reducer;

@@ -5,7 +5,6 @@ const QUESTION_URL = import.meta.env.VITE_QUESTION_URL;
 const MATCH_URL = import.meta.env.VITE_MATCH_URL;
 
 type QuestionCreateProps = {
-  questionId: number;
   questionTitle: string;
   questionDescription: string;
   questionComplexity: string;
@@ -32,6 +31,30 @@ type RemoveUserProps = {
   topic: string;
   difficulty: string;
 };
+=======
+}
+type ChangePasswordObject = {
+  passwords: {
+    oldPassword: string;
+    newPassword: string;
+  },
+  id: string
+}
+
+type CheckPasswordObject = {
+  id: string;
+  password: string;
+}
+
+type QuestionUpdateProps = {
+  id: string;
+  data : {
+    questionTitle: string;
+    questionDescription: string;
+    questionComplexity: string;
+    questionCategories: string[];
+  }
+}
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
@@ -74,6 +97,32 @@ export const api = createApi({
         url: `${MATCH_URL}/check-match`,
         method: "POST",
         body: matchData,
+    deleteQuestion: builder.mutation<{ question: any }, string>({
+      query: (id) => ({
+        url: `${QUESTION_URL}/api/questions/${id}`,
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      }),
+      invalidatesTags: ['Question'],
+    }),
+    updateQuestion: builder.mutation<{ question: any }, QuestionUpdateProps>({
+      query: (question) => ({
+        url: `${QUESTION_URL}/api/questions/${question.id}`,
+        method: 'PUT',
+        body: question.data,
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      }),
+      invalidatesTags: ['Question'],
+    }),
+    login: builder.mutation<{ token: string; user: User }, UserCredentials>({
+      query: (credentials) => ({
+        url: `${USER_URL}/users/login`,
+        method: 'POST',
+        body: credentials,
       }),
       invalidatesTags: ["Match"],
     }),
@@ -85,6 +134,26 @@ export const api = createApi({
       }),
       invalidatesTags: ["Match"],
     }),
+    deleteUser: builder.mutation<{ token: string; user: User }, string>({
+      query: (id) => ({
+        url: `${USER_URL}/users/signined/${id}`,
+        method: 'DELETE',
+      }),
+    }),
+    changePassword: builder.mutation<{}, ChangePasswordObject>({
+      query: (changePasswordObject) => ({
+        url: `${USER_URL}/users/change-password/${changePasswordObject.id}`,
+        method: 'PUT',
+        body: changePasswordObject.passwords,
+      }),
+    }),
+    checkPassword: builder.mutation<{}, CheckPasswordObject>({
+      query: (checkPasswordObject) => ({
+        url: `${USER_URL}/users/check-password/${checkPasswordObject.id}`,
+        method: 'POST',
+        body: { password: checkPasswordObject.password },
+      }),
+    }),
   }),
 });
 
@@ -94,4 +163,10 @@ export const {
   useFindMatchMutation,
   useCheckMatchMutation,
   useRemoveUserMutation,
+  useUpdateQuestionMutation,
+  useDeleteQuestionMutation,
+  useLoginMutation,
+  useChangePasswordMutation,
+  useCheckPasswordMutation,
+  useDeleteUserMutation,
 } = api;

@@ -28,7 +28,6 @@ import { useCreateQuestionMutation } from '../../../redux/api';
 type AddQuestionModalProps = {
     questionModalOpen: boolean,
     setQuestionModalOpen: Function,
-    nextQuestionId: number,
     questions: any[],
 }
 const ITEM_HEIGHT = 48;
@@ -42,7 +41,7 @@ const MenuProps = {
   },
 };
 const AddQuestionModal = (props: AddQuestionModalProps) => {
-    const { questions, questionModalOpen, setQuestionModalOpen, nextQuestionId } = props;
+    const { questions, questionModalOpen, setQuestionModalOpen } = props;
     //----------------------------------------------------------------//
     //                          HOOKS                                 //
     //----------------------------------------------------------------//
@@ -53,7 +52,6 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
     const [complexity, setComplexity] = useState('');
     const [complexityError, setComplexityError] = useState(false);
     const [category, setCategory] = useState<string[]>([]);
-    const [categoryError, setCategoryError] = useState(false);
     const [createQuestion] = useCreateQuestionMutation();
     //----------------------------------------------------------------//
     //                         HANDLERS                               //
@@ -66,7 +64,6 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
         setTitleError(false);
         setDescriptionError(false);
         setComplexityError(false);
-        setCategoryError(false);
         setTitle('');
         setDescription('');
         setComplexity('');
@@ -78,18 +75,15 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
       setTitleError(!title);
       setDescriptionError(!description);
       setComplexityError(!complexity);
-      setCategoryError(!category.length);
-      if (!title || !description || !complexity || !category) return;
+      if (!title || !description || !complexity) return;
       if (questionTitleExists(title)) {
         setTitleError(true);
-        console.log("ASDOJKASODK")
         toast.error('Question already exists!');
         return;
       }
       const createQuestionPromise = new Promise( async (resolve, reject) => {
         try {
           const res = await createQuestion({
-            questionId: nextQuestionId,
             questionTitle: title,
             questionDescription: description,
             questionCategories: category,
@@ -195,8 +189,6 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
                 <FormControl>
                 <InputLabel
                     id="category-label"
-                    required
-                    error={categoryError}
                   >
                     Category
                   </InputLabel>
@@ -208,7 +200,6 @@ const AddQuestionModal = (props: AddQuestionModalProps) => {
                   onChange={handleCategoryChange}
                   input={<OutlinedInput label="Category" />}
                   MenuProps={MenuProps}
-                  error={categoryError}
                 >
                   {QuestionCategories.map((category) => (
                     <MenuItem
