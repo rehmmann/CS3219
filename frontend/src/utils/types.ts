@@ -1,10 +1,7 @@
 export type QuestionComplexity = 'Easy' | 'Medium' | 'Hard';
 export const QuestionCategories = [
-    'Algorithms',
-    'Arrays',
-    'Bit Manipulation',
-    'Strings',
-    'Data Structures',
+    "Arrays", "Bit Manipulation",
+  "Strings", "Brainteaser", "Data Structures", "Algorithms", "Recursion", "Databases"
 ];
 
 export type QuestionCategory = typeof QuestionCategories[number];

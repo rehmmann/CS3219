@@ -74,7 +74,7 @@ const createUser = (request, response) => {
             console.error('Error executing query:', error);
             return response.status(500).json({ error: 'Internal Server Error' });
         }
-        response.status(201).send(`User added with ID: ${results.rows[0].id}`)
+        return response.status(201).json({message : `User added with ID: ${results.rows[0].id}`})
     })
     
 }
@@ -157,10 +157,39 @@ const deleteUser = (request, response) => {
             console.error('Error executing query:', error);
                 return response.status(500).json({ error: 'Internal Server Error' });
         }
-        response.status(200).send(`User deleted with ID: ${id}`)
+        response.status(200).json({message: `User deleted with ID: ${id}`})
     })
 }
+const checkPassword = (request, response) => {
+    const id = parseInt(request.params.id)
+    const { password} = request.body
+    var salt = '';
 
+    pool.query('SELECT * FROM users WHERE id = $1', [id],  
+    (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            return response.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (results.rows.length == 0) {
+            return response.status(404).json({ error: 'Account not found!'});
+        }
+        salt = results.rows[0].salt;
+        const hashedPassword = checkHash(String(salt), String(password));
+
+        pool.query('SELECT * FROM users WHERE id = $1 AND password = $2', [id, hashedPassword],  
+        (error, results) => {
+            if (error) {
+                console.error('Error executing query:', error);
+                return response.status(500).json({ error: 'Internal Server Error' });
+            }
+            if (results.rows.length == 0) {
+                return response.status(404).json({ error: 'Wrong Password!', results: results.rows, salt: salt, hashedPassword: hashedPassword });
+            }
+            response.status(200).json({message: 'correct'});
+        })
+    });
+}
 const loginUser = (request, response) => {
 
     const {email, password} = request.body
@@ -195,9 +224,6 @@ const loginUser = (request, response) => {
             response.status(200).json(responseBody);
         })
     });
-
-    
-    
 }
 
 module.exports = {
@@ -208,4 +234,5 @@ module.exports = {
   deleteUser,
   loginUser,
   changePassword,
+  checkPassword,
 }

@@ -33,13 +33,10 @@ const Dashboard = () => {
   const [complexity, setComplexity] = useState<QuestionComplexity>('');
   const [questions, setQuestions] = useState([]);
   const { data: questionData }  = useGetQuestionsQuery();
-  const [nextQuestionId, setNextQuestionId] = useState(0);
   const [id, setId] = useState<string>('');
   useEffect(() => {
     if (questionData?.questions) {
-      let nextQuestionIdTemp = 0;
-      const questionsList = map(questionData.questions, q => {
-        nextQuestionIdTemp = Math.max(q.questionId + 1, nextQuestionIdTemp);
+      const questionsList = map(questionData.questions, (q: any) => {
         return {
           id: q.questionId,
           title: q.questionTitle,
@@ -48,7 +45,6 @@ const Dashboard = () => {
           description: q.questionDescription,
         }
       });
-      setNextQuestionId(nextQuestionIdTemp);
       setQuestions(questionsList);
     }
   }, [questionData]);
@@ -79,7 +75,6 @@ const Dashboard = () => {
         questionModalOpen={questionModalOpen}
         setQuestionModalOpen={setQuestionModalOpen}
         questions={questions}
-        nextQuestionId={nextQuestionId}
       />
       <QuestionDetailsModal
         questionDetailsOpen={questionDetailsOpen}

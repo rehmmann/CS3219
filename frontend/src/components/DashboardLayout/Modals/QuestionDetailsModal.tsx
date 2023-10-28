@@ -16,8 +16,10 @@ import { RootState } from '../../../redux/store';
 
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteQuestion, updateQuestion } from '../../../redux/slices/questionSlice';
 import { toast } from 'react-toastify';
+
+import { useDeleteQuestionMutation, useUpdateQuestionMutation } from '../../../redux/api';
+
 type QuestionDetailsModalProps = {
     questionDetailsOpen: boolean,
     title: string,
@@ -56,6 +58,8 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
         setComplexity
     } = props;
     const dispatch = useDispatch();
+    const [deleteQuestion] = useDeleteQuestionMutation();
+    const [updateQuestion] = useUpdateQuestionMutation();
     const questions = useSelector((state: RootState) => state.questions);
     const questionTitleExists = (t: string) => {
       return questions.data.some((question) => question.title.toLowerCase() == t.toLowerCase() && question.id != id);
@@ -64,39 +68,69 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
     const [titleError, setTitleError] = useState(false);
     const [descriptionError, setDescriptionError] = useState(false)
     const [complexityError, setComplexityError] = useState(false);
-    const [categoryError, setCategoryError] = useState(false);
     const handleQuestionDetailsClose = () => {
-      setCategoryError(false);
       setTitleError(false);
       setDescriptionError(false);
       setComplexityError(false);
       questionsDetailsCloseHandler();
     }
     const handleDeleteQuestion = () => {
-      dispatch(deleteQuestion(id))
-      toast.success(`${title} deleted!`)
-      questionsDetailsCloseHandler()
+      const deleteQuestionPromise = new Promise( async (resolve, reject) => {
+        try {
+          const res = await deleteQuestion(id).unwrap();
+          return resolve(res);
+        } catch (error: any) {
+          return reject(error);
+        }
+      });
+      deleteQuestionPromise.then((res: any | null) => {
+        toast.success(`${title} deleted!`)
+        setTitle('');
+        setDescription('');
+        setComplexity('');
+        setCategory([]);
+        questionsDetailsCloseHandler()
+      }).catch((err) => {
+        toast.error(err.data.error);
+      })
     }
     const handleUpdateQuestion = () => {
       setTitleError(!title);
       setDescriptionError(!description);
       setComplexityError(!complexity);
-      setCategoryError(!category.length);
-      if (!title || !description || !complexity || !category) return;
+
+      if (!title || !description || !complexity) return;
       if (questionTitleExists(title)) {
         setTitleError(true);
         toast.error('Question already exists!');
         return;
       }
-      dispatch(updateQuestion({
-        id,
-        title,
-        description,
-        complexity,
-        category,
-      }))
-      toast.success(`${title} updated!`)
-      questionsDetailsCloseHandler();
+      const updateQuestionPromise = new Promise( async (resolve, reject) => {
+        try {
+          const res = await updateQuestion({
+            id,
+            data: {
+              questionTitle: title,
+              questionDescription: description,
+              questionCategories: category,
+              questionComplexity: complexity,
+            }
+          }).unwrap();
+          return resolve(res);
+        } catch (error: any) {
+          return reject(error);
+        }
+      });
+      updateQuestionPromise.then((res: any | null) => {
+        toast.success(`${title} updated!`)
+        setTitle('');
+        setDescription('');
+        setComplexity('');
+        setCategory([]);
+        questionsDetailsCloseHandler()
+      }).catch((err) => {
+        toast.error(err.data.error);
+      })
     }
     const handleCategoryChange = (event: SelectChangeEvent<typeof category>) => {
       const {
@@ -182,12 +216,10 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
             <FormControl>
               <InputLabel
                   id="category-label"
-                  required
                 >
                   Category
               </InputLabel>
               <Select
-                error={categoryError}
                 labelId="Category"
                 id="category"
                 multiple

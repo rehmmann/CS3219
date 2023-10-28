@@ -5,18 +5,20 @@ import { useState } from 'react';
 import {
     FormControl,
     IconButton,
+    Paper,
     Stack,
     TextField,
+    Typography,
 } from '@mui/material';
 
 // Import redux
-import { useCreateUserMutation } from '../../redux/api';
+import { useChangePasswordMutation, useCheckPasswordMutation, useDeleteUserMutation } from '../../redux/api';
 
 // Import toast
 import { toast } from 'react-toastify';
 
-import {User } from '../../utils/types';
-type LoginData = { password: { value: string }, email: { value: string }};
+import { User } from '../../utils/types';
+import { useNavigate } from 'react-router-dom';
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -37,86 +39,101 @@ const textInputStyle = {
         },
       },
   }
-type SignUpFormProps = {
-  setSigningUp: Function
-}
 
-const SignUpForm = (props: SignUpFormProps) => {
-  const { setSigningUp } = props;
+const DeleteAccountForm = () => {
 
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [createUser] = useCreateUserMutation();
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
-  const [email, setEmail] = useState('');
-
+  const navigate = useNavigate();
+  const [areYouSure, setAreYouSure] = useState(false);
+  const [checkPassword] = useCheckPasswordMutation();
+  const [deleteUser] = useDeleteUserMutation();
+  const { id } = JSON.parse(localStorage.getItem('user') || '{}');
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
-  const handleSignUp = () => {
-    // e.preventDefault();
+  const handleDeleteAccount = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setButtonDisabled(true);
     if (password !== retypePassword) {
       toast.error('Passwords do not match!');
       setButtonDisabled(false);
       return;
     }
-    if (password.length < 8) {
-      toast.error('Password must be at least 8 characters long!');
-      setButtonDisabled(false);
-      return;
-    }
-    const createUserPromise = new Promise( async (resolve, reject) => {
+    const checkPasswordPromise = new Promise( async (resolve, reject) => {
       try {
-        const res = await createUser({email, password}).unwrap();
+        const res = await checkPassword({id, password}).unwrap();
+        setButtonDisabled(false);
         return resolve(res);
       } catch (error: any) {
         setButtonDisabled(false);
         return reject(error);
       }
     });
-    createUserPromise.then((res: any | User | null) => {
-      toast.success('Account Successfully Created!');
-      setButtonDisabled(false);
-      setSigningUp(false);
-      return res
+    
+    checkPasswordPromise.then((res: any | User | null) => {
+      const deleteUserPromise = new Promise( async (resolve, reject) => {
+        try {
+          const res = await deleteUser(id).unwrap();
+          setButtonDisabled(false);
+          return resolve(res);
+        } catch (error: any) {
+          setButtonDisabled(false);
+          return reject(error);
+        }
+      });
+      deleteUserPromise.then((res: any | null) => {
+        console.log(":ASDOKASD", res)
+        localStorage.clear();
+        navigate('/login');
+        toast.success('Account Successfully Deleted!');
+      }).catch((err) => {
+        console.log(err)
+        toast.error(err.data.error);
+      })
     }).catch((err) => {
       toast.error(err.data.error);
-      return err
     })
   };
-
+  const handleDeleteButtonClick = () => {
+    if (!password || !retypePassword) {
+      toast.error('Please fill out all fields!');
+      return;
+    }
+    if (password !== retypePassword) {
+      toast.error('Passwords do not match!');
+      return;
+    }
+    setAreYouSure(true);
+  }
   //----------------------------------------------------------------//
   //                          RENDER                                //
   //----------------------------------------------------------------//
   return (
+    <Paper
+      sx={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+      }}
+    >
+    <Stack
+      sx={{
+        width: '40%'
+      }}
+    >
     <form
-      // onSubmit={(e) => handleSignUp(e)}
+      onSubmit={(e) => handleDeleteAccount(e)}
       >
       <FormControl
         sx={{ width: '100%', mt: 10, mb: 10 }}
         variant="standard"
       >
-        <Stack spacing={8}>
-          <TextField
-              id="email"
-              label="Email"
-              type="email"
-              variant='standard'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              sx={textInputStyle}
-              required
-              InputLabelProps={{ required: false, style: { fontFamily: 'Poppins' }}}
-              inputProps={{autoComplete: 'new-password',
-              form: {
-                autoComplete: 'off',
-              },  style: { fontFamily: 'Poppins' }}}
-          >
-          </TextField>
           <TextField
               id="password"
               label="Password"
@@ -148,7 +165,17 @@ const SignUpForm = (props: SignUpFormProps) => {
               inputProps={{style: { fontFamily: 'Poppins' }}}
               InputLabelProps={{ required: false, style: { fontFamily: 'Poppins' }}}
           />
-          <IconButton
+          <Stack
+            sx={{ marginTop: 2}}
+          >
+          {areYouSure ?
+          <Stack
+          >
+            <Typography>
+              Are you REALLY sure?
+            </Typography>
+            <Stack>
+            <IconButton
               sx={{
               color: 'black',
               backgroundColor: '#FFD900',
@@ -165,16 +192,67 @@ const SignUpForm = (props: SignUpFormProps) => {
               fontSize: 13,
               }}
               disabled={buttonDisabled}
-              // type="submit"
+              onClick={() => setAreYouSure(false)}
               disableRipple
-              onClick={handleSignUp}
+            >
+              No
+            </IconButton>
+            <IconButton
+              sx={{
+              color: 'black',
+              backgroundColor: '#FFD900',
+              height: 53,
+              borderRadius: 14,
+              border: '3px solid black',
+              "&:hover": {
+                  color: 'black',
+                  border: '3px solid black',
+              },
+              width: '100%',
+              fontFamily: 'Poppins',
+              fontWeight: 600,
+              fontSize: 13,
+              }}
+              disabled={buttonDisabled}
+              type="submit"
+              disableRipple
+            >
+              Yes
+            </IconButton>
+            </Stack>
+            
+          </Stack> :
+          <IconButton
+            sx={{
+            color: 'black',
+            backgroundColor: '#FFD900',
+            height: 53,
+            borderRadius: 14,
+            border: '3px solid black',
+            "&:hover": {
+                color: 'black',
+                border: '3px solid black',
+            },
+            width: '100%',
+            fontFamily: 'Poppins',
+            fontWeight: 600,
+            fontSize: 13,
+            }}
+            disabled={buttonDisabled}
+            onClick={handleDeleteButtonClick}
+            disableRipple
           >
-              Sign Up
+            Delete Account
           </IconButton>
-        </Stack>
+          }
+                    </Stack>
+
       </FormControl>
     </form>
+    </Stack>
+    </Paper>
+
   );
 }
 
-export default SignUpForm;
+export default DeleteAccountForm;

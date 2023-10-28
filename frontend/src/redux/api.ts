@@ -11,7 +11,6 @@ type UserCredentials = {
   username?: string;
 };
 type QuestionCreateProps = {
-  questionId: number;
   questionTitle: string;
   questionDescription: string;
   questionComplexity: string;
@@ -23,8 +22,23 @@ type ChangePasswordObject = {
     newPassword: string;
   },
   id: string
-
 }
+
+type CheckPasswordObject = {
+  id: string;
+  password: string;
+}
+
+type QuestionUpdateProps = {
+  id: string;
+  data : {
+    questionTitle: string;
+    questionDescription: string;
+    questionComplexity: string;
+    questionCategories: string[];
+  }
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `` }),
   tagTypes: ['Question'],
@@ -50,6 +64,27 @@ export const api = createApi({
       }),
       invalidatesTags: ['Question'],
     }),
+    deleteQuestion: builder.mutation<{ question: any }, string>({
+      query: (id) => ({
+        url: `${QUESTION_URL}/api/questions/${id}`,
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      }),
+      invalidatesTags: ['Question'],
+    }),
+    updateQuestion: builder.mutation<{ question: any }, QuestionUpdateProps>({
+      query: (question) => ({
+        url: `${QUESTION_URL}/api/questions/${question.id}`,
+        method: 'PUT',
+        body: question.data,
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      }),
+      invalidatesTags: ['Question'],
+    }),
     login: builder.mutation<{ token: string; user: User }, UserCredentials>({
       query: (credentials) => ({
         url: `${USER_URL}/users/login`,
@@ -64,11 +99,24 @@ export const api = createApi({
         body: credentials,
       }),
     }),
+    deleteUser: builder.mutation<{ token: string; user: User }, string>({
+      query: (id) => ({
+        url: `${USER_URL}/users/signined/${id}`,
+        method: 'DELETE',
+      }),
+    }),
     changePassword: builder.mutation<{}, ChangePasswordObject>({
       query: (changePasswordObject) => ({
         url: `${USER_URL}/users/change-password/${changePasswordObject.id}`,
         method: 'PUT',
         body: changePasswordObject.passwords,
+      }),
+    }),
+    checkPassword: builder.mutation<{}, CheckPasswordObject>({
+      query: (checkPasswordObject) => ({
+        url: `${USER_URL}/users/check-password/${checkPasswordObject.id}`,
+        method: 'POST',
+        body: { password: checkPasswordObject.password },
       }),
     }),
   }),
@@ -78,6 +126,10 @@ export const {
   useCreateUserMutation,
   useGetQuestionsQuery,
   useCreateQuestionMutation,
+  useUpdateQuestionMutation,
+  useDeleteQuestionMutation,
   useLoginMutation,
   useChangePasswordMutation,
+  useCheckPasswordMutation,
+  useDeleteUserMutation,
 } = api;

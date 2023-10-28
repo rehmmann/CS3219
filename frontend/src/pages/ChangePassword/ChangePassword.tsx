@@ -17,6 +17,7 @@ import { useChangePasswordMutation } from '../../redux/api';
 import { toast } from 'react-toastify';
 
 import { User } from '../../utils/types';
+import { useNavigate } from 'react-router-dom';
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -46,7 +47,7 @@ const ChangePasswordForm = () => {
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-
+  const navigate = useNavigate();
   const [retypePassword, setRetypePassword] = useState('');
   const [changePassword] = useChangePasswordMutation();
   const { id } = JSON.parse(localStorage.getItem('user') || '{}');
@@ -58,6 +59,11 @@ const ChangePasswordForm = () => {
     setButtonDisabled(true);
     if (newPassword !== retypePassword) {
       toast.error('Passwords do not match!');
+      setButtonDisabled(false);
+      return;
+    }
+    if (newPassword == oldPassword) {
+      toast.error('New password cannot be the same as the old password!');
       setButtonDisabled(false);
       return;
     }
@@ -75,6 +81,10 @@ const ChangePasswordForm = () => {
       }
     });
     changePasswordPromise.then((res: any | User | null) => {
+      setNewPassword('');
+      setOldPassword('');
+      setRetypePassword('');
+      navigate('/app/dashboard');
       toast.success('Password changed successfully!');
 
     }).catch((err) => {

@@ -10,4 +10,6 @@ router.post('/users', db.createUser)
 router.put('/users/signedin/:id', db.updateUser)
 router.delete('/users/signined/:id', db.deleteUser)
 router.put('/users/change-password/:id', db.changePassword)
+router.post('/users/check-password/:id', db.checkPassword)
+
 module.exports = router;

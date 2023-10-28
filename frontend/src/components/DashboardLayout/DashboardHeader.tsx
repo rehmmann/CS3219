@@ -50,7 +50,10 @@ const DashboardHeader = () => {
     setAnchorElUser(null);
     navigate("/app/change-password");
   }
-
+  const handleDeleteAccount = () => {
+    setAnchorElUser(null);
+    navigate("/app/delete-account");
+  }
   //----------------------------------------------------------------//
   //                          RENDER                                //
   //----------------------------------------------------------------//
@@ -125,6 +128,9 @@ const DashboardHeader = () => {
               </MenuItem>
               <MenuItem key={"logout"} onClick={handleLogout}>
                 <Typography textAlign="center">{"Log Out"}</Typography>
+              </MenuItem>
+              <MenuItem key={"logout"} onClick={handleDeleteAccount}>
+                <Typography textAlign="center">{"Delete Account"}</Typography>
               </MenuItem>
               {/* ))} */}
             </Menu>

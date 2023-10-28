@@ -6,6 +6,7 @@ import Matchmake from './pages/Matchmake/Matchmake';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import Login from './pages/Login/Login';
 import ChangePasswordForm from './pages/ChangePassword/ChangePassword';
+import DeleteAccountForm from './pages/DeleteAccount/DeleteAccountForm';
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
   const r = [];
@@ -28,6 +29,10 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
           path: 'change-password',
           element: <ChangePasswordForm />,
         },
+        {
+          path: 'delete-account',
+          element: <DeleteAccountForm />
+        }
       ],
     },
     

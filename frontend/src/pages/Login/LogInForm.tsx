@@ -66,7 +66,7 @@ const LogInForm = () => {
       }
     });
     loginPromise.then((res: any | User | null) => {
-        toast.success('Welcome back ' + res.username + '!');
+        toast.success('Welcome back!');
         localStorage.setItem('token', 'dummyToken');
         localStorage.setItem('user', JSON.stringify(res));
         navigate('/app/dashboard');
