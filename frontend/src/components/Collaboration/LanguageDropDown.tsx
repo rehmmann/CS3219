@@ -1,7 +1,7 @@
 import Select from "react-select";
 
 const customStyles = {
-  control: (styles) => ({
+  control: (styles: any) => ({
     ...styles,
     width: "100%",
     maxWidth: "14rem",
@@ -19,7 +19,7 @@ const customStyles = {
       boxShadow: "none",
     },
   }),
-  option: (styles) => {
+  option: (styles: any) => {
     return {
       ...styles,
       color: "#000",
@@ -34,7 +34,7 @@ const customStyles = {
       },
     };
   },
-  menu: (styles) => {
+  menu: (styles: any) => {
     return {
       ...styles,
       backgroundColor: "#fff",
@@ -45,7 +45,7 @@ const customStyles = {
     };
   },
 
-  placeholder: (defaultStyles) => {
+  placeholder: (defaultStyles: any) => {
     return {
       ...defaultStyles,
       color: "#000",
@@ -336,7 +336,8 @@ const languageOptions = [
   },
 ];
 
-const LanguagesDropdown = ({ onSelectChange }) => {
+const LanguagesDropdown = (props: any) => {
+  const { onSelectChange } = props;
   return (
     <Select
       placeholder={`Filter By Category`}

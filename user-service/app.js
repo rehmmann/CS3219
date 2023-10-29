@@ -23,5 +23,5 @@ app.get('/', (request, response) => {
 app.use("/api", routes);
 
 app.listen(port, () => {
-  console.log(`App user service running on port ${port}.`)
+  console.log(`App user service running onasdpccccort ${port}.`)
 })

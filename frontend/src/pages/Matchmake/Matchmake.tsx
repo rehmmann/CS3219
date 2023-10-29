@@ -20,7 +20,7 @@ const Matchmake = () => {
   const dispatch = useDispatch();
 
   const [removeUser, {}] = useRemoveUserMutation();
-  const [checkMatch, { data: checkMatchData }] = useCheckMatchMutation();
+  const [checkMatch] = useCheckMatchMutation();
 
   const isMatchButtonEnabled = useSelector(
     (state: any) => state.isMatching.isMatchButtonEnabled

@@ -27,7 +27,6 @@ import { getAuth, signOut } from "firebase/auth";
 import "./Dashboard.scss";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { set } from "lodash";
 import { firebaseAuth } from "../../utils/firebase";
 
 // const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];

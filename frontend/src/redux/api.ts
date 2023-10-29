@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getAuth } from "firebase/auth";
-
+import { User } from "../utils/types";
 const QUESTION_URL = import.meta.env.VITE_QUESTION_URL;
 const MATCH_URL = import.meta.env.VITE_MATCH_URL;
 const USER_URL = import.meta.env.VITE_USER_URL;
@@ -36,19 +36,6 @@ type RemoveUserProps = {
   topic: string;
   difficulty: string;
 };
-
-type ChangePasswordObject = {
-  passwords: {
-    oldPassword: string;
-    newPassword: string;
-  },
-  id: string
-}
-
-type CheckPasswordObject = {
-  id: string;
-  password: string;
-}
 
 type QuestionUpdateProps = {
   id: string;

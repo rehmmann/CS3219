@@ -101,6 +101,7 @@ const Collaboration = () => {
   }
 
   const handleChangePeerLanguage: OnChange = (value: string | undefined) => {
+    console.log(value);
   }
   const handleEditorChange: OnChange = (value: string | undefined) => {
     if (soc) {
@@ -111,6 +112,7 @@ const Collaboration = () => {
     }
   }
   const handlePeerEditorChange: OnChange = (value: string | undefined) => {
+    console.log(value);
   }
 
   return (

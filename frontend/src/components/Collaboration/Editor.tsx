@@ -15,13 +15,6 @@ const buttonStyle = {
   backgroundColor:'#83DA58', height:'100%'
 };
 
-type languageType = {
-  id: number,
-  name: string,
-  label: string,
-  value: string,
-};
-
 type EditorProps = {
   isMainEditor: boolean,
   handleEditorChange: OnChange,

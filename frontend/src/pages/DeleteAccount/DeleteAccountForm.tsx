@@ -12,13 +12,9 @@ import {
 } from '@mui/material';
 import { reauthenticateWithCredential, getAuth, Auth, AuthCredential, EmailAuthProvider, deleteUser } from "firebase/auth";
 
-// Import redux
-import { useDeleteUserMutation } from '../../redux/api';
-
 // Import toast
 import { toast } from 'react-toastify';
 
-import { User } from '../../utils/types';
 import { useNavigate } from 'react-router-dom';
 import { FirebaseError } from '@firebase/util';
 

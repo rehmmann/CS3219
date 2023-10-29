@@ -1,4 +1,3 @@
-import React from "react";
 import { Stack, Typography } from "@mui/material";
 import Button from '../../components/Button/Button'
 import { useNavigate, useParams } from "react-router-dom";

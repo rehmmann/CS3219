@@ -37,10 +37,18 @@ const ChatBox = (props: ChatType) => {
     <ListItem key={respond.date}>
       <Grid container>
         <Grid item xs={12}>
-          <ListItemText align={respond.userId === currentUser ? "right" : "left"} primary={respond.message}></ListItemText>
+          <ListItemText 
+            sx={{
+              textAlign: respond.userId === currentUser ? "right" : "left",
+            }}
+           primary={respond.message}></ListItemText>
         </Grid>
         <Grid item xs={12}>
-          <ListItemText align={respond.userId === currentUser ? "right" : "left"} secondary={respond.date}></ListItemText>
+          <ListItemText 
+           sx={{
+            textAlign: respond.userId === currentUser ? "right" : "left",
+          }}
+          secondary={respond.date}></ListItemText>
         </Grid>
       </Grid>
     </ListItem>
@@ -65,7 +73,14 @@ const ChatBox = (props: ChatType) => {
               onChange={handleChangeMessage}
             />
           </Grid>
-          <Grid item xs={1} align="right">
+          <Grid
+            item 
+            xs={1} 
+            sx={{
+              textAlign: "right",
+              marginTop: "auto",
+            }}
+          >
             <Fab color="primary" aria-label="add" onClick={handleSendMessage}><SendIcon /></Fab>
           </Grid>
         </Grid>

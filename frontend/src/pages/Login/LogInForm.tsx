@@ -54,7 +54,6 @@ const LogInForm = () => {
     e.preventDefault();
     setButtonDisabled(true);
     signInWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
-      console.log(res);
       setButtonDisabled(false);
       const createUserPromise = new Promise( async (resolve, reject) => {
         try {

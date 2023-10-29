@@ -16,8 +16,6 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
 	id SERIAL,
  	email VARCHAR(254) UNIQUE,
-	firebaseId VARCHAR(254) UNIQUE,
-	PRIMARY KEY (email, firebaseId),
+	firebaseid VARCHAR(254) UNIQUE,
+	PRIMARY KEY (email, firebaseid)
 );
-INSERT INTO users ("email", "firebaseid") VALUES ('tanjianoway+3@gmail.com', 'leHNmbOIHEa2cD0ktmNHHUhBzsG2');
-INSERT INTO users ("email", "firebaseid") VALUES ('tanjianoway+1@gmail.com', 'E6fuI8uWckWIyLswh3tcE4wWAbF2');

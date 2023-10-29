@@ -7,7 +7,6 @@ import Collaboration from './pages/Collaboration/Collaboration';
 import Matchmake from './pages/Matchmake/Matchmake';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import Login from './pages/Login/Login';
-import { is } from 'immer/dist/internal.js';
 import MatchedPage from "./pages/Matchmake/MatchedPage";
 import ChangePasswordForm from './pages/ChangePassword/ChangePassword';
 import DeleteAccountForm from './pages/DeleteAccount/DeleteAccountForm';
