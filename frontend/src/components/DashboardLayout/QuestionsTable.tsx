@@ -146,7 +146,9 @@ const QuestionsTable = (props: QuestionTableProps) => {
                                 disableFocusRipple
                                 disableTouchRipple
                                 disableElevation
-                                onClick={e => handleClickQuestion(e, question)}
+                                onClick={e => {
+                                  handleClickQuestion(e, question)
+                                }}
                               >
                                 {value}
                               </Button>

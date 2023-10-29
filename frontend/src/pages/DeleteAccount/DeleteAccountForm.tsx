@@ -10,15 +10,17 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
+import { reauthenticateWithCredential, getAuth, Auth, AuthCredential, EmailAuthProvider, deleteUser } from "firebase/auth";
 
 // Import redux
-import { useChangePasswordMutation, useCheckPasswordMutation, useDeleteUserMutation } from '../../redux/api';
+import { useDeleteUserMutation } from '../../redux/api';
 
 // Import toast
 import { toast } from 'react-toastify';
 
 import { User } from '../../utils/types';
 import { useNavigate } from 'react-router-dom';
+import { FirebaseError } from '@firebase/util';
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -50,9 +52,7 @@ const DeleteAccountForm = () => {
   const [retypePassword, setRetypePassword] = useState('');
   const navigate = useNavigate();
   const [areYouSure, setAreYouSure] = useState(false);
-  const [checkPassword] = useCheckPasswordMutation();
-  const [deleteUser] = useDeleteUserMutation();
-  const { id } = JSON.parse(localStorage.getItem('user') || '{}');
+  const auth: Auth = getAuth();  
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -63,41 +63,27 @@ const DeleteAccountForm = () => {
       toast.error('Passwords do not match!');
       setButtonDisabled(false);
       return;
-    }
-    const checkPasswordPromise = new Promise( async (resolve, reject) => {
-      try {
-        const res = await checkPassword({id, password}).unwrap();
-        setButtonDisabled(false);
-        return resolve(res);
-      } catch (error: any) {
-        setButtonDisabled(false);
-        return reject(error);
-      }
-    });
-    
-    checkPasswordPromise.then((res: any | User | null) => {
-      const deleteUserPromise = new Promise( async (resolve, reject) => {
-        try {
-          const res = await deleteUser(id).unwrap();
-          setButtonDisabled(false);
-          return resolve(res);
-        } catch (error: any) {
-          setButtonDisabled(false);
-          return reject(error);
-        }
-      });
-      deleteUserPromise.then((res: any | null) => {
-        console.log(":ASDOKASD", res)
-        localStorage.clear();
-        navigate('/login');
-        toast.success('Account Successfully Deleted!');
-      }).catch((err) => {
-        console.log(err)
-        toast.error(err.data.error);
+    } 
+    const credential: AuthCredential = EmailAuthProvider.credential(
+      auth.currentUser?.email || '',
+      password
+    );
+    reauthenticateWithCredential(auth.currentUser!, credential)
+      .then(() => {
+        deleteUser(auth.currentUser!)
+          .then(() => {
+            toast.success('Account deleted successfully!');
+            navigate('/login');
+          })
+          .catch((error: FirebaseError) => {
+            toast.error(error.message);
+            setButtonDisabled(false);
+          });
       })
-    }).catch((err) => {
-      toast.error(err.data.error);
-    })
+      .catch((error: FirebaseError) => {
+        toast.error(error.message);
+        setButtonDisabled(false);
+      });
   };
   const handleDeleteButtonClick = () => {
     if (!password || !retypePassword) {

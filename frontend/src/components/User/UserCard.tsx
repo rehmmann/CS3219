@@ -64,7 +64,11 @@ const UserLogo = (props: UserLogoProps) => {
   );
 };
 
-const UserCard = () => {
+type UserCardProps = {
+  admin: boolean;
+}
+const UserCard = (props: UserCardProps) => {
+  const { admin } = props;
   //----------------------------------------------------------------//
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
@@ -242,6 +246,24 @@ const UserCard = () => {
             >
               Level 10
             </Box>
+            { admin ?
+            <Box
+            sx={{
+              textAlign: "left",
+              fontWeight: 600
+            }}
+          >
+            Admin
+          </Box> : 
+          <Box
+            sx={{
+              textAlign: "left",
+              fontWeight: 600
+            }}
+          >
+            User
+          </Box> 
+            }
           </Stack>
         </Stack>
         <Stack

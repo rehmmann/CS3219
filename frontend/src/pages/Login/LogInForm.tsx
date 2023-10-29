@@ -16,6 +16,7 @@ import { toast } from 'react-toastify';
 // Import firebase
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { firebaseAuth } from '../../utils/firebase';
+import { useCreateUserMutation } from '../../redux/api';
 
 const textInputStyle = {
   "& label.Mui-focused": {
@@ -45,7 +46,7 @@ const LogInForm = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const [createUser] = useCreateUserMutation()
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -55,6 +56,20 @@ const LogInForm = () => {
     signInWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
       console.log(res);
       setButtonDisabled(false);
+      const createUserPromise = new Promise( async (resolve, reject) => {
+        try {
+          const newRes: any = await createUser({firebaseId: res!.user!.uid, email}).unwrap();
+          return resolve(newRes);
+        } catch (error: any) {
+          setButtonDisabled(false);
+          return reject(error);
+        }
+      });
+      createUserPromise.then((res: any | null) => {
+        return res
+      }).catch((err) => {
+        return err
+      })
       navigate('/app/dashboard');
       toast.success('Welcome back!');
 //     const loginPromise = new Promise( async (resolve, reject) => {

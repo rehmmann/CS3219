@@ -14,8 +14,8 @@ app.use(express.json());
 app.options('*', cors())
 app.use("/api", routes);
 
-app.listen(8080, () => {
-  console.log("App Intialised on port 8080");
+app.listen(8050, () => {
+  console.log("App Intialised on port 8050");
 });
 
 

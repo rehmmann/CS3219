@@ -36,12 +36,15 @@ const Dashboard = () => {
   const [category, setCategory] = useState<string[]>([]);
   const [complexity, setComplexity] = useState<QuestionComplexity>(null);
   const [questions, setQuestions] = useState<any[]>([]);
-  getAuth().currentUser?.getIdTokenResult().then((idTokenResult) => {
-    const claims: any = idTokenResult.claims;
-    if (includes(claims?.roles, 'ADMIN')) {
-      setAdmin(true);
-    }
-  })
+  useEffect(() => {
+    getAuth().currentUser?.getIdTokenResult().then((idTokenResult) => {
+      const claims: any = idTokenResult.claims;
+      if (includes(claims?.roles, 'ADMIN')) {
+        setAdmin(true);
+      }
+    })
+  }, [])
+  
   const { data: questionData }  = useGetQuestionsQuery();
   const [id, setId] = useState<string>('');
   useEffect(() => {
@@ -62,7 +65,7 @@ const Dashboard = () => {
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
-  const handleClickQuestion = (e: React.FormEvent, question: Question) => {
+  const handleClickQuestion = (e: any, question: Question) => {
     e.preventDefault();
     setQuestionDetailsOpen(true);
     setTitle(question.title);
@@ -90,6 +93,7 @@ const Dashboard = () => {
           questions={questions}
         />
       }
+      
       <QuestionDetailsModal
         questionDetailsOpen={questionDetailsOpen}
         questionsDetailsCloseHandler={questionsDetailsCloseHandler}
@@ -102,6 +106,8 @@ const Dashboard = () => {
         setDescription={setDescription}
         setComplexity={setComplexity}
         setCategory={setCategory}
+        admin={admin}
+        questions={questions}
       />
       <Stack
         direction={'row'}
@@ -125,7 +131,7 @@ const Dashboard = () => {
             width={'fit-content'}
             spacing={3}
           >
-              <UserCard />
+              <UserCard admin={admin} />
             </Stack>
           <Stack
             direction={'column'}

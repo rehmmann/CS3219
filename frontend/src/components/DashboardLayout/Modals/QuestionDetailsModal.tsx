@@ -12,10 +12,8 @@ import {
 } from '@mui/material';
 import { QuestionComplexity, QuestionCategories } from '../../../utils/types';
 import { SelectChangeEvent } from '@mui/material/Select';
-import { RootState } from '../../../redux/store';
 
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
 import { useDeleteQuestionMutation, useUpdateQuestionMutation } from '../../../redux/api';
@@ -32,6 +30,8 @@ type QuestionDetailsModalProps = {
     setCategory: Function,
     id: string,
     questionsDetailsCloseHandler: Function,
+    admin: boolean,
+    questions: any[],
 }
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -55,19 +55,19 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
         setTitle,
         setDescription,
         setCategory,
-        setComplexity
+        setComplexity,
+        admin,
+        questions
     } = props;
-    const dispatch = useDispatch();
     const [deleteQuestion] = useDeleteQuestionMutation();
     const [updateQuestion] = useUpdateQuestionMutation();
-    const questions = useSelector((state: RootState) => state.questions);
-    const questionTitleExists = (t: string) => {
-      return questions.data.some((question) => question.title.toLowerCase() == t.toLowerCase() && question.id != id);
-    }
-    
     const [titleError, setTitleError] = useState(false);
     const [descriptionError, setDescriptionError] = useState(false)
     const [complexityError, setComplexityError] = useState(false);
+    const questionTitleExists = (t: string) => {
+      return questions.some((question) => question.title.toLowerCase() == t.toLowerCase() && question.id != id);
+    }
+
     const handleQuestionDetailsClose = () => {
       setTitleError(false);
       setDescriptionError(false);
@@ -98,6 +98,7 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
       setTitleError(!title);
       setDescriptionError(!description);
       setComplexityError(!complexity);
+      console.log(title, description, complexity, category)
 
       if (!title || !description || !complexity) return;
       if (questionTitleExists(title)) {
@@ -242,11 +243,12 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
                     </MenuItem>
                   ))}
               </Select>
-              <Stack
-                direction={"row"}
-                padding={2}
-                spacing={2}
-              >
+              {admin &&
+                <Stack
+                  direction={"row"}
+                  padding={2}
+                  spacing={2}
+                >
                 <Button
                   variant="contained"
                   color="error"
@@ -271,6 +273,8 @@ const QuestionDetailsModal = (props: QuestionDetailsModalProps) => {
                   Save
                 </Button>
               </Stack>
+              }
+              
               
             </FormControl>
           </Stack>  

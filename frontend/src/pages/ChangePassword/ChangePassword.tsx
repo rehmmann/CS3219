@@ -11,13 +11,14 @@ import {
 } from '@mui/material';
 
 // Import redux
-import { useChangePasswordMutation } from '../../redux/api';
 
 // Import toast
 import { toast } from 'react-toastify';
+import { reauthenticateWithCredential, getAuth, Auth, AuthCredential, EmailAuthProvider, updatePassword } from "firebase/auth";
 
 import { User } from '../../utils/types';
 import { useNavigate } from 'react-router-dom';
+import { FirebaseError } from '@firebase/util';
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -49,8 +50,8 @@ const ChangePasswordForm = () => {
   const [newPassword, setNewPassword] = useState('');
   const navigate = useNavigate();
   const [retypePassword, setRetypePassword] = useState('');
-  const [changePassword] = useChangePasswordMutation();
   const { id } = JSON.parse(localStorage.getItem('user') || '{}');
+  const auth: Auth = getAuth()
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -67,29 +68,29 @@ const ChangePasswordForm = () => {
       setButtonDisabled(false);
       return;
     }
-    const changePasswordPromise = new Promise( async (resolve, reject) => {
-      try {
-        const res = await changePassword({id, passwords: {
-          oldPassword,
-          newPassword
-        }}).unwrap();
+    if (newPassword.length < 8) {
+      toast.error('New password must be at least 8 characters!');
+      setButtonDisabled(false);
+      return;
+    }
+    const credentials: AuthCredential = EmailAuthProvider.credential(auth!.currentUser!.email!, oldPassword);
+    reauthenticateWithCredential(auth!.currentUser!, credentials).then((res) => {
+      updatePassword(auth!.currentUser!, newPassword).then(() => {
+        toast.success("Password changed successfully!");
         setButtonDisabled(false);
-        return resolve(res);
-      } catch (error: any) {
+        navigate('/app/dashboard', { replace: true });
+      }).catch((err: FirebaseError) => {
+        console.log(err.message)
+        toast.error("Something went wrong!");
         setButtonDisabled(false);
-        return reject(error);
-      }
+        return;
+      });
+    }).catch((err: FirebaseError) => {
+      console.log(err.message)
+      toast.error(err.message);
+      setButtonDisabled(false);
+      return;
     });
-    changePasswordPromise.then((res: any | User | null) => {
-      setNewPassword('');
-      setOldPassword('');
-      setRetypePassword('');
-      navigate('/app/dashboard');
-      toast.success('Password changed successfully!');
-
-    }).catch((err) => {
-      toast.error(err.data.error);
-    })
   };
 
   //----------------------------------------------------------------//

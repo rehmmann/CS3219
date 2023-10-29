@@ -15,6 +15,7 @@ import { toast } from 'react-toastify';
 // Import firebase
 import { firebaseAuth,  } from '../../utils/firebase';
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useCreateUserMutation } from '../../redux/api';
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -46,6 +47,7 @@ const SignUpForm = (props: SignUpFormProps) => {
   //----------------------------------------------------------------//
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [createUser] = useCreateUserMutation();
+  
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
   const [email, setEmail] = useState('');
@@ -61,39 +63,34 @@ const SignUpForm = (props: SignUpFormProps) => {
       setButtonDisabled(false);
       return;
     }
-    createUserWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
-      console.log(res);
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters long!');
+      setButtonDisabled(false);
+      return;
+    }
+    createUserWithEmailAndPassword(firebaseAuth, email, password).then((res:any) => {
       setSigningUp(false);
       setButtonDisabled(false);
+      const createUserPromise = new Promise( async (resolve, reject) => {
+        try {
+          const newRes: any = await createUser({firebaseId: res!.user!.uid, email}).unwrap();
+          return resolve(newRes);
+        } catch (error: any) {
+          setButtonDisabled(false);
+          return reject(error);
+        }
+      });
+      createUserPromise.then((res: any | null) => {
+        return res
+      }).catch((err) => {
+        return err
+      })
       toast.success('Account Successfully Created!');
     }).catch((err) => {
       console.error(err);
       toast.error("Email is already in use!");
       setButtonDisabled(false);
     });
-<!--     if (password.length < 8) {
-      toast.error('Password must be at least 8 characters long!');
-      setButtonDisabled(false);
-      return;
-    }
-    const createUserPromise = new Promise( async (resolve, reject) => {
-      try {
-        const res = await createUser({email, password}).unwrap();
-        return resolve(res);
-      } catch (error: any) {
-        setButtonDisabled(false);
-        return reject(error);
-      }
-    });
-    createUserPromise.then((res: any | User | null) => {
-      toast.success('Account Successfully Created!');
-      setButtonDisabled(false);
-      setSigningUp(false);
-      return res
-    }).catch((err) => {
-      toast.error(err.data.error);
-      return err
-    }) -->
   };
 
   //----------------------------------------------------------------//
@@ -101,7 +98,6 @@ const SignUpForm = (props: SignUpFormProps) => {
   //----------------------------------------------------------------//
   return (
     <form
-      // onSubmit={(e) => handleSignUp(e)}
       >
       <FormControl
         sx={{ width: '100%', mt: 10, mb: 10 }}

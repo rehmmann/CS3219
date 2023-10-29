@@ -14,6 +14,10 @@ export async function createQuestion(req, res) {
     { questionId: 1 },
     { sort: { questionId: -1 } }
   );
+  const duplicateQuestion = await Question.findOne({questionTitle: req.body.questionTitle})
+  if (duplicateQuestion) {
+    return res.status(409).json({ message: "Question already exists" });
+  }
 
   let newQuestionId = 1; // Default value if no questions are found
 
@@ -179,26 +183,42 @@ export const getQuestionById = async (req, res) => {
 export const updateQuestion = async (req, res) => {
   const { id } = req.params;
   const { questionTitle, questionCategories, questionComplexity, questionDescription } = req.body;
-  Question.updateOne({ questionId: Number(id) }, { questionTitle, questionCategories, questionComplexity, questionDescription })
+  
+  const duplicateQuestion = await Question.findOne({questionTitle: req.body.questionTitle})
+  if (duplicateQuestion && duplicateQuestion.questionId != Number(id)) {
+    return res.status(409).json({ message: "Question title exists" });
+  }
+  Question.findOne({ questionId: Number(id) })
     .then((result) => {
-      if (result.modifiedCount == 1) {
-        res.json({ 
-          message: "Question Updates",
-          data: { 
-            questionTitle, 
-            questionCategories, 
-            questionComplexity,
-            questionDescription 
-          }
-        });
-      } else if (result.modifiedCount == 0) {
-        res.status(404).send({ message: "Question Not Found" });
+      if (!result) {
+        return res.status(404).json({ message: "Question Not Found" })
       } else {
-        res.status(520).send({ message: "Unknown Error" });
+        Question.updateOne({ questionId: Number(id) }, { questionTitle, questionCategories, questionComplexity, questionDescription })
+        .then((result) => {
+          if (result.modifiedCount == 1) {
+            res.json({ 
+              message: "Question Updated",
+              data: { 
+                questionTitle, 
+                questionCategories, 
+                questionComplexity,
+                questionDescription 
+              }
+            });
+          } else if (result.modifiedCount == 0) {
+            res.status(304).send({ message: "No change" });
+          } else {
+            res.status(520).send({ message: "Unknown Error" });
+          }
+        })
+        .catch((err) => {
+          res.status(500).send(err);
+        });
       }
     })
     .catch((err) => {
-      res.status(500).send(err);
+      return res.status(500).send(err);
     });
+ 
 };
 
