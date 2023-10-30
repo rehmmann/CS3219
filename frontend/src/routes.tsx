@@ -10,9 +10,9 @@ import Login from './pages/Login/Login';
 import MatchedPage from "./pages/Matchmake/MatchedPage";
 import ChangePasswordForm from './pages/ChangePassword/ChangePassword';
 import DeleteAccountForm from './pages/DeleteAccount/DeleteAccountForm';
+import { Typography } from "@mui/material";
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
-  console.log("isMatching", isMatching);
   const r = [];
   const loggedInRoutes = [
     {
@@ -44,10 +44,30 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
         }
       ],
     },
-    
     {
       path: "login",
       element: !isLoggedIn ? <Login /> : <Navigate to="/app/dashboard" />,
+    },
+    {
+      path: "*",
+      element: isLoggedIn ? (
+        <div>
+          <DashboardLayout/>
+          <Typography
+            variant={"h1"}
+            sx={{
+              fontFamily: "Poppins",
+              fontWeight: 600,
+              textAlign: "center",
+              marginTop: 5,
+            }}
+          >
+            404 Not Found
+          </Typography>
+        </div>
+      ) : (
+        <Navigate to="/login" />
+      ),
     },
     {
       path: "",

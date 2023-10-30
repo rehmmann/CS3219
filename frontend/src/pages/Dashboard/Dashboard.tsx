@@ -14,6 +14,7 @@ import AddQuestionModal from '../../components/DashboardLayout/Modals/AddQuestio
 import QuestionDetailsModal from '../../components/DashboardLayout/Modals/QuestionDetailsModal';
 import QuestionsTable from '../../components/DashboardLayout/QuestionsTable';
 import UserCard from '../../components/User/UserCard';
+import LinksCard from '../../components/User/LinksCard';
 
 // Import utils
 import { includes, map } from 'lodash';
@@ -132,6 +133,7 @@ const Dashboard = () => {
             spacing={3}
           >
               <UserCard admin={admin} />
+              <LinksCard />
             </Stack>
           <Stack
             direction={'column'}

@@ -16,12 +16,8 @@ app.use(
   })
 )
 
-app.get('/', (request, response) => {
-  response.json({ info: 'Node.js, Express, and Postgres API backend' })
-})
-
 app.use("/api", routes);
 
 app.listen(port, () => {
-  console.log(`App user service running onasdpccccort ${port}.`)
+  console.log(`App user service running on port ${port}.`)
 })
