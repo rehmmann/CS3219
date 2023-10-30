@@ -72,9 +72,9 @@ const Editor = (props: EditorProps) => {
     }
   );
   useEffect(() => {
-    console.log("SUBMISSION DATA", submissionData)
-    if (submissionData) {
-      setSavedCode(submissionData.code);
+    const typeCastedSubmissionData = submissionData as any;
+    if (typeCastedSubmissionData) {
+      setSavedCode(typeCastedSubmissionData.code);
     }
   }, [submissionData])
 
@@ -108,7 +108,6 @@ const Editor = (props: EditorProps) => {
     if (setInitialCode && setCode && savedCode) {
       setInitialCode(savedCode);
       setCode(savedCode);
-      // setCode(initialCode);
       toast.success('Code restored successfully!');
     } else {
       toast.error('No saved code found');

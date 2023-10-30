@@ -11,6 +11,7 @@ import MatchedPage from "./pages/Matchmake/MatchedPage";
 import ChangePasswordForm from './pages/ChangePassword/ChangePassword';
 import DeleteAccountForm from './pages/DeleteAccount/DeleteAccountForm';
 import { Typography } from "@mui/material";
+import History from "./pages/History/History";
 
 const routes = (isLoggedIn: boolean, isMatching: boolean) => {
   const r = [];
@@ -41,6 +42,10 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
         {
           path: 'delete-account',
           element: <DeleteAccountForm />
+        },
+        {
+          path: 'history',
+          element: <History />
         }
       ],
     },

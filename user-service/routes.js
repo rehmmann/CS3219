@@ -114,8 +114,8 @@ router.put(
 );
 
 router.get(
-    '/submissions',
-    guard(['ADMIN']),
+    '/submissions/:id',
+    guardByIdOrRoles(['ADMIN']),
     submissionsDb.getSubmissions
 );
 router.get(
