@@ -47,6 +47,20 @@ type QuestionUpdateProps = {
   }
 }
 
+type UpdateSubmissionProps = {
+  uid: string,
+  questionId: number,
+  languageId: number, 
+  code: string
+}
+
+type GetSubmissionProps = {
+  uid: string,
+  questionId: number,
+  languageId: number, 
+}
+
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: ``,
@@ -58,7 +72,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Question", "Match"],
+  tagTypes: ["Question", "Match", "Submission"],
   endpoints: (builder) => ({
     getQuestions: builder.query<{ questions: any[] }, void>({
       query: () => ({
@@ -136,6 +150,28 @@ export const api = createApi({
         method: 'DELETE',
       }),
     }),
+    getAllSubmissions: builder.query<{ submissions: any[] }, void>({
+      query: () => ({
+        url: `${USER_URL}/submissions/${getAuth().currentUser?.uid})}`,
+        method: 'GET',
+      }),
+      providesTags: ["Submission"],
+    }),
+    getSubmission: builder.query<{ submission: any }, GetSubmissionProps>({
+      query: (query) => ({
+        url: `${USER_URL}/submissions/${query.uid}/${query.questionId}/${query.languageId}`,
+        method: 'GET',
+      }),
+      providesTags: ["Submission"],
+    }),
+    updateSubmission: builder.mutation<{ }, UpdateSubmissionProps>({
+      query: (query) => ({
+        url: `${USER_URL}/submissions/${query.uid}`,
+        method: 'PUT',
+        body: query,
+      }),
+      invalidatesTags: ["Submission"],
+    }),
   }),
 });
 
@@ -150,4 +186,7 @@ export const {
   useLoginMutation,
   useCreateUserMutation,
   useDeleteUserMutation,
+  useUpdateSubmissionMutation,
+  useGetSubmissionQuery,
+  useGetAllSubmissionsQuery,
 } = api;

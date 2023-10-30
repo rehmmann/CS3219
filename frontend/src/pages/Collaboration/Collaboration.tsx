@@ -37,6 +37,7 @@ const Collaboration = () => {
   const { data: questionsData }  = useGetQuestionsQuery();
   
   const [code, setCode] = useState<string>("");
+  const [initialCode, setInitialCode] = useState<string>("");
   const [peerCode, setPeerCode] = useState<string>("");
   const [language, setLanguage] = useState<string>("javascript");
   const [peerLanguage, setPeerLanguage] = useState<string>("javascript");
@@ -60,6 +61,7 @@ const Collaboration = () => {
       setPeerLanguage(room.code[otherUserId].language);
       setMessages(room.messages);
       setLanguage(room.code[userId].language);
+      setInitialCode(room.code[userId].code);
       setCode(room.code[userId].code);
       if (joiningUserId !== userId) {
         console.log("user joined room", joiningUserId, room);
@@ -79,6 +81,8 @@ const Collaboration = () => {
     soc.on(ServerEvents.CODE, (data) => {
       if (data.userId === otherUserId) {
         setPeerCode(data.code[otherUserId].code);
+      } else {
+        setCode(data.code[userId].code);
       }
     })
     soc.on(ServerEvents.MESSAGE, (data) => {
@@ -91,11 +95,11 @@ const Collaboration = () => {
     });
   }
 
-  const handleChangeLanguage: OnChange = (value: string | undefined) => {
+  const handleChangeLanguage: OnChange = (value: any | undefined) => {
     if (soc) {
       soc.emit(ClientEvents.LANGUAGE, {
         roomId,
-        language: value,
+        language: value!.value,
       });
     }
   }
@@ -104,6 +108,7 @@ const Collaboration = () => {
     console.log(value);
   }
   const handleEditorChange: OnChange = (value: string | undefined) => {
+    setCode(value || "");
     if (soc) {
       soc.emit(ClientEvents.CODE, {
         roomId,
@@ -123,10 +128,13 @@ const Collaboration = () => {
             <div className="editor_container">
               <Editor 
                 code={code}
+                initialCode={initialCode}
                 language={language}
                 isMainEditor={true}
                 handleChangeLanguage={handleChangeLanguage}
                 handleEditorChange={handleEditorChange}
+                setInitialCode={setInitialCode}
+                setCode={setCode}
               />
               <Editor 
                 isMainEditor={false}
@@ -134,6 +142,9 @@ const Collaboration = () => {
                 language={peerLanguage}
                 handleChangeLanguage={handleChangePeerLanguage}
                 handleEditorChange={handlePeerEditorChange}
+                initialCode=""
+                setInitialCode={() => {}}
+                setCode={() => {}}
               />
             </div>
           <ChatBox roomId={roomId} conversation={messages} currentUser={userId}/>
