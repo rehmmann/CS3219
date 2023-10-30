@@ -41,7 +41,9 @@ const History = () => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const {data: questions } = useGetQuestionsQuery();
   const [code, setCode] = useState<string | undefined>(undefined);
-  const [languageValue, setLanguageValue] = useState<number | undefined>(undefined);
+  const [languageValue, setLanguageValue] = useState<string | undefined>(undefined);
+  const [languageLabel, setLanguageLabel] = useState<string | undefined>(undefined);
+  const [title, setTitle] = useState<string | undefined>(undefined);
   const getTime = (date: string) => {
     const d = new Date(date)
     const localeString = d.toLocaleString('en', {timeZone: 'Asia/Hong_Kong'});
@@ -89,26 +91,6 @@ const History = () => {
     }
   }, [submissionData, questionsDict])
   
-  // const submissions: any[] = [
-  //   {
-  //     id: 1,
-  //     title: 'Hello World',
-  //     category: 'Sorting',
-  //     complexity: 'Easy',
-  //     language: 'Python',
-  //     date: '10/10/2021',
-  //     code: "hello world",
-  //   },
-  //   {
-  //     id: 2,
-  //     title: 'Hello World2',
-  //     category: 'Sorting',
-  //     complexity: 'Easy',
-  //     language: 'Python',
-  //     date: '10/10/2021',
-  //     code: "hello world",
-  //   },
-  // ]
   let counter = 0
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -129,6 +111,8 @@ const History = () => {
       setSubmissionDetailsModalOpen(true);
       setCode(submission.code);
       setLanguageValue(submission.languageValue);
+      setTitle(submission.title);
+      setLanguageLabel(submission.language)
     }
     const sortedData = submissions.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
     return (
@@ -138,6 +122,8 @@ const History = () => {
         setSubmissionDetailsModalOpen={setSubmissionDetailsModalOpen}
         code={code}
         language={languageValue}
+        languageLabel={languageLabel}
+        title={title}
       />
       <div
         style={{

@@ -5,10 +5,19 @@ type SubmissionDetailsModalProps = {
   submissionDetailsModalOpen: boolean,
   setSubmissionDetailsModalOpen: Function,
   code: string | undefined,
-  language: string | undefined
+  language: string | undefined,
+  title: string | undefined,
+  languageLabel: string | undefined,
 }
 const SubmissionDetailsModal = (props: SubmissionDetailsModalProps) => {
-  const { submissionDetailsModalOpen, setSubmissionDetailsModalOpen, code, language} = props;
+  const {
+    submissionDetailsModalOpen,
+    setSubmissionDetailsModalOpen,
+    code,
+    language,
+    title,
+    languageLabel,
+  } = props;
   const handleSubmissionDetailsModalOpen = () => {
     setSubmissionDetailsModalOpen(false);
 }
@@ -34,9 +43,28 @@ const SubmissionDetailsModal = (props: SubmissionDetailsModalProps) => {
           }}
           component="form"
         >
-          <Stack>
-            <Typography>
-              Code
+          <Stack
+            spacing={3}
+          >
+            <Typography
+              variant={"h5"}
+              sx={{
+                fontFamily: "Poppins",
+                fontWeight: 600,
+                textAlign: "center",
+              }}
+            >
+              {title}
+            </Typography>
+            <Typography
+              // variant={"h2"}
+              sx={{
+                fontFamily: "Poppins",
+                fontWeight: 600,
+                textAlign: "center",
+              }}
+            >
+              {languageLabel}
             </Typography>
             <Editor
               height='40vh'
