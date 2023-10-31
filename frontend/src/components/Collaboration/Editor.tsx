@@ -4,12 +4,16 @@ import LanguageDropDown from './LanguageDropDown';
 import Button from '../../components/Button/Button';
 import Box from '@mui/material/Box';
 
+import { codeOutputType } from "../../utils/types";
+
 import './Editor.scss';
 import { useParams } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import { useGetSubmissionQuery, useUpdateSubmissionMutation } from "../../redux/api";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
+
+import axios from 'axios';
 
 const buttonStyle = {
   fontSize: "0.8rem", 
@@ -39,10 +43,21 @@ const languageOptions: any = {
   "c": 50,
   "cpp": 54,
 }
+const header = {
+  headers: {
+    "X-Auth-Token": import.meta.env.VITE_JUDGE0_API_KEY,
+    "content-type": "application/json",
+  }
+};
+function timeout(delay: number) {
+  return new Promise( res => setTimeout(res, delay) );
+}
+
 type EditorProps = {
   isMainEditor: boolean,
   handleEditorChange: OnChange,
   handleChangeLanguage: OnChange,
+  handleTerminalOutput: (output: codeOutputType) => void,
   code: string,
   language: string,
   initialCode: string | undefined,
@@ -57,6 +72,7 @@ const Editor = (props: EditorProps) => {
     language,
     handleEditorChange,
     handleChangeLanguage,
+    handleTerminalOutput,
     initialCode,
     setInitialCode,
     setCode,
@@ -78,8 +94,22 @@ const Editor = (props: EditorProps) => {
     }
   }, [submissionData])
 
-  const handleSubmitCode = () => {
-    console.log("SAD", code);
+  
+
+  const handleSubmitCode = async () => {
+    let status = 1;
+    const { data } = await axios.post('http://34.146.135.64/submissions/', {
+      source_code: code,
+      language_id: languageOptions[language],
+    }, header);
+
+    while (status == 1) {
+      await axios.get('http://34.146.135.64/submissions/' + data.token, header).then((res) => {
+        status = res.data.status.id;
+        status != 1 && handleTerminalOutput(res.data);
+      });
+      await timeout(500);
+    }
   };
 
   const handleSaveCode = () => {
