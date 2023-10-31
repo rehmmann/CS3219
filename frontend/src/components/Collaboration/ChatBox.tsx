@@ -81,7 +81,7 @@ const ChatBox = (props: ChatType) => {
               marginTop: "auto",
             }}
           >
-            <Fab color="primary" aria-label="add" onClick={handleSendMessage}><SendIcon /></Fab>
+            <Fab sx={{backgroundColor: '#FFD900', '&:hover': {backgroundColor:'#FFD900'}}} aria-label="add" onClick={handleSendMessage}><SendIcon /></Fab>
           </Grid>
         </Grid>
       </Grid>
