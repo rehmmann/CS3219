@@ -73,3 +73,14 @@ export type UpdateQuestion = {
     category: QuestionCategory[];
     complexity: QuestionComplexity;
 }
+
+export type codeOutputType = {
+    compile_output: string,
+    memory: number,
+    message: string,
+    status: {id: number, description: string},
+    stderr: string,
+    stdout: string,
+    time: string,
+    token: string,
+}
