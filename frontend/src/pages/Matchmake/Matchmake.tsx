@@ -8,7 +8,7 @@ import Loading from "../../components/Loading/Loading";
 import { useRemoveUserMutation, useCheckMatchMutation } from "../../redux/api";
 // Import MUI
 import { Box } from "@mui/material";
- 
+
 // Import style
 import "./Matchmake.scss";
 import { useEffect, useState } from "react";
@@ -38,7 +38,7 @@ const Matchmake = () => {
       if (user) {
         // User is signed in. Get the user's email and token.
         const email = user?.email;
-        setUserToken(user.uid)
+        setUserToken(user.uid);
         setUserEmail(email);
       } else {
         // User is signed out.
@@ -81,9 +81,9 @@ const Matchmake = () => {
           if (jsonString.includes("Not Matched")) {
             console.log("No match yet!");
           } else {
-            console.log(res.data)
-            const otherUserId = res?.data?.matched_user?.matchedId
-            const questionId = res?.data?.matched_user?.questionId
+            console.log(res.data);
+            const otherUserId = res?.data?.matched_user?.matchedId;
+            const questionId = res?.data?.matched_user?.questionId;
             if (otherUserId && questionId) {
               clearInterval(intervalRef.current);
               isMatchActive.current = false;
@@ -97,7 +97,6 @@ const Matchmake = () => {
               navigate(`/app/matched/`);
               toast.success("Match Found!");
             }
-
           }
         }
       });
@@ -106,16 +105,26 @@ const Matchmake = () => {
 
       if (iterations >= 12) {
         // Stop the interval after 1 minute
-        clearInterval(intervalRef.current);
-        isMatchActive.current = false;
+        handleCancel();
+        toast.error("No match found :(");
       }
     }, 5000); //5 seconds
   };
 
-  // useEffect(() => {
-  //   // Invoke the function when the component is rendered.
-  //   checkForMatchPeriodically();
-  // }, []);
+  const handleCancel = () => {
+    clearInterval(intervalRef.current);
+    isMatchActive.current = false;
+    removeUser({
+      id: userToken ? userToken : "",
+      email: userEmail ? userEmail : "",
+      topic: "",
+      difficulty: "Easy",
+    }).then((res) => {
+      console.log("Trying to remove");
+      console.log(res);
+    });
+    dispatch(initMatch(false));
+  };
 
   return (
     <Box className="matchmake_background">
@@ -128,18 +137,7 @@ const Matchmake = () => {
           title={"Cancel"}
           buttonStatus={isMatchButtonEnabled}
           event={() => {
-            clearInterval(intervalRef.current);
-            isMatchActive.current = false;
-            removeUser({
-              id: userToken ? userToken : "",
-              email: userEmail ? userEmail : "",
-              topic: "",
-              difficulty: "Easy",
-            }).then((res) => {
-              console.log("Trying to remove");
-              console.log(res);
-            });
-            dispatch(initMatch(false));
+            handleCancel();
           }}
           style={{ fontSize: 18, width: 110 }}
         />
