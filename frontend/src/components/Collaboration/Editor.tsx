@@ -23,6 +23,7 @@ const buttonStyle = {
   borderRadius: "5px", 
   height:'100%',
   width: '76px',
+  margin: '0 .5rem',
 };
 const submitButtonStyle = {
   ...buttonStyle,
@@ -150,9 +151,11 @@ const Editor = (props: EditorProps) => {
         isMainEditor && 
         <Box className="editor_toolbar_container">
           <LanguageDropDown onSelectChange={handleChangeLanguage}/>
-          <Button title={'Restore'} event={handleRestoreCode} style={restoreButtonStyle}/>
-          <Button title={'Save'} event={handleSaveCode} style={saveButtonStyle}/>
-          <Button title={'Submit'} event={handleSubmitCode} style={submitButtonStyle}/>
+          <Box style={{height:'70%'}}>
+            <Button title={'Restore'} event={handleRestoreCode} style={restoreButtonStyle}/>
+            <Button title={'Save'} event={handleSaveCode} style={saveButtonStyle}/>
+            <Button title={'Submit'} event={handleSubmitCode} style={submitButtonStyle}/>
+          </Box>
         </Box>
       }
       <MonacoEditor
