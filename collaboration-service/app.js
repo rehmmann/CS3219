@@ -10,6 +10,7 @@ import { ClientErrors, ClientEvents, ServerEvents } from "./utils/constants.js";
 import { validateToken } from "./utils/firebase.js";
 import { clientJoinRoom } from "./controllers/clientJoinRoom.js";
 import { clientLeaveRoom } from "./controllers/clientLeaveRoom.js";
+import { clientChangeQuestion } from "./controllers/clientChangeQuestion.js";
 import admin from 'firebase-admin';
 import serviceAccount from "./serviceAccount.json" assert { type: "json" };
 import { clientGetRoom } from "./controllers/clientGetRoom.js";
@@ -65,6 +66,7 @@ const connection = async (socket) => {
     clientSendMessage(io, socket, redis, userId);
     clientUpdateCode(io, socket, redis, userId);
     clientUpdateLanguage(io, socket, redis, userId);
+    clientChangeQuestion(io, socket, redis, userId);
     socket.on('disconnect', () => { 
         console.log("User " + userId + " disconnected")
     })
