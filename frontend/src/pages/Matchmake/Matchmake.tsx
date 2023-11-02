@@ -148,14 +148,14 @@ const Matchmake = () => {
         <CountdownCircleTimer
           isPlaying
           duration={60}
-          colors={["#FFD800", "#FFD800", "#FFF8D8", "#FFF8D8"]}
+          colors={["#FFD800", "#FFE333", "#FFEC66", "#FFF8D8"]}
           colorsTime={[7, 5, 2, 0]}
           size={180}
         >
           {({ remainingTime }) => (
             <div>
               <h2 style={{ fontWeight: "bold" }}>{remainingTime} </h2>
-              <h3>seconds</h3>
+              <h3>Seconds</h3>
             </div>
           )}
         </CountdownCircleTimer>
