@@ -147,7 +147,6 @@ const Collaboration = () => {
         return (
         <div style={{height:'100%', display:'flex', flexDirection:'column', justifyContent:'space-between'}}>
           <Terminal output={codeOutput}/>
-          <Terminal output={null}/>
         </div>);
       default:
         return <></>;
