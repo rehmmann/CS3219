@@ -105,7 +105,7 @@ const Matchmake = () => {
 
       iterations++;
 
-      if (iterations >= 2) {
+      if (iterations >= 12) {
         // Stop the interval after 1 minute
         handleCancel();
         toast.error("No match found :(");
@@ -129,18 +129,35 @@ const Matchmake = () => {
   };
 
   return (
-    <Box className="matchmake_background">
-      <Box className="matchmake_container">
+    <Box
+      className="matchmake_background"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Box
+        className="matchmake_container"
+        sx={{
+          height: "80%",
+        }}
+      >
         <h1 style={{ fontWeight: "bold" }}>
           Please wait while <br /> we find you a match
         </h1>
         <CountdownCircleTimer
           isPlaying
-          duration={10}
+          duration={60}
           colors={["#FFD800", "#FFD800", "#FFF8D8", "#FFF8D8"]}
           colorsTime={[7, 5, 2, 0]}
+          size={180}
         >
-          {({ remainingTime }) => remainingTime}
+          {({ remainingTime }) => (
+            <div>
+              <h2 style={{ fontWeight: "bold" }}>{remainingTime} </h2>
+              <h3>seconds</h3>
+            </div>
+          )}
         </CountdownCircleTimer>
         <Loading />
         <Button
