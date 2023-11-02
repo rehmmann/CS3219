@@ -62,11 +62,18 @@ const ChatBox = (props: ChatType) => {
           <Grid item xs={10}>
             <TextField 
               sx={{
-                '& .Mui-focused': {
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: `#FFD900`,
-                  }
-              }}}
+                "& .MuiOutlinedInput-root":{
+                  borderRadius: '1rem',
+                  '&:hover fieldset': {
+                    borderColor: '#B89C00',
+                    transition: '200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#FFD900',
+                    transition: '200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms'
+                  },
+                }
+              }}
               id="outlined-basic-email" 
               value={message} 
               label="" 
