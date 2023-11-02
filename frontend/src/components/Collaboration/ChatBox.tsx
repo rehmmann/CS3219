@@ -46,6 +46,11 @@ const ChatBox = (props: ChatType) => {
   const handleChangeMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
   }
+  const handleEnterKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSendMessage();
+    }
+  }
   return (
     <div className="chat_container">
       <Grid container className="chat_grid_container">
@@ -66,6 +71,7 @@ const ChatBox = (props: ChatType) => {
               value={message} 
               label="" 
               fullWidth 
+              onKeyDown={handleEnterKeyDown}
               onChange={handleChangeMessage}
             />
           </Grid>
