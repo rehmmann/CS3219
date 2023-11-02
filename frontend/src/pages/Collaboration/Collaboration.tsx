@@ -156,9 +156,9 @@ const Collaboration = () => {
 
   return (
     <div className="collaboration_container">
-      { questionId && otherUserId && question ?
+      {questionId && otherUserId && question ? 
         <>
-        <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question.questionDescription}/>
+        <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question?.questionDescription}/>
           <div className="editor_container">
             <Editor 
               code={code}
@@ -191,7 +191,7 @@ const Collaboration = () => {
               textColor='inherit' 
               sx={{
                 height: 33, 
-                '& .MuiButtonBase-root': { fontWeight:'700' }, 
+                '& .MuiButtonBase-root': { fontWeight:'700', color:'grey' }, 
                 '& .MuiTabs-indicator': {backgroundColor: '#FFD900'}, 
                 '& .Mui-selected': {color: '#FFD900'}
               }}
