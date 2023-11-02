@@ -27,7 +27,7 @@ const guard = (roles) => {
         try {
             const idToken = req.headers.authorization.split(' ')[1];
             const decodedToken = await firebaseApp.auth().verifyIdToken(idToken);
-            console.log("reached")
+            console.log(roles.length)
             if (roles.length === 0) {
                 next();
             } else {
