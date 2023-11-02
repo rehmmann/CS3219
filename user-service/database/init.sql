@@ -28,5 +28,5 @@ CREATE TABLE submissions (
    languageid INTEGER,
    code TEXT,
    updated_at TIMESTAMP DEFAULT NOW(),
-   PRIMARY KEY (firebaseid, questionid, language)
+   PRIMARY KEY (firebaseid, questionid, languageid)
 );
