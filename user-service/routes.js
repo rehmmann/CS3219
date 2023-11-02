@@ -23,27 +23,27 @@ const firebaseApp = admin.initializeApp({
 });
 
 const guard = (roles) => {
-return async (req, res, next) => {
-    try {
-        const idToken = req.headers.authorization.split(' ')[1];
-        const decodedToken = await firebaseApp.auth().verifyIdToken(idToken);
-        console.log("reached")
-        if (roles.length === 0) {
-            next();
-        } else {
-            const userRoles = decodedToken.roles;
-            if (!userRoles) throw new Error('Unauthorized');
-            roles.forEach(role => {
-            if (!userRoles.includes(role)) {
-                throw new Error('Unauthorized');
-            }
-            });
-            next();
-        }  
-    } catch (err) {
-        res.status(401).send('Unauthorized');
-    }
-};
+    return async (req, res, next) => {
+        try {
+            const idToken = req.headers.authorization.split(' ')[1];
+            const decodedToken = await firebaseApp.auth().verifyIdToken(idToken);
+            console.log("reached")
+            if (roles.length === 0) {
+                next();
+            } else {
+                const userRoles = decodedToken.roles;
+                if (!userRoles) throw new Error('Unauthorized');
+                roles.forEach(role => {
+                if (!userRoles.includes(role)) {
+                    throw new Error('Unauthorized');
+                }
+                });
+                next();
+            }  
+        } catch (err) {
+            res.status(401).send('Unauthorized');
+        }
+    };
 }
 
 const guardByIdOrRoles = (roles) => {
