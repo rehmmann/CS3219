@@ -38,7 +38,7 @@ const ChatBox = (props: ChatType) => {
       <Grid container className='chat_bubble_container' style={{justifyContent: respond.userId === currentUser ? 'end' : 'start'}}>
         <Grid item className='chat_bubble' style={{backgroundColor: respond.userId === currentUser ? "#FFD900" : "#E5E5E5"}}>
           <ListItemText primary={respond.message}></ListItemText>
-          <p className='time_stamp'>{respond.date}</p>
+          <p className='time_stamp'>{new Date(respond.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
         </Grid>
       </Grid>
     </ListItem>
@@ -56,6 +56,12 @@ const ChatBox = (props: ChatType) => {
         <Grid container className="chat_input_container">
           <Grid item xs={10}>
             <TextField 
+              sx={{
+                '& .Mui-focused': {
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: `#FFD900`,
+                  }
+              }}}
               id="outlined-basic-email" 
               value={message} 
               label="" 
