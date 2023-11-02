@@ -5,18 +5,15 @@ import {
     TableRow,
     TableCell,
     Table,
-    Button,
     TablePagination,
     TableBody,
  } from "@mui/material";
 import { tableCellClasses } from "@mui/material/TableCell";
 import { useEffect, useState } from "react";
 import SubmissionDetailsModal from "./SubmissionDetailsModal";
-import { useGetAllSubmissionsQuery, useGetQuestionsQuery, useGetSubmissionQuery } from "../../redux/api";
-import { getAuth } from "firebase/auth";
-import { toast } from "react-toastify";
+import { useGetAllSubmissionsQuery, useGetQuestionsQuery } from "../../redux/api";
 import { languageOptions } from './languages';
-import { forEach, map, set } from "lodash";
+import { forEach, map } from "lodash";
 import Loading from "../../components/Loading/Loading";
 
 interface Column {

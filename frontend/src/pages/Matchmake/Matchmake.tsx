@@ -6,9 +6,11 @@ import { firebaseAuth } from "../../utils/firebase";
 import Button from "../../components/Button/Button";
 import Loading from "../../components/Loading/Loading";
 import { useRemoveUserMutation, useCheckMatchMutation } from "../../redux/api";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
+
 // Import MUI
 import { Box } from "@mui/material";
- 
+
 // Import style
 import "./Matchmake.scss";
 import { useEffect, useState } from "react";
@@ -38,7 +40,7 @@ const Matchmake = () => {
       if (user) {
         // User is signed in. Get the user's email and token.
         const email = user?.email;
-        setUserToken(user.uid)
+        setUserToken(user.uid);
         setUserEmail(email);
       } else {
         // User is signed out.
@@ -81,9 +83,9 @@ const Matchmake = () => {
           if (jsonString.includes("Not Matched")) {
             console.log("No match yet!");
           } else {
-            console.log(res.data)
-            const otherUserId = res?.data?.matched_user?.matchedId
-            const questionId = res?.data?.matched_user?.questionId
+            console.log(res.data);
+            const otherUserId = res?.data?.matched_user?.matchedId;
+            const questionId = res?.data?.matched_user?.questionId;
             if (otherUserId && questionId) {
               clearInterval(intervalRef.current);
               isMatchActive.current = false;
@@ -97,7 +99,6 @@ const Matchmake = () => {
               navigate(`/app/matched/`);
               toast.success("Match Found!");
             }
-
           }
         }
       });
@@ -106,40 +107,64 @@ const Matchmake = () => {
 
       if (iterations >= 12) {
         // Stop the interval after 1 minute
-        clearInterval(intervalRef.current);
-        isMatchActive.current = false;
+        handleCancel();
+        toast.error("No match found :(");
       }
     }, 5000); //5 seconds
   };
 
-  // useEffect(() => {
-  //   // Invoke the function when the component is rendered.
-  //   checkForMatchPeriodically();
-  // }, []);
+  const handleCancel = () => {
+    clearInterval(intervalRef.current);
+    isMatchActive.current = false;
+    removeUser({
+      id: userToken ? userToken : "",
+      email: userEmail ? userEmail : "",
+      topic: "",
+      difficulty: "Easy",
+    }).then((res) => {
+      console.log("Trying to remove");
+      console.log(res);
+    });
+    dispatch(initMatch(false));
+  };
 
   return (
-    <Box className="matchmake_background">
-      <Box className="matchmake_container">
+    <Box
+      className="matchmake_background"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Box
+        className="matchmake_container"
+        sx={{
+          height: "80%",
+        }}
+      >
         <h1 style={{ fontWeight: "bold" }}>
           Please wait while <br /> we find you a match
         </h1>
+        <CountdownCircleTimer
+          isPlaying
+          duration={60}
+          colors={["#FFD800", "#FFE333", "#FFEC66", "#FFF8D8"]}
+          colorsTime={[7, 5, 2, 0]}
+          size={180}
+        >
+          {({ remainingTime }) => (
+            <div>
+              <h2 style={{ fontWeight: "bold" }}>{remainingTime} </h2>
+              <h3>Seconds</h3>
+            </div>
+          )}
+        </CountdownCircleTimer>
         <Loading />
         <Button
           title={"Cancel"}
           buttonStatus={isMatchButtonEnabled}
           event={() => {
-            clearInterval(intervalRef.current);
-            isMatchActive.current = false;
-            removeUser({
-              id: userToken ? userToken : "",
-              email: userEmail ? userEmail : "",
-              topic: "",
-              difficulty: "Easy",
-            }).then((res) => {
-              console.log("Trying to remove");
-              console.log(res);
-            });
-            dispatch(initMatch(false));
+            handleCancel();
           }}
           style={{ fontSize: 18, width: 110 }}
         />
