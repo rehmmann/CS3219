@@ -25,22 +25,23 @@ const firebaseApp = admin.initializeApp({
 const guard = (roles) => {
 return async (req, res, next) => {
     try {
-    const idToken = req.headers.authorization.split(' ')[1];
-    const decodedToken = await firebaseApp.auth().verifyIdToken(idToken);
-    if (roles.length === 0) {
-        next();
-    } else {
-        const userRoles = decodedToken.roles;
-        if (!userRoles) throw new Error('Unauthorized');
-        roles.forEach(role => {
-        if (!userRoles.includes(role)) {
-            throw new Error('Unauthorized');
-        }
-        });
-        next();
-    }  
+        const idToken = req.headers.authorization.split(' ')[1];
+        const decodedToken = await firebaseApp.auth().verifyIdToken(idToken);
+        console.log("reached")
+        if (roles.length === 0) {
+            next();
+        } else {
+            const userRoles = decodedToken.roles;
+            if (!userRoles) throw new Error('Unauthorized');
+            roles.forEach(role => {
+            if (!userRoles.includes(role)) {
+                throw new Error('Unauthorized');
+            }
+            });
+            next();
+        }  
     } catch (err) {
-    res.status(401).send('Unauthorized');
+        res.status(401).send('Unauthorized');
     }
 };
 }
@@ -72,7 +73,7 @@ const guardByIdOrRoles = (roles) => {
 
 router.get(
     '/test',
-    guard(['']),
+    guard([]),
     (req, res) => res.send('Hello User!')
 );
 
@@ -99,12 +100,14 @@ router.get(
 
 router.post(
     '/users/login',
-    guard(['']),
+    guard([]),
     userDb.loginUser
 );
 router.post(
     '/users',
-    guard(['']), userDb.createUser);
+    guard([]),
+    userDb.createUser,
+);
 router.delete('/users/signined/:id', userDb.deleteUser);
 
 router.put(
