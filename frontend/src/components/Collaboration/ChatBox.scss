@@ -32,3 +32,24 @@
   display: flex;
   justify-content: space-between;
 }
+
+.chat_bubble_container {
+  display:flex;
+  flex-direction:row;
+}
+
+.chat_bubble {
+  display:flex;
+  width: fit-content;
+  padding: .2rem 1rem;
+  border-radius:1.5rem;
+}
+
+.time_stamp {
+  margin: 0;
+  font-size: .7rem;
+  height: fit-content;
+  align-self: flex-end;
+  padding-left: .5rem;
+  opacity: 50%; 
+}

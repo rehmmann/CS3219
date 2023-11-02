@@ -35,20 +35,10 @@ const ChatBox = (props: ChatType) => {
   }
   const renderConversation = () => conversation.map(respond => 
     <ListItem key={respond.date}>
-      <Grid container>
-        <Grid item xs={12}>
-          <ListItemText 
-            sx={{
-              textAlign: respond.userId === currentUser ? "right" : "left",
-            }}
-           primary={respond.message}></ListItemText>
-        </Grid>
-        <Grid item xs={12}>
-          <ListItemText 
-           sx={{
-            textAlign: respond.userId === currentUser ? "right" : "left",
-          }}
-          secondary={respond.date}></ListItemText>
+      <Grid container className='chat_bubble_container' style={{justifyContent: respond.userId === currentUser ? 'end' : 'start'}}>
+        <Grid item className='chat_bubble' style={{backgroundColor: respond.userId === currentUser ? "#FFD900" : "#E5E5E5"}}>
+          <ListItemText primary={respond.message}></ListItemText>
+          <p className='time_stamp'>{respond.date}</p>
         </Grid>
       </Grid>
     </ListItem>
