@@ -6,6 +6,8 @@ import { firebaseAuth } from "../../utils/firebase";
 import Button from "../../components/Button/Button";
 import Loading from "../../components/Loading/Loading";
 import { useRemoveUserMutation, useCheckMatchMutation } from "../../redux/api";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
+
 // Import MUI
 import { Box } from "@mui/material";
 
@@ -103,7 +105,7 @@ const Matchmake = () => {
 
       iterations++;
 
-      if (iterations >= 12) {
+      if (iterations >= 2) {
         // Stop the interval after 1 minute
         handleCancel();
         toast.error("No match found :(");
@@ -132,6 +134,14 @@ const Matchmake = () => {
         <h1 style={{ fontWeight: "bold" }}>
           Please wait while <br /> we find you a match
         </h1>
+        <CountdownCircleTimer
+          isPlaying
+          duration={10}
+          colors={["#FFD800", "#FFD800", "#FFF8D8", "#FFF8D8"]}
+          colorsTime={[7, 5, 2, 0]}
+        >
+          {({ remainingTime }) => remainingTime}
+        </CountdownCircleTimer>
         <Loading />
         <Button
           title={"Cancel"}
