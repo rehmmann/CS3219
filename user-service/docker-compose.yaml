@@ -9,18 +9,18 @@ services:
       - ./database:/docker-entrypoint-initdb.d
     ports: 
       - ${DB_PORT}:5432
-  # user-service:
-  #   depends_on:
-  #     - postgres
-  #   build: .
-  #   restart: unless-stopped
-  #   env_file: .env
-  #   ports:
-  #     - 8080:8080
-  #   environment:
-  #     - DB_USER=${DB_USER}
-  #     - DB_HOST=postgres
-  #     - DB_NAME=${DB_NAME}
-  #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - DB_PORT=5432
+  user-service:
+    depends_on:
+      - postgres
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - 8080:8080
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_HOST=postgres
+      - DB_NAME=${DB_NAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=5432
     

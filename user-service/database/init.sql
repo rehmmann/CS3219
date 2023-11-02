@@ -25,7 +25,7 @@ CREATE TABLE submissions (
    id SERIAL,
    firebaseid VARCHAR(254),
    questionid INTEGER,
-   language VARCHAR(254),
+   languageid INTEGER,
    code TEXT,
    updated_at TIMESTAMP DEFAULT NOW(),
    PRIMARY KEY (firebaseid, questionid, language)
