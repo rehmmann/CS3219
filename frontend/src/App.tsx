@@ -45,6 +45,7 @@ const App = () => {
   //----------------------------------------------------------------//
   useEffect (() => {
     auth.currentUser?.getIdTokenResult().then((idTokenResult) => {
+      console.log(idTokenResult.token)
       dispatch(setToken(idTokenResult.token));
       setSoc(socket(auth.currentUser!.uid!, idTokenResult.token));
     })

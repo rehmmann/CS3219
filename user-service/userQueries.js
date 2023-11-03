@@ -1,5 +1,4 @@
 const Pool = require('pg').Pool
-const crypto = require('crypto');
 
 const pool = new Pool({
     user: process.env.DB_USER,
