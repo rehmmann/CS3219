@@ -62,17 +62,21 @@ export async function getRandomQuestion(req, res) {
 export async function getNewRandomQuestion(req, res) {
   try {
     const { oldQuestionId } = req.params;
-    const newQuestion = await getQuestion();
+    
     const count = await Question.countDocuments();
     if (count <= 1) { // no new question in the database
       res.status(404).json({
         error: "There is no new question",
       });
     }
-    if (oldQuestionId == newQuestion) {
-      const otherQuestion = oldQuestionId == 0 ? 1 : oldQuestionId - 1
-      res.status(200).json({
-        question: otherQuestion,
+
+    const newQuestion = await getQuestion();
+    const newQuestionId = newQuestion[0].questionId;
+
+
+    if (oldQuestionId == newQuestionId) {
+      res.status(500).json({
+        error: "Can not get new question, try again",
       });
     } else {
       res.status(200).json({
