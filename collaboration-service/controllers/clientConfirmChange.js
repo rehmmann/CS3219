@@ -13,7 +13,6 @@ export const clientConfirmChange = async (io, socket, redis, userId) => {
            return;
        }
        const roomId = data.roomId;
-       const oldQuestionId = data.questionId;
 
        // User 2 confirms the change
        // Set a flag in Redis to indicate the request is confirmed for User 2
@@ -23,6 +22,7 @@ export const clientConfirmChange = async (io, socket, redis, userId) => {
        const changeQuestionIdUser1 = userId + "ChangeConfirmation"
        const changeQuestionIdUser2 = otherUserId + "ChangeConfirmation"
        const room = await getRoom(redis, roomId);
+       const oldQuestionId = room.questionId;
        // Check if both users have confirmed the change in Redis
        const user1Confirmation = room[changeQuestionIdUser1]
        const user2Confirmation = room[changeQuestionIdUser2]
