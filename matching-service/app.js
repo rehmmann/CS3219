@@ -12,7 +12,6 @@ const PROJECT_ID = 'peer-prep-399105';
 const fh = new FirestoreHandler(PROJECT_ID);
 await fh.connect();
 const qst = new QuestionServiceInstance();
-await qst.connect();
 const matcher = new  Matcher(fh, qst);
 
 
