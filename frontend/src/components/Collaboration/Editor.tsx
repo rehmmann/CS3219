@@ -99,13 +99,13 @@ const Editor = (props: EditorProps) => {
 
   const handleSubmitCode = async () => {
     let status = 1;
-    const { data } = await axios.post('http://34.146.135.64/submissions/', {
+    const { data } = await axios.post('https://pp-svc.com/submissions/', {
       source_code: code,
       language_id: languageOptions[language],
     }, header);
 
     while (status == 1) {
-      await axios.get('http://34.146.135.64/submissions/' + data.token, header).then((res) => {
+      await axios.get('https://pp-svc.com/submissions/' + data.token, header).then((res) => {
         status = res.data.status.id;
         status != 1 && handleTerminalOutput(res.data);
       });
