@@ -14,8 +14,9 @@ import {
 import { toast } from 'react-toastify';
 
 // Import firebase
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { firebaseAuth } from '../../utils/firebase';
+import { useCreateUserMutation } from '../../redux/api';
 
 const textInputStyle = {
   "& label.Mui-focused": {
@@ -45,7 +46,7 @@ const LogInForm = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const [createUser] = useCreateUserMutation()
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
@@ -54,9 +55,39 @@ const LogInForm = () => {
     setButtonDisabled(true);
     signInWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
       setButtonDisabled(false);
+      const createUserPromise = new Promise( async (resolve, reject) => {
+        try {
+          const newRes: any = await createUser({firebaseId: res!.user!.uid, email}).unwrap();
+          return resolve(newRes);
+        } catch (error: any) {
+          setButtonDisabled(false);
+          return reject(error);
+        }
+      });
+      createUserPromise.then((res: any | null) => {
+        return res
+      }).catch((err) => {
+        return err
+      })
       navigate('/app/dashboard');
       toast.success('Welcome back!');
+//     const loginPromise = new Promise( async (resolve, reject) => {
+//       try {
+//         const res = await login({email, password}).unwrap();
+//         setButtonDisabled(false);
+//         return resolve(res);
+//       } catch (error: any) {
+//         setButtonDisabled(false);
+//         return reject(error);
+//       }
+//     });
+//     loginPromise.then((res: any | User | null) => {
+//         toast.success('Welcome back!');
+//         localStorage.setItem('token', 'dummyToken');
+//         localStorage.setItem('user', JSON.stringify(res));
+//         navigate('/app/dashboard');
     }).catch((err) => {
+      console.error(err);
       toast.error("Login Failed!");
       setButtonDisabled(false);
     })

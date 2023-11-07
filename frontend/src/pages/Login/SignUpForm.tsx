@@ -15,6 +15,7 @@ import { toast } from 'react-toastify';
 // Import firebase
 import { firebaseAuth,  } from '../../utils/firebase';
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useCreateUserMutation } from '../../redux/api';
 
 const textInputStyle = {
     "& label.Mui-focused": {
@@ -45,6 +46,8 @@ const SignUpForm = (props: SignUpFormProps) => {
   //                          HOOKS                                 //
   //----------------------------------------------------------------//
   const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [createUser] = useCreateUserMutation();
+  
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
   const [email, setEmail] = useState('');
@@ -52,19 +55,39 @@ const SignUpForm = (props: SignUpFormProps) => {
   //----------------------------------------------------------------//
   //                         HANDLERS                               //
   //----------------------------------------------------------------//
-  const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSignUp = () => {
+    // e.preventDefault();
     setButtonDisabled(true);
     if (password !== retypePassword) {
       toast.error('Passwords do not match!');
       setButtonDisabled(false);
       return;
     }
-    createUserWithEmailAndPassword(firebaseAuth, email, password).then((res) => {
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters long!');
+      setButtonDisabled(false);
+      return;
+    }
+    createUserWithEmailAndPassword(firebaseAuth, email, password).then((res:any) => {
       setSigningUp(false);
       setButtonDisabled(false);
+      const createUserPromise = new Promise( async (resolve, reject) => {
+        try {
+          const newRes: any = await createUser({firebaseId: res!.user!.uid, email}).unwrap();
+          return resolve(newRes);
+        } catch (error: any) {
+          setButtonDisabled(false);
+          return reject(error);
+        }
+      });
+      createUserPromise.then((res: any | null) => {
+        return res
+      }).catch((err) => {
+        return err
+      })
       toast.success('Account Successfully Created!');
     }).catch((err) => {
+      console.error(err);
       toast.error("Email is already in use!");
       setButtonDisabled(false);
     });
@@ -75,7 +98,6 @@ const SignUpForm = (props: SignUpFormProps) => {
   //----------------------------------------------------------------//
   return (
     <form
-      onSubmit={(e) => handleSignUp(e)}
       >
       <FormControl
         sx={{ width: '100%', mt: 10, mb: 10 }}
@@ -98,24 +120,6 @@ const SignUpForm = (props: SignUpFormProps) => {
               },  style: { fontFamily: 'Poppins' }}}
           >
           </TextField>
-          {/* <TextField
-              id="username"
-              label="Username"
-              type="text"
-              value={username}
-              variant='standard'
-              sx={textInputStyle}
-              required
-              onFocus={(e) => e.target.value = ""}
-              autoComplete='chrome-off'
-              onChange={(e) => setUsername(e.target.value)}
-              InputLabelProps={{ required: false, style: { fontFamily: 'Poppins' }}}
-              inputProps={{autoComplete: 'new-password',
-              form: {
-                autoComplete: 'off',
-              }, style: { fontFamily: 'Poppins' }}}
-          >
-          </TextField> */}
           <TextField
               id="password"
               label="Password"
@@ -164,8 +168,9 @@ const SignUpForm = (props: SignUpFormProps) => {
               fontSize: 13,
               }}
               disabled={buttonDisabled}
-              type="submit"
+              // type="submit"
               disableRipple
+              onClick={handleSignUp}
           >
               Sign Up
           </IconButton>
