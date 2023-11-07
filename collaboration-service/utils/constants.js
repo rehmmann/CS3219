@@ -6,6 +6,9 @@ export const ClientEvents = {
     MESSAGE: 'message',
     CODE: 'code',
     LANGUAGE: 'language',
+    CHANGE_QUESTION: "change-question",
+    CANCEL_CHANGE_QN: "cancel-change-question",
+    CONFIRM_CHANGE_QN: "confirm-change-question"
 }
 
 export const ServerEvents = {
@@ -17,10 +20,17 @@ export const ServerEvents = {
     CODE: 'code',
     LANGUAGE: 'language',
     ERROR: 'error',
+    CHANGE_REQUEST: "change-question-request",
+    CANCEL_CHANGE_REQUEST: "cancel-change-question-request",
+    QUESTION_CHANGED: "question-changed"
 }
 
 export const ClientErrors = {
     MISSING_TOKEN: 'Missing JWT',
     INVALID_TOKEN: "Invalid JWT",
     MISSING_USER_ID: "Missing User ID",
+}
+
+export const ServerErrors = {
+    NO_NEW_QUESTION: "no-new-question"
 }

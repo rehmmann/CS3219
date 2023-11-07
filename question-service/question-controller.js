@@ -59,6 +59,38 @@ export async function getRandomQuestion(req, res) {
   }
 }
 
+export async function getNewRandomQuestion(req, res) {
+  try {
+    const { oldQuestionId } = req.params;
+    
+    const count = await Question.countDocuments();
+    if (count <= 1) { // no new question in the database
+      res.status(404).json({
+        error: "There is no new question",
+      });
+    }
+
+    const newQuestion = await getQuestion();
+    const newQuestionId = newQuestion[0].questionId;
+
+
+    if (oldQuestionId == newQuestionId) {
+      res.status(500).json({
+        error: "Can not get new question, try again",
+      });
+    } else {
+      res.status(200).json({
+        question: newQuestion,
+      }); 
+    }
+    
+  } catch (err) {
+    res.status(500).json({
+      error: err,
+    });
+  }
+}
+
 export async function getFilteredQuestions(req, res) {
   try {
     const query = req.query;
