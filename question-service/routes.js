@@ -9,6 +9,7 @@ import {
   updateQuestion,
   getRandomFilteredQuestions,
   getQuestionById,
+  getNewRandomQuestion,
 } from "./question-controller.js";
 
 let router = express.Router();
@@ -49,6 +50,10 @@ router.post(
 //Get random question
 router
   .get("/questions/random", getRandomQuestion);
+
+//Get new random question
+router
+  .get("/questions/random/:oldQuestionId", getNewRandomQuestion);
 
 //Get list of questions based on query parameters
 router.get(

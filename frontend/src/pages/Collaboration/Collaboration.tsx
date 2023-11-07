@@ -131,6 +131,7 @@ const Collaboration = () => {
   }
 
   const handleTabChange = (event: React.SyntheticEvent, tabValue: number) => {
+    console.log(event);
     setTab(tabValue);
   };
 

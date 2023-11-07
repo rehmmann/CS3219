@@ -76,6 +76,7 @@ const QuestionsTable = (props: QuestionTableProps) => {
     event: React.MouseEvent<unknown>,
     property: string
   ) => {
+    console.log(event);
     const isAsc = valueToOrderBy === property && sortOrder === "asc";
     setValueToOrderBy(property);
     setSortOrder(isAsc ? "desc" : "asc");
@@ -123,6 +124,7 @@ const QuestionsTable = (props: QuestionTableProps) => {
   };
 
   const getComparator = (order: any, orderBy: any) => {
+    console.log(order);
     if (orderBy === "complexity") {
       return compareByComplexity;
     } else if (orderBy === "title") {

@@ -9,52 +9,86 @@ class Matcher {
         this.QueueOrderPref = "asc";
         this.Queuelimit = 1;
         this.questInst = questInst;
+        this.timeToMatch = 60; // In Seconds
+
     }
 
     // etiher queus the user ot be matched , or adds the match to the database
-    async findMatch(user) {
-        const userJson = {"email": user.email, "id": user.id, "topic": user.topic, "difficulty": user.difficulty};
-        const umUser = UnmatchedUser.toObject(userJson);
+    async findMatch(user, idToken) {
+
         
-        // Search in Unmatched Queue
-        const queryRes = await this.firestoreHandler.readwithAndQuery(UnmatchedUser.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchPredicates());
 
+        const db = await this.firestoreHandler.getDb("findMatch");
+        console.log(`The db is: ${db}`);
+        await db.runTransaction(async (t) => {
+            console.log(`User is ${user}`);
 
-        if (queryRes == null) {
-            await this.addUser(umUser);
-            console.log(`Added User: ${userJson.email} to Queue`);
-        } else {
-            // Get Question Id
-            const questionId = await this.questInst.getQuestionId(umUser.difficulty, umUser.topic);
+            const userJson = {"email": user.email, "id": user.id, "topic": user.topic, "difficulty": user.difficulty};
+            const umUser = UnmatchedUser.toObject(userJson);
+            console.log(`User is ${umUser.toFirestore()}`);
+            // Search in Unmatched Queue
+            const queryRes = await this.firestoreHandler.readwithAndQuery(t, UnmatchedUser.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchPredicates());
+
             
-            console.log(`Question Id is ${questionId}`);
-            // Get MatchedUser
-            let matchedUserEmail = null;
+            if (queryRes == null) {
+                await this.addUser(t,umUser);
+                console.log(`Added User: ${userJson.email} to Queue`);
+            } else {
+                // Get MatchedUser
+                let matchedUserEmail = null;
+                
 
-            for (var key in queryRes) {
-                matchedUserEmail = key;
-            }
-            const matchedUserJson = queryRes[matchedUserEmail];
+                for (var key in queryRes) {
+                    matchedUserEmail = key;
+                }
 
-            // From matcheUserJson
-            const matchedJson = {"email1" : umUser.email, "id1": umUser.id ,"email2": matchedUserJson.email , "id2" : matchedUserJson.id, "topic": umUser.topic, "difficulty" : umUser.difficulty, "questionId": questionId};
-            // Make Object
-            console.log(`MatchedJson ${matchedJson}`);
-            const matchedUsers = MatchedUsers.fromJsonToObject(matchedJson);
+                const matchedUserJson = queryRes[matchedUserEmail];
+                
+                if (matchedUserEmail == umUser.email) {
+                    // Cannot Match with the same email , so invalid match
+                    console.log(`Invalid Match: Identical email match detected. user email: ${matchedUserEmail}`)
+                } else if (Date.now() - queryRes[matchedUserEmail].addDatetime >= this.timeToMatch * 1000  ) {
+                    // User Found has already expired
+                    // Delete the expired user from match queue 
+                    this.deleteUser(t, matchedUserJson)
 
-            // Add Matched user
-            await this.addMatchToFind(matchedUsers, matchedUserJson);
+                    // Add current user to Queue
+                    await this.addUser(t,umUser);
+                    console.log(`Invalid Match: Expired User matched. Expired user email: ${matchedUserEmail}`)
+                } else {
+                // Get Question Id
+                const questionId = await this.questInst.getQuestionId(umUser.difficulty, umUser.topic, idToken);
+                
+                console.log(`Question Id is ${questionId}`);
+                
+                
 
-            console.log(`Added match: ${matchedJson} to matches db`);
+                // From matcheUserJson
+                const matchedJson = {"email1" : umUser.email, "id1": umUser.id ,"email2": matchedUserJson.email , "id2" : matchedUserJson.id, "topic": umUser.topic, "difficulty" : umUser.difficulty, "questionId": questionId};
+                // Make Object
+                console.log(`MatchedJson ${matchedJson}`);
+                const matchedUsers = MatchedUsers.fromJsonToObject(matchedJson);
+
+                // Add Matched user
+                await this.addMatchToFind(t, matchedUsers, matchedUserJson);
+
+                console.log(`Added match: ${matchedJson} to matches db`);
         }
+        }
+    });
     }
 
 
     // Returns the match found for the user email and deals with match Foudn logic
     async checkMatches(user) {
+        const db = await this.firestoreHandler.getDb("checkMatch");
+
+        return await db.runTransaction(async (t) => {
         const userJson = {"email": user.email, "id": user.id, "topic": user.topic, "difficulty": user.difficulty};
         const umUser = UnmatchedUser.toObject(userJson);
-        const queryRes = await this.firestoreHandler.readwithOrQuery(MatchedUsers.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchesPredicates());
+        const queryRes = await this.firestoreHandler.readwithOrQuery(t, MatchedUsers.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchesPredicates());
+
+        
         if (queryRes != null) {
             // Match Found
             let matchFoundEmail = null;
@@ -63,12 +97,17 @@ class Matcher {
             }
             const matchFound = queryRes[matchFoundEmail];
             const matchObject = MatchedUsers.fromJsonToObject(matchFound);
-            
-            // Acknowledge the match
-            if (matchFound.ack1 || matchFound.ack2) {
+            if ((Date.now() - matchFound.addDatetime) > this.timeToMatch*2 * 1000) {
+                // Invalid / Old Match 
+                await this.deleteMatch(t, matchFoundEmail);
+                
+                // So no match found
+                return null;
+            }// Acknowledge the match
+            else if (matchFound.ack1 || matchFound.ack2) {
                 // Match Found & One of the matches already acked 
                 // Delete the Match
-                await this.deleteMatch(matchFoundEmail);
+                await this.deleteMatch(t, matchFoundEmail);
             } else {
                 // match Found but noone acked
                 // Ack and store the one Found
@@ -80,9 +119,7 @@ class Matcher {
                     matchFound.ack2 = true;
                 }
 
-                await this.updateMatchFromJson(matchFound,matchFoundEmail);
-
-                
+                await this.updateMatchFromJson(t,matchFound,matchFoundEmail);
 
             }
             
@@ -93,20 +130,23 @@ class Matcher {
 
         // No Match Found
         return null;
-
+        });
     }
 
 
     async removeUser(user) {
+        const db = await this.firestoreHandler.getDb("removeUser");
+
+        return await db.runTransaction(async (t) => {
         const userJson = {"email": user.email, "id": user.id, "topic": user.topic, "difficulty": user.difficulty};
         const umUser = UnmatchedUser.toObject(userJson);
-        const unmatchRes = await this.firestoreHandler.readwithAndQuery(UnmatchedUser.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getExactMatchPredicate());
-        const matchRes = await this.firestoreHandler.readwithOrQuery(MatchedUsers.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchesPredicates());
+        const unmatchRes = await this.firestoreHandler.readwithAndQuery(t, UnmatchedUser.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getExactMatchPredicate());
+        const matchRes = await this.firestoreHandler.readwithOrQuery(t,MatchedUsers.collectionName, this.QueueOrderBy, this.QueueOrderPref, this.Queuelimit, umUser.getMatchesPredicates());
         
         if (unmatchRes != null) {
             //Found unmatch
             console.log("Found in Unmatched Queue");
-            await this.deleteUser(umUser);
+            await this.deleteUser(t,umUser);
 
         } else if (matchRes != null) {
             console.log("Found in Matched.");
@@ -115,46 +155,47 @@ class Matcher {
             for (var key in matchRes) {
                 matchFoundEmail = key;
             }
-            await this.deleteMatch(matchFoundEmail);
+            await this.deleteMatch(t,matchFoundEmail);
 
         } else {
             // Not in the database
             throw new Error("Not in the Database");
         }
+    });
 
     }
 
     // Utiltiy Functions For Add 
 
     // Takes in Unmatched user object
-    async addUser(user) { 
-        await this.firestoreHandler.write(UnmatchedUser.collectionName, user.email,user.toFirestore() );
+    async addUser(db,user) { 
+        await this.firestoreHandler.write(db,UnmatchedUser.collectionName, user.email,user.toFirestore() );
     }
 
 
     // Takes in Unmatched user object 
-    async addMatchToFind(mUsers, deleteUser) {
+    async addMatchToFind(db, mUsers, deleteUser) {
         // Add the Match
-        await this.firestoreHandler.write(MatchedUsers.collectionName, deleteUser.email, mUsers.toFirestore());
+        await this.firestoreHandler.write(db, MatchedUsers.collectionName, deleteUser.email, mUsers.toFirestore());
 
-        await this.deleteUser(deleteUser);
+        await this.deleteUser(db, deleteUser);
 
 
         
     }
 
     // Takes in Matched user json
-    async updateMatchFromJson(updateMatchJson, matchFoundEmail) {
-        await this.firestoreHandler.write(MatchedUsers.collectionName, matchFoundEmail, updateMatchJson);
+    async updateMatchFromJson(db, updateMatchJson, matchFoundEmail) {
+        await this.firestoreHandler.write(db,MatchedUsers.collectionName, matchFoundEmail, updateMatchJson);
     }
 
-    async deleteUser(user) {
+    async deleteUser(db,user) {
         // Delete the Matched User
-        await this.firestoreHandler.delete(UnmatchedUser.collectionName, user.email);
+        await this.firestoreHandler.delete(db, UnmatchedUser.collectionName, user.email);
     }
 
-    async deleteMatch(matchId) {
-        await this.firestoreHandler.delete(MatchedUsers.collectionName, matchId);
+    async deleteMatch(db,matchId) {
+        await this.firestoreHandler.delete(db,MatchedUsers.collectionName, matchId);
     }
 }
 
