@@ -5,9 +5,22 @@ import matcher from "./app.js";
 export async function findMatch(req, res) {
     var user= {"id" : req.body.id , "email": req.body.email, "topic" : req.body.topic , "difficulty": req.body.difficulty};
     console.log(user);
-  
+    console.log(`Request Header is ${JSON.stringify(req.headers)}`);
+    let idToken = null;
+    try {
+      // For GCP Case
+      console.log("GCP Case")
+      idToken = req.headers["x-forwarded-authorization"].split(' ')[1]
+    } catch (error) {
+      // For Normal Case
+      console.log("Normal")
+      idToken = req.headers.authorization.split(' ')[1];
+    }
+    
+    console.log(`Id token is ${idToken}`);
+
     matcher
-      .findMatch(user)
+      .findMatch(user, idToken)
       .then((result) => {
         res
         .status(200)

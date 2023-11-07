@@ -10,12 +10,16 @@ import { ClientErrors, ClientEvents, ServerEvents } from "./utils/constants.js";
 import { validateToken } from "./utils/firebase.js";
 import { clientJoinRoom } from "./controllers/clientJoinRoom.js";
 import { clientLeaveRoom } from "./controllers/clientLeaveRoom.js";
+import { clientChangeQuestion } from "./controllers/clientChangeQuestion.js";
+import { clientCancelChangeQuestion } from "./controllers/clientCancelChangeQuestion.js";
 import admin from 'firebase-admin';
 import serviceAccount from "./serviceAccount.json" assert { type: "json" };
 import { clientGetRoom } from "./controllers/clientGetRoom.js";
 import { clientSendMessage } from "./controllers/clientSendMessage.js";
 import { clientUpdateCode } from "./controllers/clientUpdateCode.js";
 import { clientUpdateLanguage } from "./controllers/clientUpdateLanguage.js";
+import { clientConfirmChange } from "./controllers/clientConfirmChange.js";
+import QuestionServiceInstance from "./utils/QuestionServiceInstance.js";
 dotenv.config();
 
 const app = express();
@@ -65,10 +69,16 @@ const connection = async (socket) => {
     clientSendMessage(io, socket, redis, userId);
     clientUpdateCode(io, socket, redis, userId);
     clientUpdateLanguage(io, socket, redis, userId);
+    clientChangeQuestion(io, socket, redis, userId);
+    clientCancelChangeQuestion(io, socket, redis, userId);
+    clientConfirmChange(io, socket, redis, userId);
     socket.on('disconnect', () => { 
         console.log("User " + userId + " disconnected")
     })
 };
+
+export const qst = new QuestionServiceInstance();
+await qst.connect();
 
 io.use(authentication).on("connection", connection);
 

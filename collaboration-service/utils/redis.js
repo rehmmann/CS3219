@@ -73,3 +73,13 @@ export const updateLanguage = async (redisClient, roomId, userId, language) => {
     }
     return redisClient.set(roomKey(roomId), stringify(newRoomDetails));
 }
+
+export const changeQuestionStatus = async (redisClient, roomId, userId, status) => {
+    const room = await getRoom(redisClient, roomId);
+    const changeQuestionId = userId + "ChangeConfirmation"
+    const newRoomDetails = {
+        ...room,
+        [changeQuestionId]: status
+    }
+    return redisClient.set(roomKey(roomId), stringify(newRoomDetails));
+}
