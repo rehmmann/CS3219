@@ -14,6 +14,7 @@ import { Socket } from "socket.io-client";
 import QuestionBox from '../../components/Collaboration/QuestionBox';
 import Editor from '../../components/Collaboration/Editor';
 import ChatBox from '../../components/Collaboration/ChatBox';
+import Terminal from '../../components/Collaboration/Terminal';
 
 // Import firebase
 import { getAuth } from "@firebase/auth";
@@ -23,9 +24,13 @@ import { useGetQuestionsQuery } from "../../redux/api";
 
 // Import utils
 import { find } from "lodash";
+import { codeOutputType } from "../../utils/types";
 
 // Import style
 import './Collaboration.scss';
+import { Box } from "@mui/system";
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 const Collaboration = () => {
   const { questionId, otherUserId } = useParams();
@@ -37,16 +42,20 @@ const Collaboration = () => {
   const { data: questionsData }  = useGetQuestionsQuery();
   
   const [code, setCode] = useState<string>("");
+  const [codeOutput, setCodeOutput] = useState<codeOutputType | null>(null);
   const [initialCode, setInitialCode] = useState<string>("");
   const [peerCode, setPeerCode] = useState<string>("");
   const [language, setLanguage] = useState<string>("javascript");
   const [peerLanguage, setPeerLanguage] = useState<string>("javascript");
   const [question, setQuestion] = useState<any | null>(null);
+  const [tab, setTab] = useState<number>(0);
+
   useEffect(() => {
     if (questionsData?.questions && questionId) {
       setQuestion(find(questionsData?.questions, (q: any) => q.questionId === parseInt(questionId)));
     }
   }, [questionsData?.questions])
+
   useEffect (() => {
     if (auth.currentUser) {
       setUserId(auth.currentUser.uid);
@@ -116,41 +125,86 @@ const Collaboration = () => {
       })
     }
   }
+
   const handlePeerEditorChange: OnChange = (value: string | undefined) => {
     console.log(value);
   }
 
+  const handleTabChange = (event: React.SyntheticEvent, tabValue: number) => {
+    setTab(tabValue);
+  };
+
+  const handleTerminalOutput = (output: codeOutputType) => {
+    setCodeOutput(output);
+    setTab(1);
+  }
+
+  const selectTab = (tab: number) => {
+    switch (tab) {
+      case 0:
+        return <ChatBox roomId={roomId} conversation={messages} currentUser={userId}/>;
+      case 1:
+        return (
+        <div style={{height:'100%', display:'flex', flexDirection:'column', justifyContent:'space-between'}}>
+          <Terminal output={codeOutput}/>
+        </div>);
+      default:
+        return <></>;
+    }
+  }
+
   return (
     <div className="collaboration_container">
-      {questionId && otherUserId && question ?
+      {questionId && otherUserId && question ? 
         <>
-          <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question.questionDescription}/>
-            <div className="editor_container">
-              <Editor 
-                code={code}
-                initialCode={initialCode}
-                language={language}
-                isMainEditor={true}
-                handleChangeLanguage={handleChangeLanguage}
-                handleEditorChange={handleEditorChange}
-                setInitialCode={setInitialCode}
-                setCode={setCode}
-              />
-              <Editor 
-                isMainEditor={false}
-                code={peerCode}
-                language={peerLanguage}
-                handleChangeLanguage={handleChangePeerLanguage}
-                handleEditorChange={handlePeerEditorChange}
-                initialCode=""
-                setInitialCode={() => {}}
-                setCode={() => {}}
-              />
-            </div>
-          <ChatBox roomId={roomId} conversation={messages} currentUser={userId}/>
-        </> : 
+        <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question?.questionDescription}/>
+          <div className="editor_container">
+            <Editor 
+              code={code}
+              initialCode={initialCode}
+              language={language}
+              isMainEditor={true}
+              handleChangeLanguage={handleChangeLanguage}
+              handleEditorChange={handleEditorChange}
+              handleTerminalOutput={handleTerminalOutput}
+              setInitialCode={setInitialCode}
+              setCode={setCode}
+            />
+            <Editor 
+              isMainEditor={false}
+              code={peerCode}
+              language={peerLanguage}
+              handleChangeLanguage={handleChangePeerLanguage}
+              handleEditorChange={handlePeerEditorChange}
+              handleTerminalOutput={() => {}}
+              initialCode=""
+              setInitialCode={() => {}}
+              setCode={() => {}}
+            />
+          </div>
+          <Box className="output_section">
+            <Tabs 
+              value={tab} 
+              onChange={handleTabChange} 
+              centered={true} 
+              textColor='inherit' 
+              sx={{
+                height: 33, 
+                '& .MuiButtonBase-root': { fontWeight:'700', color:'grey' }, 
+                '& .MuiTabs-indicator': {backgroundColor: '#FFD900'}, 
+                '& .Mui-selected': {color: '#FFD900'}
+              }}
+            >
+              <Tab label="chat"/>
+              <Tab label="terminal"/>
+            </Tabs>
+            <Box style={{width:'100%', height:'95%'}}>
+              {selectTab(tab)}
+            </Box>
+          </Box>
+        </>  : 
         <>Please Join a room!</>
-      }
+      } 
     </div>
     
   );

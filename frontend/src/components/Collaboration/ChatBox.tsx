@@ -35,26 +35,21 @@ const ChatBox = (props: ChatType) => {
   }
   const renderConversation = () => conversation.map(respond => 
     <ListItem key={respond.date}>
-      <Grid container>
-        <Grid item xs={12}>
-          <ListItemText 
-            sx={{
-              textAlign: respond.userId === currentUser ? "right" : "left",
-            }}
-           primary={respond.message}></ListItemText>
-        </Grid>
-        <Grid item xs={12}>
-          <ListItemText 
-           sx={{
-            textAlign: respond.userId === currentUser ? "right" : "left",
-          }}
-          secondary={respond.date}></ListItemText>
+      <Grid container className='chat_bubble_container' style={{justifyContent: respond.userId === currentUser ? 'end' : 'start'}}>
+        <Grid item className='chat_bubble' style={{backgroundColor: respond.userId === currentUser ? "#FFD900" : "#E5E5E5"}}>
+          <ListItemText primary={respond.message}></ListItemText>
+          <p className='time_stamp'>{new Date(respond.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
         </Grid>
       </Grid>
     </ListItem>
   );
   const handleChangeMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
+  }
+  const handleEnterKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSendMessage();
+    }
   }
   return (
     <div className="chat_container">
@@ -66,10 +61,24 @@ const ChatBox = (props: ChatType) => {
         <Grid container className="chat_input_container">
           <Grid item xs={10}>
             <TextField 
+              sx={{
+                "& .MuiOutlinedInput-root":{
+                  borderRadius: '1rem',
+                  '&:hover fieldset': {
+                    borderColor: '#B89C00',
+                    transition: '200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#FFD900',
+                    transition: '200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms'
+                  },
+                }
+              }}
               id="outlined-basic-email" 
               value={message} 
               label="" 
               fullWidth 
+              onKeyDown={handleEnterKeyDown}
               onChange={handleChangeMessage}
             />
           </Grid>
@@ -81,7 +90,7 @@ const ChatBox = (props: ChatType) => {
               marginTop: "auto",
             }}
           >
-            <Fab color="primary" aria-label="add" onClick={handleSendMessage}><SendIcon /></Fab>
+            <Fab sx={{backgroundColor: '#FFD900', '&:hover': {backgroundColor:'#FFD900'}}} aria-label="add" onClick={handleSendMessage}><SendIcon /></Fab>
           </Grid>
         </Grid>
       </Grid>
