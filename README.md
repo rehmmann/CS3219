@@ -19,3 +19,19 @@ password: password
 ## Assignment 2
 
 #### Running the Application
+
+
+
+## Assignment 5
+#### Running the Application
+
+1. Clone the repository
+2. Run the following commands
+```
+cd matching-service
+npm install
+```
+2. Place the service_account_key.json file in the matching sevice folder
+3. In the terminal run `export GOOGLE_APPLICATION_CREDENTIALS="service_account_key.json"`
+4. In the terminal run `npm start`
+
