@@ -27,7 +27,6 @@ const guard = (roles) => {
         try {
             const idToken = req.headers.authorization.split(' ')[1];
             const decodedToken = await firebaseApp.auth().verifyIdToken(idToken);
-            console.log(roles.length)
             if (roles.length === 0) {
                 next();
             } else {
@@ -119,7 +118,7 @@ router.put(
 router.get(
     '/submissions/:id',
     guardByIdOrRoles(['ADMIN']),
-    submissionsDb.getSubmissions
+    submissionsDb.getAllSubmissionsByUser
 );
 router.get(
     '/submissions/:id/:questionId/:languageId',
