@@ -70,6 +70,8 @@ const guardByIdOrRoles = (roles) => {
     };
 };
 
+router.get('/test/unauth', (req, res) => res.send('Hello World! 1'));
+
 router.get(
     '/test',
     guard([]),
