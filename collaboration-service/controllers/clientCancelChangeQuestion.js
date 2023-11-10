@@ -16,7 +16,7 @@ export const clientCancelChangeQuestion = async (io, socket, redis, userId) => {
         await changeQuestionStatus(redis, roomId, userId, false);
         await changeQuestionStatus(redis, roomId, otherUserId, false);
         // Emit a cancelChange event to all users
-        io.emit(ServerEvents.CANCEL_CHANGE_REQUEST, { 
+        io.to(roomId).emit(ServerEvents.CANCEL_CHANGE_REQUEST, { 
             userId,
             roomId
         });

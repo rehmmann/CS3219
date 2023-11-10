@@ -16,7 +16,7 @@ export const clientConfirmChange = async (io, socket, redis, userId) => {
 
        // User 2 confirms the change
        // Set a flag in Redis to indicate the request is confirmed for User 2
-       await changeQuestionStatus(redis, roomId, otherUserId, true);
+       await changeQuestionStatus(redis, roomId, userId, true);
        console.log("change status 2 to true")
 
        const changeQuestionIdUser1 = userId + "ChangeConfirmation"
@@ -33,7 +33,7 @@ export const clientConfirmChange = async (io, socket, redis, userId) => {
            await qst.getNewQuestion(oldQuestionId).then
            (async (newQuestionId) => {
                // Emit the new question ID to both users   
-               io.emit(ServerEvents.QUESTION_CHANGED, { newQuestionId });
+               io.to(roomId).emit(ServerEvents.QUESTION_CHANGED, { newQuestionId });
                // Reset the flags in Redis for the next change request
                await changeQuestionStatus(redis, roomId, userId, false);
                await changeQuestionStatus(redis, roomId, otherUserId, false);
@@ -45,7 +45,7 @@ export const clientConfirmChange = async (io, socket, redis, userId) => {
                console.log("user 2 status after new question: " + user2Status)
            })
            .catch(async (err) => {
-               io.emit(ServerErrors.NO_NEW_QUESTION, { 
+               io.to(roomId).emit(ServerErrors.NO_NEW_QUESTION, { 
                    userId,
                    roomId
                });
@@ -54,7 +54,7 @@ export const clientConfirmChange = async (io, socket, redis, userId) => {
            }); // Get the new question ID logic here
 
        } else {
-           io.emit(ServerEvents.CANCEL_CHANGE_REQUEST, { 
+           io.to(roomId).emit(ServerEvents.CANCEL_CHANGE_REQUEST, { 
                userId,
                roomId
            });
