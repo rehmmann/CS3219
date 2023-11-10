@@ -34,7 +34,7 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
       children: [
         { path: 'dashboard', element: isMatching ? <Matchmake /> : <Dashboard /> },
         { path: 'collaboration/:questionId?/:otherUserId?', element: isMatching ? <Matchmake /> : <Collaboration /> },
-        { path: "matched/:questionId?/:otherUserId?", element: <MatchedPage /> },
+        { path: "matched/:questionId?/:otherUserId?", element: isMatching ? <Matchmake /> : <MatchedPage />},
         {
           path: 'change-password',
           element: <ChangePasswordForm />,
@@ -45,7 +45,7 @@ const routes = (isLoggedIn: boolean, isMatching: boolean) => {
         },
         {
           path: 'history',
-          element: <History />
+          element: isMatching ? <Matchmake /> : <History />
         }
       ],
     },
