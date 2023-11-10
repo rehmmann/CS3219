@@ -1,9 +1,9 @@
 // Import react
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 // Import types
-import { ClientEvents, Message, ServerEvents } from "../../utils/types";
+import { ClientEvents, Message, ServerErrors, ServerEvents } from "../../utils/types";
 import { OnChange } from "@monaco-editor/react";
 
 // Import socket
@@ -31,6 +31,8 @@ import './Collaboration.scss';
 import { Box } from "@mui/system";
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import { Dialog, DialogContent, Button, DialogTitle, DialogContentText, DialogActions } from "@mui/material";
+import { toast } from "react-toastify";
 
 const Collaboration = () => {
   const { questionId, otherUserId } = useParams();
@@ -49,6 +51,8 @@ const Collaboration = () => {
   const [peerLanguage, setPeerLanguage] = useState<string>("javascript");
   const [question, setQuestion] = useState<any | null>(null);
   const [tab, setTab] = useState<number>(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [doesUserStartRefresh, setDoesUserStartRefresh] = useState(false)
 
   useEffect(() => {
     if (questionsData?.questions && questionId) {
@@ -154,11 +158,76 @@ const Collaboration = () => {
     }
   }
 
+  //Refresh question
+
+  
+
+
+ 
+  if (soc) {
+    //confirm change question event from server
+    soc.on(ServerEvents.QUESTION_CHANGED, (data) => {
+      const { newQuestionId} = data;
+      setIsDialogOpen(false);
+      setDoesUserStartRefresh(false);
+      const navigate = useNavigate();
+      navigate(`/app/collaboration/${newQuestionId}/${otherUserId}`)
+    });
+
+    //receive change question event from server
+    soc.on(ServerEvents.CHANGE_REQUEST, (data) => {
+      const {startingUserId} = data;
+      if (startingUserId == userId) {
+        setDoesUserStartRefresh(true);
+      }
+      setIsDialogOpen(true);
+      
+    });
+
+    // handle server confirm cancel
+    soc.on(ServerEvents.CANCEL_CHANGE_REQUEST, () => {
+      setIsDialogOpen(false);
+      setDoesUserStartRefresh(false);
+      console.log("cancel change");
+      toast.error("An user cancel change question request");
+    });
+
+    // handle no new question
+    soc.on(ServerErrors.NO_NEW_QUESTION, () => {
+      setIsDialogOpen(false);
+      setDoesUserStartRefresh(false);
+      console.log("no new question");
+      toast.error("Cannot refresh question, please try again!");
+    });
+  }
+
+  //cancel change question
+
+  //by close the dialog
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    soc?.emit(ClientEvents.CANCEL_CHANGE_QN, {
+      otherUserId,
+      roomId
+    });
+  };
+
+  //confirm change question
+  const handleConfirmChange = () => {
+    soc?.emit(ClientEvents.CONFIRM_CHANGE_QN, {
+      otherUserId,
+      roomId
+    });
+  };
+  
+
+
+
   return (
     <div className="collaboration_container">
       {questionId && otherUserId && question ? 
         <>
-        <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question?.questionDescription}/>
+        <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question?.questionDescription} otherUserId={otherUserId} roomId={roomId}/>
           <div className="editor_container">
             <Editor 
               code={code}
@@ -203,6 +272,26 @@ const Collaboration = () => {
               {selectTab(tab)}
             </Box>
           </Box>
+          {/* <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
+            <DialogTitle>
+              An user want to refresh and get new question
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                If you want to cancel request, press Cancel
+              </DialogContentText>
+              {!doesUserStartRefresh && 
+                <DialogContentText>If you want to confirm request, press Confirm</DialogContentText>
+              }
+              <DialogActions>
+                <Button variant="contained" onClick={handleCloseDialog}>Cancel</Button>
+                {!doesUserStartRefresh && 
+                <Button variant="contained" onClick={handleConfirmChange}>Confirm</Button>
+                }
+              </DialogActions>
+              
+            </DialogContent>
+          </Dialog> */}
         </>  : 
         <>Please Join a room!</>
       } 
