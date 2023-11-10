@@ -17,7 +17,8 @@ cd frontend
 npm i
 npm run dev
 ```
-3. Access the application using the following credentials:
+3. The application is running here: http://localhost:5173
+4. Access the application using the following credentials:
 ```
 username: dummy@example.com
 password: password
@@ -81,9 +82,9 @@ cd user-service
 npm i 
 npm run start
 ```
-
-9. To access the application, create an account using the Register button and login using the account created
-10. Alternatively, you can access the application with the account credentials:
+9. The application is running here: http://localhost:5173
+10. To access the application, create an account using the Register button and login using the account created
+11. Alternatively, you can access the application with the account credentials:
 ```
 username: alanwalker@gmail.com
 password: password1
@@ -144,9 +145,9 @@ cd user-service
 npm i 
 npm run start
 ```
-
-9. To access the application, create an account using the Register button and login using the account created
-10. Alternatively, you can access the application with the account credentials:
+9. The application is running here: http://localhost:5173
+10. To access the application, create an account using the Register button and login using the account created
+11. Alternatively, you can access the application with the account credentials:
 ```
 Admin Account:
 username: tanjianoway+1@gmail.com
@@ -177,8 +178,9 @@ password: password123
 ```
 docker compose up --build -d
 ```
-5. To access the application, create an account using the Register button and login using the account created
-6. Alternatively, you can access the application with the account credentials:
+5. The application is running here: http://localhost:80
+6. To access the application, create an account using the Register button and login using the account created
+7. Alternatively, you can access the application with the account credentials:
 ```
 Admin Account:
 username: tanjianoway+1@gmail.com
