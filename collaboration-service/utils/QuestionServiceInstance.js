@@ -32,19 +32,10 @@ class QuestionServiceInstance {
         console.log(`Making request to Url : ${apiUrl}`);
         console.log("start:");
         let questionId = null;
-        await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${this.bearer}`
-            }
-        })
-        .then(resp => {
-            console.log(`Response : ${resp.status}`);
-            return resp.json();
-        })
-        .then(data => {
-            console.log(data)
-            questionId = data?.question[0].questionId;
+        await this.client.request({url: apiUrl})
+        .then(res => {
+            console.log(res)
+            questionId = res?.data.question[0].questionId;
         })
         console.log("new question id: " + questionId)
 
