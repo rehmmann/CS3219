@@ -26,3 +26,4 @@ dist-ssr
 app.yaml
 build
 
+.env.*

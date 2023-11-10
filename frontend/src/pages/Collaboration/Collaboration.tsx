@@ -56,13 +56,6 @@ const restoreButtonStyle = {
 
   backgroundColor:'#ad8713',
 };
-const languageOptions: any = {
-  "javascript": 63,
-  "python": 71,
-  "c": 50,
-  "cpp": 54,
-}
-
 
 const Collaboration = () => {
   const { questionId, otherUserId } = useParams();
