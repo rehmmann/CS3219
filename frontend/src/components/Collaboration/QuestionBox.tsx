@@ -2,7 +2,7 @@ import Divider from '@mui/material/Divider';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useContext } from 'react';
 import { SocketContext } from '../../contexts';
-import { ClientEvents, ServerEvents, ServerErrors } from '../../utils/types';
+import { ClientEvents, } from '../../utils/types';
 import { Socket } from 'socket.io-client';
 
 const getDifficultyColorCode = (difficulty: string | null) => {
@@ -28,11 +28,9 @@ type QuestionBoxProps = {
 
 const QuestionBox = (props: QuestionBoxProps) => {
   const { title, complexity, description, otherUserId, roomId} = props;
-
+  const soc: Socket | null = useContext(SocketContext);
   const resetQuestion = () => {
     console.log("Initiate refresh question");
-
-    const soc = useContext<Socket | null>(SocketContext);
     if (soc) {
       soc.emit(ClientEvents.CHANGE_QUESTION, { otherUserId, roomId});
     }

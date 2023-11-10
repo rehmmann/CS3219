@@ -31,8 +31,38 @@ import './Collaboration.scss';
 import { Box } from "@mui/system";
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { Dialog, DialogContent, Button, DialogTitle, DialogContentText, DialogActions } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions } from "@mui/material";
 import { toast } from "react-toastify";
+import Button from "../../components/Button/Button";
+
+//Button style
+const buttonStyle = {
+  fontSize: "0.8rem", 
+  fontWeight: '500', 
+  color:'white', 
+  border: "none", 
+  borderRadius: "5px", 
+  height:'100%',
+  width: '76px',
+  margin: '0 .5rem',
+};
+const submitButtonStyle = {
+  ...buttonStyle,
+  backgroundColor:'#83DA58'
+}
+
+const restoreButtonStyle = {
+  ...buttonStyle,
+
+  backgroundColor:'#ad8713',
+};
+const languageOptions: any = {
+  "javascript": 63,
+  "python": 71,
+  "c": 50,
+  "cpp": 54,
+}
+
 
 const Collaboration = () => {
   const { questionId, otherUserId } = useParams();
@@ -53,6 +83,7 @@ const Collaboration = () => {
   const [tab, setTab] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [doesUserStartRefresh, setDoesUserStartRefresh] = useState(false)
+//  const [refresh, setRefresh] = useState(false)
 
   useEffect(() => {
     if (questionsData?.questions && questionId) {
@@ -159,24 +190,38 @@ const Collaboration = () => {
   }
 
   //Refresh question
+  // useEffect(() => {
+  //   if (questionsData?.questions && questionId) {
+  //     setQuestion(find(questionsData?.questions, (q: any) => q.questionId === parseInt(questionId)));
+  //   }
+  // }, [refresh])
+  const navigate = useNavigate();
+  const navigateAction = (newQuestionId: string | undefined, otherUserId: string | undefined) => {
+    
+    console.log("redirecting")
+    console.log(otherUserId)
+    navigate(`/app/collaboration/${newQuestionId}/${otherUserId}`);
+    window.location.reload();
+  };
 
-  
-
-
- 
   if (soc) {
+    soc.removeAllListeners(ServerEvents.QUESTION_CHANGED);
+    soc.removeAllListeners(ServerEvents.CHANGE_REQUEST);
+    soc.removeAllListeners(ServerEvents.CANCEL_CHANGE_REQUEST);
+    soc.removeAllListeners(ServerErrors.NO_NEW_QUESTION);
     //confirm change question event from server
     soc.on(ServerEvents.QUESTION_CHANGED, (data) => {
       const { newQuestionId} = data;
+      console.log("newid: " + newQuestionId)
       setIsDialogOpen(false);
       setDoesUserStartRefresh(false);
-      const navigate = useNavigate();
-      navigate(`/app/collaboration/${newQuestionId}/${otherUserId}`)
+      navigateAction(newQuestionId, otherUserId);
     });
 
     //receive change question event from server
     soc.on(ServerEvents.CHANGE_REQUEST, (data) => {
-      const {startingUserId} = data;
+      const startingUserId = data.userId;
+      console.log(startingUserId)
       if (startingUserId == userId) {
         setDoesUserStartRefresh(true);
       }
@@ -218,10 +263,9 @@ const Collaboration = () => {
       otherUserId,
       roomId
     });
+    setIsDialogOpen(false);
+    toast.success("you have confirm to change the question, please wait for the page to refresh")
   };
-  
-
-
 
   return (
     <div className="collaboration_container">
@@ -272,26 +316,28 @@ const Collaboration = () => {
               {selectTab(tab)}
             </Box>
           </Box>
-          {/* <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
+          <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
             <DialogTitle>
-              An user want to refresh and get new question
+              <h2 style={{fontFamily: "Poppins", fontWeight: 600}}>An user want to refresh and get new question</h2>
             </DialogTitle>
             <DialogContent>
               <DialogContentText>
-                If you want to cancel request, press Cancel
+                <p style={{fontFamily: "Poppins", fontWeight: 600, whiteSpace:'pre-line'}}>If you want to cancel request, press Cancel</p> 
               </DialogContentText>
               {!doesUserStartRefresh && 
-                <DialogContentText>If you want to confirm request, press Confirm</DialogContentText>
+                <DialogContentText>
+                <p style={{fontFamily: "Poppins", fontWeight: 600, whiteSpace:'pre-line', marginTop:'1rem'}}>If you want to confirm request, press Confirm</p> 
+                  </DialogContentText>
               }
               <DialogActions>
-                <Button variant="contained" onClick={handleCloseDialog}>Cancel</Button>
+                <Button title={'Cancel'} event={handleCloseDialog} style={restoreButtonStyle}/>
                 {!doesUserStartRefresh && 
-                <Button variant="contained" onClick={handleConfirmChange}>Confirm</Button>
+                <Button title={'Confirm'} event={handleConfirmChange} style={submitButtonStyle}/>
                 }
               </DialogActions>
               
             </DialogContent>
-          </Dialog> */}
+          </Dialog>
         </>  : 
         <>Please Join a room!</>
       } 
