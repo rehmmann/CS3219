@@ -4,6 +4,38 @@
 1. Have Docker and docker compose installed
 1. Have node >= v18.0.0
 
+# Project
+
+## Accessing the Project
+
+To access the project, we have provided you with the following accounts that would grant you access to the application:
+
+```
+Admin Account:
+username: tanjianoway+1@gmail.com
+password: password123
+
+User Account:
+username: tanjianoway@gmail.com
+password: password123
+```
+
+Alternatively, if you wish to create an account you can also choose to do so. If you require an Administrator account please contact the developers.
+
+### Deployment
+We have a deployed version of the application which can be accessed [here](https://peer-prep-399105.an.r.appspot.com/).
+
+### Running Locally
+1. To run the application locally, ensure you have the following files:
+```
+1. ./env
+2. frontend/.env
+```
+2. Ensure that you do not have anything running on port 80, and run the following command from the root directory:
+```
+docker compose up --build
+```
+3. The applcation can then be accessed at http://localhost.
 # Assignments
 Detailed below are the instructions required to run all Assignments from 1 to 5.
 ## Assignment 1
