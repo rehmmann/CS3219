@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import SubmissionDetailsModal from "./SubmissionDetailsModal";
 import { useGetAllSubmissionsQuery, useGetQuestionsQuery } from "../../redux/api";
 import { languageOptions } from './languages';
-import { forEach, map } from "lodash";
+import { filter, forEach, map } from "lodash";
 import Loading from "../../components/Loading/Loading";
 
 interface Column {
@@ -65,7 +65,8 @@ const History = () => {
   
   useEffect(() => {
     if (submissionData && Object.keys(questionsDict).length > 0) {
-      const a = (map(submissionData, (submission: any) => {
+      const a = (filter(submissionData, (submission: any) => submission.questionid in questionsDict))
+      const b = (map(a, (submission: any) => {
         let categoryString = '';
         const questionId: number = submission.questionid;
         const languageId: number = submission.languageid;
@@ -84,7 +85,7 @@ const History = () => {
         }
       }
       ))
-      setSubmissions(a);
+      setSubmissions(b);
     }
   }, [submissionData, questionsDict])
   

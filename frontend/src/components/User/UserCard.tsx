@@ -2,7 +2,15 @@
 import { useEffect, useState } from "react";
 import { useFindMatchMutation } from "../../redux/api";
 // Import MUI
-import { Box, IconButton, InputLabel, MenuItem, Paper, Stack, TextField } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+} from "@mui/material";
 
 // Import redux
 import { useSelector, useDispatch } from "react-redux";
@@ -21,12 +29,18 @@ type MatchButtonProps = {
   value: string;
 };
 type CategorySelectProps = {
-  categories: string[]
-}
+  categories: string[];
+};
 const allCategories: string[] = [
-  "Arrays", "Bit Manipulation",
-  "Strings", "Brainteaser", "Data Structures", "Algorithms", "Recursion", "Databases"
-]
+  "Arrays",
+  "Bit Manipulation",
+  "Strings",
+  "Brainteaser",
+  "Data Structures",
+  "Algorithms",
+  "Recursion",
+  "Databases",
+];
 //----------------------------------------------------------------//
 //                      LOCAL COMPONENTS                          //
 //----------------------------------------------------------------//
@@ -66,7 +80,7 @@ const UserLogo = (props: UserLogoProps) => {
 
 type UserCardProps = {
   admin: boolean;
-}
+};
 const UserCard = (props: UserCardProps) => {
   const { admin } = props;
   //----------------------------------------------------------------//
@@ -105,74 +119,77 @@ const UserCard = (props: UserCardProps) => {
   const CategorySelect = (props: CategorySelectProps) => {
     const { categories } = props;
     return (
-    <>
-    <InputLabel 
-      id="category-select"
-      sx={{
-        color: "black",
-        fontFamily: "Poppins",
-        fontWeight: 600,
-      }}
-    >
-      <h4>Category</h4>
-    </InputLabel>
-    <TextField
-      value={selectedCategory}
-      select
-      InputProps={{
-        sx: {
-          color: "black",
-          fontFamily: "Poppins",
-          fontWeight: 600,
-          borderRadius: 14,
-          backgroundColor: selectedCategory && selectedCategory != "undefined" ? "#FFD900" : "white",
-          border: "3px solid black",
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            border: "1px solid #484850",
-          },
-        }
-      }}
-      sx={{
-        fontFamily: "Poppins",
-        fontWeight: 600,
-        borderRadius: 51,
-      }}
-      
-    >
-    <MenuItem 
-      value="undefined"
-      sx={{
-        fontFamily: "Poppins",
-        fontWeight: 600,
-      }}
-      onClick={() => {
-        setSelectedCategory("undefined")
-      }}
-      disabled
-    >
-      Choose a Category
-    </MenuItem>
-    {map(categories, (category) => {
-      return (
-        <MenuItem 
-          value={category}
+      <>
+        <InputLabel
+          id="category-select"
           sx={{
+            color: "black",
             fontFamily: "Poppins",
             fontWeight: 600,
           }}
-          onClick={() => {
-            setSelectedCategory(selectedCategory == category ? "undefined" : category)
+        >
+          <h4>Category</h4>
+        </InputLabel>
+        <TextField
+          value={selectedCategory}
+          select
+          InputProps={{
+            sx: {
+              color: "black",
+              fontFamily: "Poppins",
+              fontWeight: 600,
+              borderRadius: 14,
+              backgroundColor:
+                selectedCategory && selectedCategory != "undefined"
+                  ? "#FFD900"
+                  : "white",
+              border: "3px solid black",
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                border: "1px solid #484850",
+              },
+            },
+          }}
+          sx={{
+            fontFamily: "Poppins",
+            fontWeight: 600,
+            borderRadius: 51,
           }}
         >
-          {category}
-        </MenuItem>
-      );
-    })}
-  </TextField>
-  </>
-  )
-
-  }
+          <MenuItem
+            value="undefined"
+            sx={{
+              fontFamily: "Poppins",
+              fontWeight: 600,
+            }}
+            onClick={() => {
+              setSelectedCategory("undefined");
+            }}
+            disabled
+          >
+            Choose a Category
+          </MenuItem>
+          {map(categories, (category) => {
+            return (
+              <MenuItem
+                value={category}
+                sx={{
+                  fontFamily: "Poppins",
+                  fontWeight: 600,
+                }}
+                onClick={() => {
+                  setSelectedCategory(
+                    selectedCategory == category ? "undefined" : category
+                  );
+                }}
+              >
+                {category}
+              </MenuItem>
+            );
+          })}
+        </TextField>
+      </>
+    );
+  };
   const MatchButton = (props: MatchButtonProps) => {
     const { type, title, value } = props;
     const getBackgroundColor = () => {
@@ -202,7 +219,9 @@ const UserCard = (props: UserCardProps) => {
         disableRipple
         onClick={() => {
           if (value === selectedCategory || value === selectedDifficulty) {
-            type === "topic" ? setSelectedCategory("") : setSelectedDifficulty("");
+            type === "topic"
+              ? setSelectedCategory("")
+              : setSelectedDifficulty("");
           } else {
             type === "topic"
               ? setSelectedCategory(value)
@@ -243,27 +262,27 @@ const UserCard = (props: UserCardProps) => {
               sx={{
                 textAlign: "left",
               }}
-            >
-              Level 10
-            </Box>
-            { admin ?
-            <Box
-            sx={{
-              textAlign: "left",
-              fontWeight: 600
-            }}
-          >
-            Admin
-          </Box> : 
-          <Box
-            sx={{
-              textAlign: "left",
-              fontWeight: 600
-            }}
-          >
-            User
-          </Box> 
-            }
+            ></Box>
+            {admin ? (
+              <Box
+                sx={{
+                  marginTop: "50%",
+                  textAlign: "left",
+                  fontWeight: 600,
+                }}
+              >
+                Admin
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  textAlign: "left",
+                  fontWeight: 600,
+                }}
+              >
+                User
+              </Box>
+            )}
           </Stack>
         </Stack>
         <Stack
@@ -273,7 +292,7 @@ const UserCard = (props: UserCardProps) => {
             borderTop: "1px solid #D9D9D9",
             pt: 3,
           }}
-        >          
+        >
           <CategorySelect categories={allCategories} />
           <h4>Difficulty</h4>
           <Stack direction={"row"} justifyContent={"center"} spacing={2}>
@@ -289,7 +308,10 @@ const UserCard = (props: UserCardProps) => {
             }}
           >
             <IconButton
-              disabled={selectedDifficulty == "" && (selectedCategory == "undefined" || selectedCategory == "")}
+              disabled={
+                selectedDifficulty == "" &&
+                (selectedCategory == "undefined" || selectedCategory == "")
+              }
               sx={{
                 color: "black",
                 backgroundColor: "#FFD900",
@@ -310,7 +332,12 @@ const UserCard = (props: UserCardProps) => {
                 findMatch({
                   email: userEmail ? userEmail : "",
                   id: userToken ? userToken : "",
-                  topic: selectedCategory === "undefined" ? "" : selectedCategory ? selectedCategory : "",
+                  topic:
+                    selectedCategory === "undefined"
+                      ? ""
+                      : selectedCategory
+                      ? selectedCategory
+                      : "",
                   difficulty: selectedDifficulty ? selectedDifficulty : "",
                 }).then((res) => {
                   console.log(res);

@@ -152,7 +152,7 @@ export const api = createApi({
     }),
     getAllSubmissions: builder.query<{ submissions: any[] }, void>({
       query: () => ({
-        url: `${USER_URL}/submissions/${getAuth().currentUser?.uid})}`,
+        url: `${USER_URL}/submissions/${getAuth().currentUser?.uid}`,
         method: 'GET',
       }),
       providesTags: ["Submission"],

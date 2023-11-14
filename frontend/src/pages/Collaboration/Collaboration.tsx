@@ -1,9 +1,9 @@
 // Import react
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 // Import types
-import { ClientEvents, Message, ServerEvents } from "../../utils/types";
+import { ClientEvents, Message, ServerErrors, ServerEvents } from "../../utils/types";
 import { OnChange } from "@monaco-editor/react";
 
 // Import socket
@@ -31,6 +31,31 @@ import './Collaboration.scss';
 import { Box } from "@mui/system";
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import { Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions } from "@mui/material";
+import { toast } from "react-toastify";
+import Button from "../../components/Button/Button";
+
+//Button style
+const buttonStyle = {
+  fontSize: "0.8rem", 
+  fontWeight: '500', 
+  color:'white', 
+  border: "none", 
+  borderRadius: "5px", 
+  height:'100%',
+  width: '76px',
+  margin: '0 .5rem',
+};
+const submitButtonStyle = {
+  ...buttonStyle,
+  backgroundColor:'#83DA58'
+}
+
+const restoreButtonStyle = {
+  ...buttonStyle,
+
+  backgroundColor:'#ad8713',
+};
 
 const Collaboration = () => {
   const { questionId, otherUserId } = useParams();
@@ -49,6 +74,9 @@ const Collaboration = () => {
   const [peerLanguage, setPeerLanguage] = useState<string>("javascript");
   const [question, setQuestion] = useState<any | null>(null);
   const [tab, setTab] = useState<number>(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [doesUserStartRefresh, setDoesUserStartRefresh] = useState(false)
+//  const [refresh, setRefresh] = useState(false)
 
   useEffect(() => {
     if (questionsData?.questions && questionId) {
@@ -154,11 +182,89 @@ const Collaboration = () => {
     }
   }
 
+  //Refresh question
+  // useEffect(() => {
+  //   if (questionsData?.questions && questionId) {
+  //     setQuestion(find(questionsData?.questions, (q: any) => q.questionId === parseInt(questionId)));
+  //   }
+  // }, [refresh])
+  const navigate = useNavigate();
+  const navigateAction = (newQuestionId: string | undefined, otherUserId: string | undefined) => {
+    
+    console.log("redirecting")
+    console.log(otherUserId)
+    navigate(`/app/collaboration/${newQuestionId}/${otherUserId}`);
+    window.location.reload();
+  };
+
+  if (soc) {
+    soc.removeAllListeners(ServerEvents.QUESTION_CHANGED);
+    soc.removeAllListeners(ServerEvents.CHANGE_REQUEST);
+    soc.removeAllListeners(ServerEvents.CANCEL_CHANGE_REQUEST);
+    soc.removeAllListeners(ServerErrors.NO_NEW_QUESTION);
+    //confirm change question event from server
+    soc.on(ServerEvents.QUESTION_CHANGED, (data) => {
+      const { newQuestionId} = data;
+      console.log("newid: " + newQuestionId)
+      setIsDialogOpen(false);
+      setDoesUserStartRefresh(false);
+      navigateAction(newQuestionId, otherUserId);
+    });
+
+    //receive change question event from server
+    soc.on(ServerEvents.CHANGE_REQUEST, (data) => {
+      const startingUserId = data.userId;
+      console.log(startingUserId)
+      if (startingUserId == userId) {
+        setDoesUserStartRefresh(true);
+      }
+      setIsDialogOpen(true);
+      
+    });
+
+    // handle server confirm cancel
+    soc.on(ServerEvents.CANCEL_CHANGE_REQUEST, () => {
+      setIsDialogOpen(false);
+      setDoesUserStartRefresh(false);
+      console.log("cancel change");
+      toast.error("An user cancel change question request");
+    });
+
+    // handle no new question
+    soc.on(ServerErrors.NO_NEW_QUESTION, () => {
+      setIsDialogOpen(false);
+      setDoesUserStartRefresh(false);
+      console.log("no new question");
+      toast.error("Cannot refresh question, please try again!");
+    });
+  }
+
+  //cancel change question
+
+  //by close the dialog
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    soc?.emit(ClientEvents.CANCEL_CHANGE_QN, {
+      otherUserId,
+      roomId
+    });
+  };
+
+  //confirm change question
+  const handleConfirmChange = () => {
+    soc?.emit(ClientEvents.CONFIRM_CHANGE_QN, {
+      otherUserId,
+      roomId
+    });
+    setIsDialogOpen(false);
+    toast.success("you have confirm to change the question, please wait for the page to refresh")
+  };
+
   return (
     <div className="collaboration_container">
       {questionId && otherUserId && question ? 
         <>
-        <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question?.questionDescription}/>
+        <QuestionBox title={question?.questionTitle} complexity={question?.questionComplexity} description={question?.questionDescription} otherUserId={otherUserId} roomId={roomId}/>
           <div className="editor_container">
             <Editor 
               code={code}
@@ -203,6 +309,28 @@ const Collaboration = () => {
               {selectTab(tab)}
             </Box>
           </Box>
+          <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
+            <DialogTitle>
+              <h2 style={{fontFamily: "Poppins", fontWeight: 600}}>An user want to refresh and get new question</h2>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                <p style={{fontFamily: "Poppins", fontWeight: 600, whiteSpace:'pre-line'}}>If you want to cancel request, press Cancel</p> 
+              </DialogContentText>
+              {!doesUserStartRefresh && 
+                <DialogContentText>
+                <p style={{fontFamily: "Poppins", fontWeight: 600, whiteSpace:'pre-line', marginTop:'1rem'}}>If you want to confirm request, press Confirm</p> 
+                  </DialogContentText>
+              }
+              <DialogActions>
+                <Button title={'Cancel'} event={handleCloseDialog} style={restoreButtonStyle}/>
+                {!doesUserStartRefresh && 
+                <Button title={'Confirm'} event={handleConfirmChange} style={submitButtonStyle}/>
+                }
+              </DialogActions>
+              
+            </DialogContent>
+          </Dialog>
         </>  : 
         <>Please Join a room!</>
       } 

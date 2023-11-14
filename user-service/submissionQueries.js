@@ -1,4 +1,5 @@
 const Pool = require('pg').Pool
+const JwtDecode = require("jwt-decode");
 
 const pool = new Pool({
     user: process.env.DB_USER,
@@ -9,30 +10,40 @@ const pool = new Pool({
 })
 
 const getSubmissions = (request, response) => {
-    pool.query('SELECT * FROM submissions ORDER BY id ASC', 
-    (error, results) => {
-        if (error) {
-            console.error('Error executing query:', error);
-                return response.status(500).json({ error: 'Internal Server Error' });
-        }
-        response.status(200).json(results.rows)
-    })
-}
-
-const getAllSubmissionsByUser = (request, response) => {
-    const id = parseInt(request.params.id)
-    pool.query('SELECT * FROM submissions WHERE firebaseid = $1', [id], 
+    const id = request.params.id;
+    const idToken = request.headers.authorization.split(' ')[1];
+    const { roles, user_id } = JwtDecode.jwtDecode(idToken)
+    if (id == user_id || roles.includes('ADMIN')) {
+        pool.query('SELECT * FROM submissions WHERE firebaseid = $1 ORDER BY id ASC', [id],
         (error, results) => {
             if (error) {
                 console.error('Error executing query:', error);
-                return response.status(500).json({ error: 'Internal Server Error' });
-            }
-            if (results.rows.length == 0) {
-                return response.status(404).json({ error: 'Not Found' });
+                    return response.status(500).json({ error: 'Internal Server Error' });
             }
             response.status(200).json(results.rows)
-        }
-    );
+        });
+    } else {
+        return response.status(401).json({ error: 'Unauthorized' });
+    }
+    
+}
+
+const getAllSubmissionsByUser = (request, response) => {
+    const id = request.params.id
+    const idToken = request.headers.authorization.split(' ')[1];
+    const { roles, user_id } = JwtDecode.jwtDecode(idToken)
+    if (id == user_id || roles.includes('ADMIN')) {
+        pool.query('SELECT * FROM submissions WHERE firebaseid = $1 ORDER BY id ASC', [id],
+        (error, results) => {
+            if (error) {
+                console.error('Error executing query:', error);
+                    return response.status(500).json({ error: 'Internal Server Error' });
+            }
+            response.status(200).json(results.rows)
+        });
+    } else {
+        return response.status(401).json({ error: 'Unauthorized' });
+    }
 }
 
 const getOneSubmission = (request, response) => {
@@ -106,8 +117,8 @@ const deleteSubmission = (request, response) => {
 module.exports = {
     getSubmissions,
     getOneSubmission,
-    getSubmissionsByFirebaseId: getAllSubmissionsByUser,
+    getAllSubmissionsByUser,
     upsertSubmission,
     deleteSubmission,
-  }
+}
   
