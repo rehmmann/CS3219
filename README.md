@@ -6,6 +6,12 @@
 
 # Project
 
+We have deployed all our services using Google Cloud Platform. Thus, you will not need to run any of the services aside.
+
+The code for all the services can be found in this respository and their respective links can be found in the report in this repository.
+
+The project is hosted [here](https://peer-prep-399105.an.r.appspot.com/).
+
 ## Accessing the Project
 
 To access the project, we have provided you with the following accounts that would grant you access to the application:
@@ -22,16 +28,16 @@ password: password123
 
 Alternatively, if you wish to create an account you can also choose to do so. If you require an Administrator account please contact the developers.
 
-### Deployment
-We have a deployed version of the application which can be accessed [here](https://peer-prep-399105.an.r.appspot.com/).
 
 ### Running Locally
-1. To run the application locally, ensure you have the following files:
+1. Clone this repository.
+2. Ensure you have the following files:
 ```
-1. ./env
-2. frontend/.env
+1. frontend/.env
 ```
-2. Ensure that you do not have anything running on port 80, and run the following command from the root directory:
+If you do not have any of these files, or any other files required for the Assignments, please contact the developers for a copy.
+
+3. Ensure that you do not have anything running on port 80, and run the following command from the root directory:
 ```
 docker compose up --build
 ```
@@ -52,7 +58,7 @@ npm run dev
 3. The application is running here: http://localhost:5173
 4. Access the application using the following credentials:
 ```
-username: dummy@example.com
+username: dummyuser@example.com
 password: password
 ```
 
